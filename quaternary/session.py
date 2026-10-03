@@ -522,11 +522,19 @@ class QuaternarySession:
 
         assert self.output is not None
 
+        export_path = kwargs.get("export_path")
+
         fmt = format.lower().strip()
         if fmt == "json":
-            return self.output.model_dump_json(indent=2)
+            json_str = self.output.model_dump_json(indent=2)
+            if export_path:
+                Path(export_path).write_text(json_str, encoding="utf-8")
+            return json_str
         elif fmt == "dict":
-            return self.output.model_dump()
+            res_dict = self.output.model_dump()
+            if export_path:
+                Path(export_path).write_text(json.dumps(res_dict, indent=2), encoding="utf-8")
+            return res_dict
         elif fmt in ("dataframe", "df", "dataframes"):
             dfs: Dict[str, pd.DataFrame] = {}
 
@@ -561,3 +569,12 @@ class QuaternarySession:
             return dfs
         else:
             raise ValueError(f"Unsupported UI export format '{format}'. Supported: 'json', 'dict', 'dataframe'")
+
+    # Convenience aliases for step-wise stage execution (03-02-PLAN)
+    run_stage_1_uniprot_subunit = run_stage_1_primary_evidence
+    run_stage_2_pdb_experimental = run_stage_2_experimental_qualification
+    run_stage_3_pisa_interfaces = run_stage_3_homology_and_partners
+    run_stage_4_swiss_model = run_stage_4_structural_context
+    run_stage_5_alphafold_context = run_stage_5_multimer_hypothesis
+    run_stage_6_aggregate = run_stage_6_synthesis
+

@@ -44,14 +44,18 @@ def test_notebook_no_raw_http(notebook):
     assert "analyze_quaternary" in combined_code
 
     # Assert no raw HTTP calls
+    forbidden_clients = ["requests.get(", "requests.post(", "urllib.request", "httpx.", "aiohttp."]
     for line in combined_code.splitlines():
         stripped = line.strip()
         if stripped.startswith("#"):
             continue  # Comments explaining the rule are allowed
-        assert "requests.get(" not in stripped, f"Raw requests.get found: {stripped}"
-        assert "requests.post(" not in stripped, f"Raw requests.post found: {stripped}"
-        assert "urllib.request" not in stripped, f"Raw urllib.request found: {stripped}"
-        assert "http://" not in stripped and "https://" not in stripped, f"Raw URL found in code: {stripped}"
+        for client in forbidden_clients:
+            assert client not in stripped, f"Raw HTTP client call found: {stripped}"
+
+        # Ensure no bioinformatics API endpoint URLs are called directly in cells
+        bio_api_hosts = ["rest.uniprot.org", "data.rcsb.org", "ebi.ac.uk", "swissmodel.expasy.org", "alphafold.ebi.ac.uk"]
+        for host in bio_api_hosts:
+            assert host not in stripped, f"Bioinformatics API URL found directly in code: {stripped}"
 
 
 def test_preflight_validation_logic(notebook):

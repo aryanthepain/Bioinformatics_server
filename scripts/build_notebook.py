@@ -262,6 +262,280 @@ if not is_valid:
 
 def assemble_notebook(cells: list[nbf.NotebookNode]) -> nbf.NotebookNode:
     """Create a validated v4 notebook from cells."""
+def build_wave_2_cells() -> list[nbf.NotebookNode]:
+    """Generate cells for Wave 2: Visual helpers, Part 1 facade, and Part 2 modular session."""
+    cells = []
+
+    # 1. Visual Helpers Markdown
+    visual_md = r"""## Interactive Visualization Helpers & Biological Summary Displays
+
+We define two presentation utilities:
+1. `show_json(data, max_depth=1)`: Interactive dark tree viewer with collapsible arrows using `renderjson@1.4.0` (matching `UniProtKB.ipynb`).
+2. `render_quaternary_summary_card(output)`: Formatted biological summary card highlighting assembly classification, stoichiometry, subunit count, and segregated confidence provenance.
+"""
+    cells.append(create_markdown_cell(visual_md))
+
+    # 2. Visual Helpers Code Cell
+    visual_code = r'''# Collapsible JSON Tree Viewer and Styled Biological Summary Card
+
+def show_json(data, max_depth=1):
+    """
+    Renders JSON in a VS Code style dark tree view with collapsible arrows.
+    Supports Pydantic models, dictionaries, lists, and JSON strings.
+    """
+    if hasattr(data, "model_dump"):
+        data = data.model_dump()
+    elif isinstance(data, str):
+        try:
+            data = json.loads(data)
+        except Exception:
+            pass
+    elif hasattr(data, "__dict__") and not isinstance(data, dict):
+        data = vars(data)
+
+    container_id = f"json_viewer_{uuid.uuid4().hex[:8]}"
+    json_str = json.dumps(data, default=str)
+
+    html_code = f"""
+    <div id="{container_id}" style="background-color: #1e1e1e; padding: 14px; border-radius: 6px; font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace; font-size: 13px; text-align: left; overflow-x: auto;">
+        <noscript><pre style="color: #d4d4d4; margin: 0;">{json_str}</pre></noscript>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/renderjson@1.4.0/renderjson.min.js"></script>
+    <script>
+        (function() {{
+            if (typeof renderjson !== 'undefined') {{
+                renderjson.set_show_to_level({max_depth});
+                renderjson.set_icons('&#9654; ', '&#9660; ');
+                var container = document.getElementById("{container_id}");
+                if (container) {{
+                    container.innerHTML = '';
+                    container.appendChild(renderjson({json_str}));
+                }}
+            }} else {{
+                var container = document.getElementById("{container_id}");
+                if (container) {{
+                    container.innerHTML = '<pre style="color: #d4d4d4; margin: 0; font-family: monospace;">' + JSON.stringify({json_str}, null, 2) + '</pre>';
+                }}
+            }}
+        }})();
+    </script>
+
+    <style>
+        #{container_id} .renderjson {{ color: #d4d4d4; line-height: 1.5; }}
+        #{container_id} .renderjson .disclosure {{ color: #808080; cursor: pointer; text-decoration: none; font-weight: bold; margin-right: 2px; }}
+        #{container_id} .renderjson .disclosure:hover {{ color: #ffffff; }}
+        #{container_id} .renderjson .syntax {{ color: #ffd700; }}
+        #{container_id} .renderjson .string {{ color: #ce9178; }}
+        #{container_id} .renderjson .number {{ color: #b5cea8; }}
+        #{container_id} .renderjson .boolean {{ color: #569cd6; }}
+        #{container_id} .renderjson .key {{ color: #9cdcfe; }}
+        #{container_id} .renderjson .keyword {{ color: #c586c0; }}
+    </style>
+    """
+    display(HTML(html_code))
+
+
+def render_quaternary_summary_card(output: QuaternaryStructureOutput) -> None:
+    """Render a styled HTML summary table displaying top-level biological metrics."""
+    if not isinstance(output, QuaternaryStructureOutput):
+        if isinstance(output, dict):
+            output = QuaternaryStructureOutput.model_validate(output)
+
+    assembly_type = output.stoichiometry.assembly_type
+    assembly_val = assembly_type.value if hasattr(assembly_type, "value") else str(assembly_type)
+    formula = getattr(output.stoichiometry, "formula", None) or getattr(output.stoichiometry, "stoichiometry_formula", "Uncharacterized")
+    total_subunits = getattr(output.stoichiometry, "total_subunits", None) or getattr(output.stoichiometry, "total_subunit_count", 1)
+    oligo_state = getattr(output, "oligomeric_state", None) or f"{total_subunits}-mer"
+
+    conflict_detected = False
+    if hasattr(output, "experimental_conflict") and output.experimental_conflict:
+        conflict_detected = getattr(output.experimental_conflict, "conflict_detected", False)
+    elif hasattr(output, "experimental_conflicts") and output.experimental_conflicts:
+        conflict_detected = bool(output.experimental_conflicts)
+
+    if conflict_detected:
+        conflict_badge = '<span style="background: #5a1e1e; color: #ff7b72; padding: 3px 10px; border-radius: 12px; font-size: 11.5px; font-weight: 700;">&#9888; CONFLICT DETECTED</span>'
+    else:
+        conflict_badge = '<span style="background: #1e3a24; color: #7ee787; padding: 3px 10px; border-radius: 12px; font-size: 11.5px; font-weight: 700;">&#10004; CONSENSUS ALIGNED</span>'
+
+    prov = getattr(output, "confidence_provenance", None)
+    pisa = getattr(prov, "pdbe_pisa", None) if prov else None
+    if pisa and getattr(pisa, "dissociation_energy_kcal_mol", None) is not None:
+        pisa_score = f"{pisa.dissociation_energy_kcal_mol:.1f} kcal/mol"
+    elif pisa and getattr(pisa, "buried_surface_area_angstrom2", None) is not None:
+        pisa_score = f"{pisa.buried_surface_area_angstrom2:.0f} Å²"
+    else:
+        pisa_score = "N/A"
+
+    swiss = getattr(prov, "swissmodel", None) if prov else None
+    swiss_qmqe = f"{swiss.qmqe:.2f}" if (swiss and getattr(swiss, "qmqe", None) is not None) else (
+        f"{swiss.gmqe:.2f}" if (swiss and getattr(swiss, "gmqe", None) is not None) else "N/A"
+    )
+
+    af = getattr(prov, "alphafold_db", None) if prov else None
+    af_plddt = f"{af.global_plddt:.1f}" if (af and getattr(af, "global_plddt", None) is not None) else "N/A"
+
+    afm = getattr(prov, "alphafold_multimer", None) if prov else None
+    af_iptm = f"{afm.iptm:.2f}" if (afm and getattr(afm, "iptm", None) is not None) else "N/A"
+
+    interfaces_list = getattr(output, "interfaces", None) or getattr(output, "interface_contacts", [])
+    interfaces_count = len(interfaces_list) if interfaces_list else 0
+
+    card_html = f"""
+    <div style="background-color: #1e1e1e; border: 1px solid #30363d; border-radius: 8px; padding: 20px; margin: 15px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #c9d1d9;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #30363d; padding-bottom: 12px; margin-bottom: 16px;">
+            <div style="font-size: 18px; font-weight: 700; color: #58a6ff;">
+                &#129516; Quaternary Structure Summary: <span style="color: #79c0ff;">{output.analysis_id}</span>
+            </div>
+            <div>{conflict_badge}</div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 18px;">
+            <div style="background: #252526; padding: 12px; border-radius: 6px; border-left: 3px solid #58a6ff;">
+                <div style="font-size: 11px; text-transform: uppercase; color: #8b949e; letter-spacing: 0.5px;">Assembly Type</div>
+                <div style="font-size: 16px; font-weight: bold; color: #f0f6fc; margin-top: 4px;">{assembly_val}</div>
+            </div>
+            <div style="background: #252526; padding: 12px; border-radius: 6px; border-left: 3px solid #7ee787;">
+                <div style="font-size: 11px; text-transform: uppercase; color: #8b949e; letter-spacing: 0.5px;">Stoichiometry</div>
+                <div style="font-size: 16px; font-weight: bold; color: #f0f6fc; margin-top: 4px;">{formula}</div>
+            </div>
+            <div style="background: #252526; padding: 12px; border-radius: 6px; border-left: 3px solid #d2a8ff;">
+                <div style="font-size: 11px; text-transform: uppercase; color: #8b949e; letter-spacing: 0.5px;">Subunits / Oligomer</div>
+                <div style="font-size: 16px; font-weight: bold; color: #f0f6fc; margin-top: 4px;">{total_subunits} ({oligo_state})</div>
+            </div>
+            <div style="background: #252526; padding: 12px; border-radius: 6px; border-left: 3px solid #ffa657;">
+                <div style="font-size: 11px; text-transform: uppercase; color: #8b949e; letter-spacing: 0.5px;">Interface Contacts</div>
+                <div style="font-size: 16px; font-weight: bold; color: #f0f6fc; margin-top: 4px;">{interfaces_count} Pairwise</div>
+            </div>
+        </div>
+
+        <div style="background: #161b22; border-radius: 6px; padding: 14px; border: 1px solid #30363d;">
+            <div style="font-size: 12px; font-weight: 600; color: #8b949e; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px;">
+                &#128202; Segregated Confidence Metrics (Zero Synthetic Blending)
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; font-size: 12.5px;">
+                <div><span style="color: #8b949e;">PDBe PISA Score:</span> <strong style="color: #58a6ff;">{pisa_score}</strong></div>
+                <div><span style="color: #8b949e;">SWISS-MODEL QMQE:</span> <strong style="color: #7ee787;">{swiss_qmqe}</strong></div>
+                <div><span style="color: #8b949e;">AlphaFold pLDDT:</span> <strong style="color: #d2a8ff;">{af_plddt}</strong></div>
+                <div><span style="color: #8b949e;">AlphaFold ipTM:</span> <strong style="color: #ffa657;">{af_iptm}</strong></div>
+            </div>
+        </div>
+    </div>
+    """
+    display(HTML(card_html))
+
+print(" Visualization helpers initialized: show_json(), render_quaternary_summary_card()")
+'''
+    cells.append(create_code_cell(visual_code))
+
+    # 3. Part 1 Markdown Header
+    part1_md = r"""## Part 1: High-Level Quickstart Facade (Single-Line Execution)
+
+The quickest way to characterize a target protein's quaternary structure is via `analyze_quaternary()`.
+This single high-level function:
+1. Initializes an internal analysis session.
+2. Coordinates experimental queries (UniProt SUBUNIT, RCSB PDB assemblies, PDBe PISA interface chemistry).
+3. Evaluates homology templates (SWISS-MODEL) and predictive structural models (AlphaFold-DB / Multimer).
+4. Synthesizes a unified, validated `QuaternaryStructureOutput` contract.
+"""
+    cells.append(create_markdown_cell(part1_md))
+
+    # 4. Part 1 Execution Cell
+    part1_code = r'''# Execute complete quaternary characterization via high-level façade
+print(f"[START] Executing analyze_quaternary for target: {TARGET_PROTEIN} ...")
+t0 = time.time()
+output = analyze_quaternary(TARGET_PROTEIN, config=config, enable_multimer=ENABLE_MULTIMER)
+elapsed = time.time() - t0
+print(f"[COMPLETE] Characterization completed in {elapsed:.2f}s | Status: {output.status.value}")
+'''
+    cells.append(create_code_cell(part1_code))
+
+    # 5. Part 1 Summary Card Display Cell
+    part1_summary_code = r'''# Render formatted biological metric summary table
+render_quaternary_summary_card(output)
+'''
+    cells.append(create_code_cell(part1_summary_code))
+
+    # 6. Part 1 JSON Tree Inspection Cell
+    part1_tree_code = r'''# Collapsible dark-tree inspection of the complete QuaternaryStructureOutput
+print("Interactive JSON Inspection (click arrows to expand/collapse nested nodes):")
+show_json(output, max_depth=1)
+'''
+    cells.append(create_code_cell(part1_tree_code))
+
+    # 7. Part 2 Markdown Header
+    part2_md = r"""## Part 2: Step-by-Step Modular Session Walkthrough
+
+For scientific workflows requiring fine-grained control or intermediate stage inspection, `QuaternarySession` exposes individual stage runners (`run_stage_1_...` through `run_stage_6_...`).
+
+Each stage updates internal session state independently with non-fatal fallbacks, preserving evidence provenance across all experimental and predictive providers.
+"""
+    cells.append(create_markdown_cell(part2_md))
+
+    # 8. Part 2 Session Initialization Cell
+    part2_init_code = r'''# Instantiate modular QuaternarySession
+session = QuaternarySession(TARGET_PROTEIN, config=config)
+print(f" QuaternarySession created:")
+print(f"  - Session ID: {session.session_id}")
+print(f"  - Target: {session.target_input}")
+print(f"  - Initial Status: {session.status.value}")
+'''
+    cells.append(create_code_cell(part2_init_code))
+
+    # 9. Part 2 Stages 1 & 2 Cell
+    part2_stages_1_2_code = r'''# Stage 1: UniProt SUBUNIT Annotation & Stage 2: RCSB PDB Experimental Assemblies
+print("[STAGE 1/6: UNIPROT SUBUNIT] Querying curated subunit annotations...")
+r1 = session.run_stage_1_uniprot_subunit()
+print(f"  -> Status: {r1.status.value} | Summary: {r1.details.get('summary', 'Completed')}")
+
+print("\n[STAGE 2/6: PDB EXPERIMENTAL] Searching experimental biological assemblies...")
+r2 = session.run_stage_2_pdb_experimental()
+assemblies_found = r2.data.get('assemblies', []) if r2.data else []
+print(f"  -> Status: {r2.status.value} | Assemblies Found: {len(assemblies_found)}")
+'''
+    cells.append(create_code_cell(part2_stages_1_2_code))
+
+    # 10. Part 2 Stages 3 & 4 Cell
+    part2_stages_3_4_code = r'''# Stage 3: PDBe PISA Interface Biophysics & Stage 4: SWISS-MODEL Homology Templates
+print("[STAGE 3/6: PISA INTERFACES] Computing interface contacts and solvation free energy...")
+r3 = session.run_stage_3_pisa_interfaces()
+interfaces_found = r3.data.get('interfaces', []) if r3.data else []
+print(f"  -> Status: {r3.status.value} | Interfaces Analyzed: {len(interfaces_found)}")
+
+print("\n[STAGE 4/6: SWISS-MODEL HOMOLOGY] Querying oligomeric homology templates...")
+r4 = session.run_stage_4_swiss_model()
+models_found = r4.data.get('models', []) if r4.data else []
+print(f"  -> Status: {r4.status.value} | Homology Models: {len(models_found)}")
+'''
+    cells.append(create_code_cell(part2_stages_3_4_code))
+
+    # 11. Part 2 Stages 5 & 6 Cell
+    part2_stages_5_6_code = r'''# Stage 5: AlphaFold Structural Context & Stage 6: Multi-Evidence Synthesis
+print(f"[STAGE 5/6: ALPHAFOLD CONTEXT] Inspecting structural predictions (Multimer enabled: {ENABLE_MULTIMER})...")
+r5 = session.run_stage_5_alphafold_context(enable_multimer=ENABLE_MULTIMER)
+print(f"  -> Status: {r5.status.value}")
+
+print("\n[STAGE 6/6: SYNTHESIS AGGREGATOR] Resolving consensus quaternary stoichiometry...")
+r6 = session.run_stage_6_aggregate()
+print(f"  -> Status: {r6.status.value}")
+print(f"  -> Final Stoichiometry Formula: {session.output.stoichiometry.stoichiometry_formula}")
+print(f"  -> Assembly Classification: {session.output.stoichiometry.assembly_type.value}")
+'''
+    cells.append(create_code_cell(part2_stages_5_6_code))
+
+    # 12. Part 2 Stage Results Tree Inspection Cell
+    part2_stages_tree_code = r'''# Inspect multi-stage evidence payloads across all 6 stages
+print("Multi-Stage Evidence Payloads (StageResult dictionary):")
+show_json(session.stage_results, max_depth=1)
+'''
+    cells.append(create_code_cell(part2_stages_tree_code))
+
+    return cells
+
+
+def assemble_notebook(cells: list[nbf.NotebookNode]) -> nbf.NotebookNode:
+    """Create a validated v4 notebook from cells."""
     nb = nbf.v4.new_notebook()
     nb["cells"] = cells
     nb["metadata"] = {
@@ -292,10 +566,11 @@ def write_notebook(nb: nbf.NotebookNode, output_path: str = "Quaternary_Structur
 
 def main() -> None:
     """Build Quaternary_Structure.ipynb."""
-    cells = build_wave_1_cells()
+    cells = build_wave_1_cells() + build_wave_2_cells()
     nb = assemble_notebook(cells)
     write_notebook(nb)
 
 
 if __name__ == "__main__":
     main()
+
