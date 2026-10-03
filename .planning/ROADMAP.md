@@ -67,8 +67,13 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
+**Wave 1**
 - [ ] 03-01: Scaffold `Quaternary_Structure.ipynb` importing `quaternary_pipeline` with configuration and input handling cells
+
+**Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 03-02: Implement interactive tabular displays, confidence metric visuals, and assembly status summaries
+
+**Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 03-03: Add interactive export triggers and complete end-to-end biological interpretation markdown documentation
 
 ### Phase 4: Standardized UI JSON Data Contract & Benchmark Validation
