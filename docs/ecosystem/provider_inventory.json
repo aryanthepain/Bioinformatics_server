@@ -1,0 +1,471 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Quaternary Ecosystem Provider Inventory",
+  "version": "1.0.0",
+  "phase": "01",
+  "governing_standard": "phase_1/guideline.md",
+  "invariants_enforced": ["D-01", "D-02", "D-03", "D-04", "D-05", "D-06", "D-07", "D-08", "D-09", "D-10", "D-11", "D-12", "D-13"],
+  "providers": [
+    {
+      "id": "uniprotkb_subunit",
+      "name": "UniProtKB Subunit & Structural Annotations",
+      "classification": "pipeline-ready",
+      "evidence_tier": "curated_experimental_and_candidate_hypotheses",
+      "accepted_inputs": ["uniprot_accession", "gene_name", "tax_id", "fasta_sequence"],
+      "primary_endpoint": "https://rest.uniprot.org/uniprotkb",
+      "bioservices_integration": {
+        "supported": true,
+        "class_name": "bioservices.UniProt",
+        "primary_method": "UniProt().search(query, columns=\"id,entry_name,comment(SUBUNIT),xref_pdb,xref_complexportal\")",
+        "fallback_invariant": "Fallback Invariant 2 (High-Throughput Batch Streaming via /uniprotkb/stream) & Fallback Invariant 3 (Non-Standard Redirect Protocols on /idmapping)"
+      },
+      "authentication": {
+        "required": false,
+        "type": "none"
+      },
+      "rate_limits": "~200 requests/minute (EMBL-EBI standard)",
+      "polling": {
+        "async_job": true,
+        "recommended_interval_sec": 3
+      },
+      "returned_fields": [
+        "accession",
+        "entry_name",
+        "subunit_comment",
+        "complexportal_ids",
+        "pdb_cross_references"
+      ],
+      "limitations": [
+        "Unstructured free-text subunit annotations require regex normalization",
+        "Uncharacterized bacterial sequences frequently lack curated subunit records"
+      ],
+      "operational_notes": "Primary baseline database for curated experimental stoichiometry annotations and cross-references."
+    },
+    {
+      "id": "rcsb_pdb_search",
+      "name": "RCSB PDB Sequence Search & Core Entry API",
+      "classification": "pipeline-ready",
+      "evidence_tier": "candidate_experimental_provenance",
+      "accepted_inputs": ["fasta_sequence", "pdb_id", "uniprot_accession"],
+      "primary_endpoint": "https://search.rcsb.org/rcsbsearch/v2/query",
+      "bioservices_integration": {
+        "supported": true,
+        "class_name": "bioservices.PDB",
+        "primary_method": "PDB().describePDB(pdb_id)",
+        "fallback_invariant": "Fallback Invariant 1 (Unsupported Specialized Endpoint - Complex JSON/GraphQL Search Query DSL)"
+      },
+      "authentication": {
+        "required": false,
+        "type": "none"
+      },
+      "rate_limits": "<= 20 requests/second sustained",
+      "polling": {
+        "async_job": false,
+        "recommended_interval_sec": null
+      },
+      "returned_fields": [
+        "rcsb_id",
+        "assembly_count",
+        "polymer_entity_count_protein",
+        "resolution_combined",
+        "determination_method",
+        "assembly_symmetry",
+        "stoichiometry_formula"
+      ],
+      "limitations": [
+        "Asymmetric crystal lattice units often differ from functional biological units",
+        "Requires sequence coverage tier gating (D-02) and PISA assembly qualification (D-01)"
+      ],
+      "operational_notes": "Subject to target-chain coverage tiers: >=90% High Confidence, 70-89% Qualifying, <70% Provenance-Only."
+    },
+    {
+      "id": "pdbe_pisa",
+      "name": "PDBe PISA (Protein Interfaces, Surfaces and Assemblies)",
+      "classification": "pipeline-ready",
+      "evidence_tier": "confirmed_experimental_assembly_qualification",
+      "accepted_inputs": ["pdb_id", "assembly_serial"],
+      "primary_endpoint": "https://www.ebi.ac.uk/pdbe/api/pisa/assembly/{pdb_id}",
+      "bioservices_integration": {
+        "supported": false,
+        "class_name": null,
+        "primary_method": null,
+        "fallback_invariant": "Fallback Invariant 1 (Unsupported Specialized Endpoint - Direct REST client with requests/httpx)"
+      },
+      "authentication": {
+        "required": false,
+        "type": "none"
+      },
+      "rate_limits": "~15-30 requests/second (EMBL-EBI REST)",
+      "polling": {
+        "async_job": false,
+        "recommended_interval_sec": null
+      },
+      "returned_fields": [
+        "pdb_id",
+        "assembly_id",
+        "macromolecular_size",
+        "composition",
+        "dissociation_energy",
+        "accessible_surface_area",
+        "buried_surface_area",
+        "stability_status"
+      ],
+      "limitations": [
+        "Pre-calculated for deposited PDB entries only",
+        "User-uploaded unreleased models cannot be calculated via public REST without local PISA binary"
+      ],
+      "operational_notes": "Provides biophysical Delta G diss (kcal/mol) interface validation; governs conflict retention (D-03) and multi-assembly ranking (D-04)."
+    },
+    {
+      "id": "complex_portal",
+      "name": "Complex Portal (EMBL-EBI)",
+      "classification": "pipeline-ready",
+      "evidence_tier": "curated_reference_complex_evidence",
+      "accepted_inputs": ["complex_portal_id", "uniprot_accession"],
+      "primary_endpoint": "https://www.ebi.ac.uk/intact/complex-portal/api/complex/{cpx_id}",
+      "bioservices_integration": {
+        "supported": false,
+        "class_name": null,
+        "primary_method": "Discovered via bioservices.UniProt column 'xref_complexportal'",
+        "fallback_invariant": "Fallback Invariant 1 (Unsupported Specialized Endpoint - Direct EBI Complex Portal REST API)"
+      },
+      "authentication": {
+        "required": false,
+        "type": "none"
+      },
+      "rate_limits": "~20 requests/second",
+      "polling": {
+        "async_job": false,
+        "recommended_interval_sec": null
+      },
+      "returned_fields": [
+        "complex_id",
+        "recommended_name",
+        "systematic_name",
+        "stoichiometry",
+        "participants",
+        "biological_properties"
+      ],
+      "limitations": [
+        "Coverage concentrated heavily on model organisms; low representation of novel bacterial proteomes"
+      ],
+      "operational_notes": "Golden standard for validated, non-redundant macromolecular complexes."
+    },
+    {
+      "id": "intact",
+      "name": "IntAct Molecular Interaction Database",
+      "classification": "pipeline-ready",
+      "evidence_tier": "interaction_partner_hypothesis",
+      "accepted_inputs": ["uniprot_accession", "gene_name", "tax_id"],
+      "primary_endpoint": "https://www.ebi.ac.uk/intact/ws/interactors",
+      "bioservices_integration": {
+        "supported": true,
+        "class_name": "bioservices.IntAct",
+        "primary_method": "IntAct().get_interactor(accession)",
+        "fallback_invariant": "Fallback Invariant 1 (PSICQUIC REST for advanced PSI-MI XML/JSON records)"
+      },
+      "authentication": {
+        "required": false,
+        "type": "none"
+      },
+      "rate_limits": "~20 requests/second",
+      "polling": {
+        "async_job": false,
+        "recommended_interval_sec": null
+      },
+      "returned_fields": [
+        "interactor_a",
+        "interactor_b",
+        "detection_methods",
+        "interaction_type",
+        "expansion_method",
+        "confidence_score"
+      ],
+      "limitations": [
+        "Captures interaction topology and affinity, not atomic 3D quaternary coordinates or symmetry"
+      ],
+      "operational_notes": "Supplies candidate partner hypotheses for predictive multimer modeling."
+    },
+    {
+      "id": "biogrid",
+      "name": "BioGRID Interaction Datasets",
+      "classification": "authenticated",
+      "evidence_tier": "interaction_partner_hypothesis",
+      "accepted_inputs": ["gene_symbol", "entrez_gene_id", "uniprot_accession", "tax_id"],
+      "primary_endpoint": "https://webservice.thebiogrid.org/interactions",
+      "bioservices_integration": {
+        "supported": true,
+        "class_name": "bioservices.BioGrid",
+        "primary_method": "BioGrid(api_key=...).get_interactions(...)",
+        "fallback_invariant": "Fallback Invariant 1 (Direct REST query with accesskey parameter)"
+      },
+      "authentication": {
+        "required": true,
+        "type": "api_key"
+      },
+      "rate_limits": "<= 10 requests/second",
+      "polling": {
+        "async_job": false,
+        "recommended_interval_sec": null
+      },
+      "returned_fields": [
+        "interaction_id",
+        "interactor_a_symbol",
+        "interactor_b_symbol",
+        "experimental_system",
+        "experimental_system_type",
+        "throughput",
+        "publication_pubmed_id"
+      ],
+      "limitations": [
+        "Requires active API registration key",
+        "Must filter out genetic synthetic lethality interactions; keep only physical assays"
+      ],
+      "operational_notes": "Provides broad physical interactome data for candidate multimer hypothesis generation."
+    },
+    {
+      "id": "swissmodel_repository",
+      "name": "SWISS-MODEL Repository",
+      "classification": "pipeline-ready",
+      "evidence_tier": "homology_derived_hypothesis",
+      "accepted_inputs": ["uniprot_accession"],
+      "primary_endpoint": "https://swissmodel.expasy.org/repository/uniprot/{accession}.json",
+      "bioservices_integration": {
+        "supported": false,
+        "class_name": null,
+        "primary_method": null,
+        "fallback_invariant": "Fallback Invariant 1 (Unsupported Specialized Endpoint - SIB SWISS-MODEL Repository REST API)"
+      },
+      "authentication": {
+        "required": false,
+        "type": "none"
+      },
+      "rate_limits": "~10-20 requests/second",
+      "polling": {
+        "async_job": false,
+        "recommended_interval_sec": null
+      },
+      "returned_fields": [
+        "template_pdb_id",
+        "template_oligomeric_state",
+        "qmqe",
+        "gmqe",
+        "qmean",
+        "sequence_identity",
+        "coverage"
+      ],
+      "limitations": [
+        "Only indexes pre-calculated models for known UniProt entries; no arbitrary novel sequences"
+      ],
+      "operational_notes": "Yields Quaternary Structure Model Quality Estimates (QMQE) based on homology templates."
+    },
+    {
+      "id": "swissmodel_automodel",
+      "name": "SWISS-MODEL Automodel API",
+      "classification": "authenticated",
+      "evidence_tier": "homology_derived_hypothesis",
+      "accepted_inputs": ["fasta_sequence", "template_pdb_id"],
+      "primary_endpoint": "https://swissmodel.expasy.org/automodel",
+      "bioservices_integration": {
+        "supported": false,
+        "class_name": null,
+        "primary_method": null,
+        "fallback_invariant": "Fallback Invariant 3 (Ticket-based async polling protocol with Bearer token authentication)"
+      },
+      "authentication": {
+        "required": true,
+        "type": "user_token"
+      },
+      "rate_limits": "Max 5 concurrent modeling jobs per user account",
+      "polling": {
+        "async_job": true,
+        "recommended_interval_sec": 10
+      },
+      "returned_fields": [
+        "job_id",
+        "status",
+        "model_pdb_url",
+        "qmqe",
+        "gmqe",
+        "template_used"
+      ],
+      "limitations": [
+        "Requires active Expasy user API token",
+        "Job queue duration depends on server load"
+      ],
+      "operational_notes": "Allows comparative modeling of novel sequences with explicit oligomeric templates."
+    },
+    {
+      "id": "alphafold_db",
+      "name": "AlphaFold Protein Structure Database (v4)",
+      "classification": "pipeline-ready",
+      "evidence_tier": "predictive_structural_context",
+      "accepted_inputs": ["uniprot_accession"],
+      "primary_endpoint": "https://alphafold.ebi.ac.uk/api/prediction/{accession}",
+      "bioservices_integration": {
+        "supported": false,
+        "class_name": null,
+        "primary_method": null,
+        "fallback_invariant": "Fallback Invariant 1 (Unsupported Specialized Endpoint - Direct REST Client)"
+      },
+      "authentication": {
+        "required": false,
+        "type": "none"
+      },
+      "rate_limits": "~20-30 requests/second",
+      "polling": {
+        "async_job": false,
+        "recommended_interval_sec": null
+      },
+      "returned_fields": [
+        "uniprot_accession",
+        "gene",
+        "pdb_url",
+        "cif_url",
+        "bcif_url",
+        "pae_doc_url",
+        "global_plddt"
+      ],
+      "limitations": [
+        "Single-chain monomeric models only; strictly prohibited from asserting oligomeric state (D-05)",
+        "Does not model inter-chain interfaces or quaternary stoichiometry"
+      ],
+      "operational_notes": "Provides tertiary structural context only; pLDDT confidence scores preserved separately per D-08."
+    },
+    {
+      "id": "alphafold_multimer",
+      "name": "AlphaFold-Multimer & ColabFold Batch",
+      "classification": "pipeline-ready",
+      "evidence_tier": "predictive_multimer_hypothesis",
+      "accepted_inputs": ["multi_chain_fasta_sequences", "stoichiometry_specification"],
+      "primary_endpoint": "local_container_colabfold_batch",
+      "bioservices_integration": {
+        "supported": false,
+        "class_name": null,
+        "primary_method": null,
+        "fallback_invariant": "Fallback Invariant 1 (Unsupported Specialized Execution - Local container / CLI runner)"
+      },
+      "authentication": {
+        "required": false,
+        "type": "local_compute_resources"
+      },
+      "rate_limits": "Bounded by GPU VRAM and compute capacity (typical runtime 3-20 minutes/complex)",
+      "polling": {
+        "async_job": true,
+        "recommended_interval_sec": 15
+      },
+      "returned_fields": [
+        "predicted_complex_pdb",
+        "plddt",
+        "ptm",
+        "iptm",
+        "model_confidence",
+        "pae_matrix"
+      ],
+      "limitations": [
+        "Computationally intensive (requires >= 16GB GPU VRAM)",
+        "Strictly caller-opt-in requiring explicit partner or self-association hypothesis per D-06"
+      ],
+      "operational_notes": "Deep learning co-folding for complex assemblies; model confidence defined as 0.8*ipTM + 0.2*pTM."
+    },
+    {
+      "id": "galaxy_heteromer",
+      "name": "GalaxyHeteromer Multimer Modeling Server",
+      "classification": "web-only",
+      "evidence_tier": "predictive_multimer_hypothesis",
+      "accepted_inputs": ["two_or_more_fasta_sequences"],
+      "primary_endpoint": "http://galaxy.seoklab.org/cgi-bin/submit.cgi?type=HETEROMER",
+      "bioservices_integration": {
+        "supported": false,
+        "class_name": null,
+        "primary_method": null,
+        "fallback_invariant": "Fallback Invariant 1 (Web-only server with no programmatic API)"
+      },
+      "authentication": {
+        "required": false,
+        "type": "optional_web_account"
+      },
+      "rate_limits": "Server web queue (latencies 30 min to several hours)",
+      "polling": {
+        "async_job": true,
+        "recommended_interval_sec": 60
+      },
+      "returned_fields": [
+        "multimer_pdb_models",
+        "template_pdb_id",
+        "energy_score"
+      ],
+      "limitations": [
+        "Lacks stable public REST API; requires manual HTML scraping / browser queue monitoring",
+        "Not suitable for automated headless batch pipelines"
+      ],
+      "operational_notes": "Cataloged for interactive web verification and benchmarking reference."
+    },
+    {
+      "id": "cluspro",
+      "name": "ClusPro 2.0 Protein-Protein Docking Server",
+      "classification": "authenticated",
+      "evidence_tier": "docking_assembly_hypothesis",
+      "accepted_inputs": ["receptor_pdb_structure", "ligand_pdb_structure"],
+      "primary_endpoint": "https://cluspro.bu.edu/api/",
+      "bioservices_integration": {
+        "supported": false,
+        "class_name": null,
+        "primary_method": null,
+        "fallback_invariant": "Fallback Invariant 1 (ClusPro REST API queue)"
+      },
+      "authentication": {
+        "required": true,
+        "type": "academic_credentials"
+      },
+      "rate_limits": "Max 2 concurrent queued docking jobs per user",
+      "polling": {
+        "async_job": true,
+        "recommended_interval_sec": 30
+      },
+      "returned_fields": [
+        "docked_complex_pdb_clusters",
+        "cluster_size",
+        "lowest_energy_score"
+      ],
+      "limitations": [
+        "Rigid-body docking assumption; does not simulate induced fit or backbone co-folding",
+        "Requires academic registration credentials"
+      ],
+      "operational_notes": "Tests binary interface feasibility using AlphaFold DB tertiary monomer models."
+    },
+    {
+      "id": "esmatlas",
+      "name": "ESMFold / ESM Metagenomic Atlas",
+      "classification": "pipeline-ready",
+      "evidence_tier": "predictive_structural_context",
+      "accepted_inputs": ["fasta_sequence"],
+      "primary_endpoint": "https://api.esmatlas.com/foldSequence/v1/pdb/",
+      "bioservices_integration": {
+        "supported": false,
+        "class_name": null,
+        "primary_method": null,
+        "fallback_invariant": "Fallback Invariant 1 (ESM Metagenomic Atlas REST endpoint)"
+      },
+      "authentication": {
+        "required": false,
+        "type": "none"
+      },
+      "rate_limits": "~60 requests/minute (recommend <= 5 concurrent calls)",
+      "polling": {
+        "async_job": false,
+        "recommended_interval_sec": null
+      },
+      "returned_fields": [
+        "atomic_coordinates_pdb",
+        "per_residue_plddt",
+        "mean_plddt"
+      ],
+      "limitations": [
+        "Single-chain folding only; does not predict quaternary multimer assemblies",
+        "Sequence length constrained on public endpoint (~400 residues)"
+      ],
+      "operational_notes": "Ultra-fast monomer fallback for unindexed novel sequences lacking pre-computed AlphaFold DB entries."
+    }
+  ]
+}
