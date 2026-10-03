@@ -1,0 +1,55 @@
+"""SWISS-MODEL Repository client adapter retrieving homology models and oligomeric templates."""
+
+from __future__ import annotations
+
+import logging
+from typing import Any, Dict, List, Optional
+
+from quaternary.clients.base import BaseBioClient
+
+logger = logging.getLogger(__name__)
+
+
+class SwissModelClient(BaseBioClient):
+    """Client for querying SWISS-MODEL precomputed homology models and template oligomeric states."""
+
+    def get_homology_models(self, accession: str) -> List[Dict[str, Any]]:
+        """Fetch precomputed homology models for target UniProt accession."""
+        clean_acc = accession.strip().upper()
+
+        def _fetch() -> Dict[str, Any]:
+            url = f"https://swissmodel.expasy.org/repository/uniprot/{clean_acc}.json"
+            resp = self.session.get(url, timeout=self.config.timeout)
+            if resp.status_code == 404:
+                return {"result": []}
+            resp.raise_for_status()
+            return resp.json()
+
+        data = self.get_with_cache("swissmodel", clean_acc, _fetch)
+        raw_models = data.get("result", [])
+        if isinstance(data, list):
+            raw_models = data
+
+        parsed_models: List[Dict[str, Any]] = []
+        for m in raw_models:
+            tpl = m.get("template", "")
+            tpl_pdb = m.get("template_pdb_id") or (tpl.split(".")[0].upper() if tpl else "UNKNOWN")
+            oligo = m.get("template_oligomeric_state") or m.get("oligo-state") or "unknown"
+            qmqe = float(m.get("qmqe", 0.0)) if m.get("qmqe") is not None else 0.0
+            gmqe = float(m.get("gmqe", 0.0)) if m.get("gmqe") is not None else 0.0
+            identity = float(m.get("seq_identity", m.get("identity", 0.0)))
+            coverage = float(m.get("coverage", 0.0))
+
+            qualifying = qmqe >= 0.70
+
+            parsed_models.append({
+                "template_pdb_id": tpl_pdb,
+                "template_oligomeric_state": oligo,
+                "qmqe": qmqe,
+                "gmqe": gmqe,
+                "seq_identity": identity,
+                "coverage": coverage,
+                "qualifying_homology": qualifying,
+            })
+
+        return parsed_models
