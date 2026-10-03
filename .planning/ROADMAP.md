@@ -7,7 +7,7 @@ This roadmap drives the development of the Quaternary Structure module for the b
 ## Phases
 
 - [x] **Phase 1: Quaternary Ecosystem Survey, Server Benchmarking & Reusable Research Prompt** - Survey quaternary servers/APIs and author reusable discovery prompt. (Completed 2026-10-03)
-- [ ] **Phase 2: Core Quaternary Engine & API Abstraction Module** - Implement `quaternary_pipeline.py` abstracting API calls, async polling, and data normalization.
+- [x] **Phase 2: Core Quaternary Engine & API Abstraction Module** - Implement `quaternary_pipeline.py` abstracting API calls, async polling, and data normalization. (Completed 2026-10-04)
 - [ ] **Phase 3: Abstracted Interactive Jupyter Notebook** - Create `Quaternary_Structure.ipynb` providing high-level analysis with minimal boilerplate.
 - [ ] **Phase 4: Standardized UI JSON Data Contract & Benchmark Validation** - Export standard schema for frontend UI and validate against *H. influenzae* and synthetic sequences.
 
@@ -45,14 +45,14 @@ Plans:
 
 Plans:
 **Wave 1**
-- [ ] 02-01: Design core data models (dataclasses/Pydantic) for quaternary structure results in `quaternary_pipeline.py`
+- [x] 02-01: Design core data models (dataclasses/Pydantic) for quaternary structure results in `quaternary_pipeline.py`
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 02-02: Implement experimental and homology-based retrieval clients (UniProtKB SUBUNIT, PDB PISA, SWISS-MODEL)
-- [ ] 02-03: Implement predictive multimer client wrappers with robust async polling and HTTP 303 redirect handling
+- [x] 02-02: Implement experimental and homology-based retrieval clients (UniProtKB SUBUNIT, PDB PISA, SWISS-MODEL)
+- [x] 02-03: Implement predictive multimer client wrappers with robust async polling and HTTP 303 redirect handling
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 02-04: Implement unified aggregation, error fallback, and interface contact extraction logic
+- [x] 02-04: Implement unified aggregation, error fallback, and interface contact extraction logic
 
 ### Phase 3: Abstracted Interactive Jupyter Notebook
 
@@ -96,8 +96,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Quaternary Ecosystem Survey & Reusable Prompt | 0/3 | Not started | - |
-| 2. Core Quaternary Engine & API Abstraction Module | 0/4 | Not started | - |
+| 1. Quaternary Ecosystem Survey & Reusable Prompt | 3/3 | Complete | 2026-10-03 |
+| 2. Core Quaternary Engine & API Abstraction Module | 4/4 | Complete | 2026-10-04 |
 | 3. Abstracted Interactive Jupyter Notebook | 0/3 | Not started | - |
 | 4. UI JSON Data Contract & Benchmark Validation | 0/3 | Not started | - |
 
