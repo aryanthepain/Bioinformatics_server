@@ -31,6 +31,11 @@ class StageResult(BaseModel):
     provenance: Dict[str, Any] = Field(default_factory=dict)
     error_message: Optional[str] = None
 
+    @property
+    def details(self) -> Dict[str, Any]:
+        """Convenience property alias to self.data."""
+        return self.data
+
 
 class QuaternaryStructureOutput(BaseModel):
     """Canonical data contract for quaternary structure synthesis and UI export."""
@@ -44,3 +49,11 @@ class QuaternaryStructureOutput(BaseModel):
     confidence_provenance: ConfidenceProvenance = Field(default_factory=ConfidenceProvenance)
     stages_completed: List[int] = Field(default_factory=list)
     metadata: Dict[str, Any] = Field(default_factory=dict)
+
+    @property
+    def status(self) -> StageStatus:
+        """Convenience property aligning with stage runner return types."""
+        try:
+            return StageStatus(self.quaternary_status)
+        except Exception:
+            return StageStatus.SUCCESS

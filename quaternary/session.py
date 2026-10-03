@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import json
 import logging
 import re
+import time
+import uuid
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 import pandas as pd
 
@@ -41,30 +45,66 @@ class QuaternarySession:
 
     def __init__(
         self,
-        session_id: str,
-        target_input: str,
-        config: QuaternaryConfig,
-        uniprot_client: UniProtClient,
-        complex_portal_client: ComplexPortalClient,
-        rcsb_client: RCSBSearchClient,
-        pisa_client: PisaClient,
-        swissmodel_client: SwissModelClient,
-        intact_client: IntActClient,
-        alphafold_client: AlphaFoldClient,
-        multimer_client: MultimerPredictorClient,
+        target_input_or_session_id: Optional[str] = None,
+        target_input: Optional[str] = None,
+        config: Optional[QuaternaryConfig] = None,
+        uniprot_client: Optional[UniProtClient] = None,
+        complex_portal_client: Optional[ComplexPortalClient] = None,
+        rcsb_client: Optional[RCSBSearchClient] = None,
+        pisa_client: Optional[PisaClient] = None,
+        swissmodel_client: Optional[SwissModelClient] = None,
+        intact_client: Optional[IntActClient] = None,
+        alphafold_client: Optional[AlphaFoldClient] = None,
+        multimer_client: Optional[MultimerPredictorClient] = None,
+        session_id: Optional[str] = None,
     ) -> None:
-        self.session_id = session_id
-        self.target_input = target_input.strip()
-        self.config = config
+        self.config = config or QuaternaryConfig()
 
-        self.uniprot_client = uniprot_client
-        self.complex_portal_client = complex_portal_client
-        self.rcsb_client = rcsb_client
-        self.pisa_client = pisa_client
-        self.swissmodel_client = swissmodel_client
-        self.intact_client = intact_client
-        self.alphafold_client = alphafold_client
-        self.multimer_client = multimer_client
+        # Handle both QuaternarySession(target_input, config=...) and QuaternarySession(session_id=..., target_input=..., ...)
+        if session_id is not None:
+            self.session_id = session_id
+            resolved_target = target_input or target_input_or_session_id or ""
+        elif target_input is not None:
+            self.session_id = target_input_or_session_id or f"quat-{uuid.uuid4().hex[:8]}"
+            resolved_target = target_input
+        else:
+            resolved_target = target_input_or_session_id or ""
+            ts = int(time.time() * 1000)
+            self.session_id = f"quat-session-{ts}-{uuid.uuid4().hex[:6]}"
+
+        self.target_input = resolved_target.strip()
+
+        # If clients not provided, instantiate default client pool via cache backend
+        if uniprot_client is None:
+            from quaternary.cache import get_cache_backend
+            from quaternary.clients import (
+                AlphaFoldClient,
+                ComplexPortalClient,
+                IntActClient,
+                MultimerPredictorClient,
+                PisaClient,
+                RCSBSearchClient,
+                SwissModelClient,
+                UniProtClient,
+            )
+            cache = get_cache_backend(self.config)
+            self.uniprot_client = UniProtClient(self.config, cache)
+            self.complex_portal_client = ComplexPortalClient(self.config, cache)
+            self.rcsb_client = RCSBSearchClient(self.config, cache)
+            self.pisa_client = PisaClient(self.config, cache)
+            self.swissmodel_client = SwissModelClient(self.config, cache)
+            self.intact_client = IntActClient(self.config, cache)
+            self.alphafold_client = AlphaFoldClient(self.config, cache)
+            self.multimer_client = MultimerPredictorClient(self.config, cache)
+        else:
+            self.uniprot_client = uniprot_client
+            self.complex_portal_client = complex_portal_client
+            self.rcsb_client = rcsb_client
+            self.pisa_client = pisa_client
+            self.swissmodel_client = swissmodel_client
+            self.intact_client = intact_client
+            self.alphafold_client = alphafold_client
+            self.multimer_client = multimer_client
 
         self.stages: Dict[int, StageResult] = {}
         self.output: Optional[QuaternaryStructureOutput] = None
@@ -76,6 +116,21 @@ class QuaternarySession:
         )
         self.is_accession = bool(uniprot_pattern.match(self.target_input))
         self.accession: Optional[str] = self.target_input if self.is_accession else None
+
+    @property
+    def status(self) -> StageStatus:
+        """Dynamic session status based on stage execution and final output."""
+        if self.output is not None:
+            return StageStatus.SUCCESS
+        if self.stages:
+            latest = list(self.stages.values())[-1]
+            return latest.status
+        return StageStatus.PENDING
+
+    @property
+    def stage_results(self) -> Dict[str, Any]:
+        """Inspection dictionary of completed stage results."""
+        return {f"Stage_{k}_{v.stage_name}": v.model_dump() for k, v in self.stages.items()}
 
     # ==========================================
     # Stage 1: Primary Evidence Collection

@@ -1,0 +1,78 @@
+{
+  "analysis_id": "quat-session-1791059794542-3aa82f",
+  "target_accession_or_sequence": "P0A6F5",
+  "quaternary_status": "HETEROMER",
+  "stoichiometry": {
+    "formula": "A14B7",
+    "chains": {
+      "A": 14,
+      "B": 7
+    },
+    "total_subunits": 21,
+    "assembly_type": "HETEROMER",
+    "symmetry": null
+  },
+  "interfaces": [
+    {
+      "chain_1": "A",
+      "chain_2": "B",
+      "buried_surface_area_angstrom2": 2150.0,
+      "solvation_free_energy_kcal_mol": -18.2,
+      "hydrogen_bonds_count": 12,
+      "salt_bridges_count": 6,
+      "interface_residues_chain_1": [
+        25,
+        27,
+        28,
+        31,
+        35,
+        88,
+        89
+      ],
+      "interface_residues_chain_2": [
+        110,
+        112,
+        115,
+        120,
+        142
+      ]
+    }
+  ],
+  "experimental_conflict": {
+    "conflict_detected": false,
+    "rcsb_annotated_assembly": "A14",
+    "pisa_thermodynamic_state": "stable",
+    "dissociation_energy_kcal_mol": -124.5,
+    "conflict_rationale": null
+  },
+  "confidence_provenance": {
+    "pdbe_pisa": {
+      "dissociation_energy_kcal_mol": -124.5,
+      "buried_surface_area_angstrom2": 52000.0
+    },
+    "swissmodel": {
+      "qmqe": 0.88,
+      "gmqe": 0.92,
+      "coverage": 1.0
+    },
+    "alphafold_db": {
+      "global_plddt": 94.6
+    },
+    "alphafold_multimer": null
+  },
+  "stages_completed": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+  ],
+  "metadata": {
+    "session_id": "quat-session-1791059794542-3aa82f",
+    "gene_name": "groL",
+    "organism": "Escherichia coli (strain K12)",
+    "pisa_status": "stable",
+    "assembly_score": 8.0
+  }
+}
