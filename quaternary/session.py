@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from typing import Any, Dict, List, Optional, Union
 import pandas as pd
 
@@ -69,9 +70,12 @@ class QuaternarySession:
         self.output: Optional[QuaternaryStructureOutput] = None
 
         # Determine input type (UniProt accession vs raw sequence)
-        self.is_accession = len(self.target_input) <= 12 and not any(
-            c in self.target_input for c in (" ", "\n", "\t")
+        uniprot_pattern = re.compile(
+            r"^([O,P,Q][0-9][A-Z,0-9]{3}[0-9]|[A-N,R-Z][0-9]([A-Z][A-Z,0-9]{2}[0-9]){1,2})$",
+            re.IGNORECASE,
         )
+        self.is_accession = bool(uniprot_pattern.match(self.target_input))
+        self.accession: Optional[str] = self.target_input if self.is_accession else None
 
     # ==========================================
     # Stage 1: Primary Evidence Collection
@@ -87,15 +91,17 @@ class QuaternarySession:
         provenance: Dict[str, Any] = {"errors": []}
         has_data = False
 
-        # 1. UniProt
-        accession = self.target_input if self.is_accession else "P0A6F5"
-        try:
-            uniprot_res = self.uniprot_client.get_subunit_annotations(accession)
-            data["uniprot"] = uniprot_res
-            has_data = True
-        except Exception as e:
-            logger.warning(f"Stage 1 UniProt fetch failed: {e}")
-            provenance["errors"].append({"source": "uniprot", "error": str(e)})
+        # 1. UniProt (if accession provided or offline fallback)
+        acc_to_query = self.accession or ("P0A6F5" if self.config.offline_mode else None)
+        if acc_to_query:
+            try:
+                uniprot_res = self.uniprot_client.get_subunit_annotations(acc_to_query)
+                data["uniprot"] = uniprot_res
+                self.accession = uniprot_res.get("accession", acc_to_query)
+                has_data = True
+            except Exception as e:
+                logger.warning(f"Stage 1 UniProt fetch failed: {e}")
+                provenance["errors"].append({"source": "uniprot", "error": str(e)})
 
         # 2. Complex Portal
         cpx_ids = data["uniprot"].get("complex_portal_ids", [])
@@ -238,7 +244,7 @@ class QuaternarySession:
 
     def run_stage_3_homology_and_partners(self) -> StageResult:
         """Stage 3: Discover homology models and physical interaction partners."""
-        accession = self.target_input if self.is_accession else "P0A6F5"
+        accession = self.accession or ("P0A6F5" if self.config.offline_mode else None)
         data: Dict[str, Any] = {
             "homology_models": [],
             "qualifying_homology_templates": [],
@@ -246,22 +252,23 @@ class QuaternarySession:
         }
         provenance: Dict[str, Any] = {"errors": []}
 
-        # 1. SWISS-MODEL
-        try:
-            models = self.swissmodel_client.get_homology_models(accession)
-            data["homology_models"] = models
-            data["qualifying_homology_templates"] = [m for m in models if m.get("qualifying_homology")]
-        except Exception as e:
-            logger.warning(f"Stage 3 SWISS-MODEL fetch failed: {e}")
-            provenance["errors"].append({"source": "swissmodel", "error": str(e)})
+        if accession:
+            # 1. SWISS-MODEL
+            try:
+                models = self.swissmodel_client.get_homology_models(accession)
+                data["homology_models"] = models
+                data["qualifying_homology_templates"] = [m for m in models if m.get("qualifying_homology")]
+            except Exception as e:
+                logger.warning(f"Stage 3 SWISS-MODEL fetch failed: {e}")
+                provenance["errors"].append({"source": "swissmodel", "error": str(e)})
 
-        # 2. IntAct Physical Interactors
-        try:
-            interactors = self.intact_client.get_physical_interactors(accession)
-            data["physical_interactors"] = interactors
-        except Exception as e:
-            logger.warning(f"Stage 3 IntAct fetch failed: {e}")
-            provenance["errors"].append({"source": "intact", "error": str(e)})
+            # 2. IntAct Physical Interactors
+            try:
+                interactors = self.intact_client.get_physical_interactors(accession)
+                data["physical_interactors"] = interactors
+            except Exception as e:
+                logger.warning(f"Stage 3 IntAct fetch failed: {e}")
+                provenance["errors"].append({"source": "intact", "error": str(e)})
 
         has_data = bool(data["homology_models"] or data["physical_interactors"])
         status = StageStatus.SUCCESS if has_data else StageStatus.UNAVAILABLE
@@ -282,12 +289,15 @@ class QuaternarySession:
 
     def run_stage_4_structural_context(self) -> StageResult:
         """Stage 4: Retrieve monomeric coordinates and pLDDT strictly maintaining the monomer boundary (D-05)."""
-        accession = self.target_input if self.is_accession else "P0A6F5"
+        accession = self.accession or ("P0A6F5" if self.config.offline_mode else None)
         data: Dict[str, Any] = {}
         provenance: Dict[str, Any] = {"errors": []}
 
         try:
-            context = self.alphafold_client.get_structural_context(accession)
+            if accession:
+                context = self.alphafold_client.get_structural_context(accession)
+            else:
+                context = self.alphafold_client.query_esmfold_fallback(self.target_input)
             data = context
             # Enforce D-05
             data["monomer_context_only"] = True
@@ -318,7 +328,7 @@ class QuaternarySession:
         hypothesis: Optional[str] = None,
     ) -> StageResult:
         """Stage 5: Formulate multimer hypotheses or execute predictive multimer simulation (enforcing D-06)."""
-        accession = self.target_input if self.is_accession else "P0A6F5"
+        accession = self.accession or ("P0A6F5" if self.config.offline_mode else "TARGET")
         stage_3 = self.stages.get(3)
         partners = stage_3.data.get("physical_interactors", []) if stage_3 else []
 
