@@ -14,6 +14,7 @@ This roadmap drives the development of the Quaternary Structure module for the b
 ## Phase Details
 
 ### Phase 1: Quaternary Ecosystem Survey, Server Benchmarking & Reusable Research Prompt
+
 **Goal**: Identify, catalog, and evaluate all available quaternary structure databases and predictive servers; author a structured reusable prompt for server research.
 **Depends on**: Nothing (first phase)
 **Requirements**: QUAT-01, QUAT-02
@@ -21,6 +22,7 @@ This roadmap drives the development of the Quaternary Structure module for the b
   1. A comprehensive catalog of quaternary databases (UniProtKB SUBUNIT, PDBe PISA, SWISS-MODEL) and predictive servers (AlphaFold-Multimer, GalaxyHeteromer, ClusPro, ESM-complex) is documented with inputs, endpoints, and limitations.
   2. A proven, copy-pasteable reusable research prompt is produced for discovering and evaluating additional quaternary servers.
   3. API authentication, rate limits, and async polling characteristics are cataloged for pipeline design.
+
 **Plans**: 3 plans
 
 Plans:
@@ -29,6 +31,7 @@ Plans:
 - [x] 01-03: Synthesize findings and formulate the reusable quaternary server research prompt
 
 ### Phase 2: Core Quaternary Engine & API Abstraction Module
+
 **Goal**: Build a robust, standalone Python module (`quaternary_pipeline.py`) that handles all quaternary queries, async polling, redirect handling, and data normalization outside of notebook cells.
 **Depends on**: Phase 1
 **Requirements**: QUAT-03, QUAT-04, QUAT-05
@@ -37,15 +40,22 @@ Plans:
   2. Experimental and homology quaternary annotations are queried and parsed with zero raw boilerplate in caller code.
   3. Asynchronous job polling safely handles UniProt/EBI HTTP 303 redirects and rate limits without crashes or infinite loops.
   4. Unified data structures represent oligomeric state, subunit count, stoichiometry, and interface residues.
+
 **Plans**: 4 plans
 
 Plans:
+**Wave 1**
 - [ ] 02-01: Design core data models (dataclasses/Pydantic) for quaternary structure results in `quaternary_pipeline.py`
+
+**Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 02-02: Implement experimental and homology-based retrieval clients (UniProtKB SUBUNIT, PDB PISA, SWISS-MODEL)
 - [ ] 02-03: Implement predictive multimer client wrappers with robust async polling and HTTP 303 redirect handling
+
+**Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 02-04: Implement unified aggregation, error fallback, and interface contact extraction logic
 
 ### Phase 3: Abstracted Interactive Jupyter Notebook
+
 **Goal**: Deliver a clean, highly readable Jupyter notebook (`Quaternary_Structure.ipynb`) that demonstrates complete quaternary characterization using high-level module calls.
 **Depends on**: Phase 2
 **Requirements**: QUAT-06, QUAT-07
@@ -53,6 +63,7 @@ Plans:
   1. `Quaternary_Structure.ipynb` executes cleanly from start to finish without exposing raw HTTP or parser internals.
   2. Clear visual summary tables and plots display predicted oligomeric states, stoichiometry, and confidence scores.
   3. Interactive cells allow users to input a sequence or accession ID and inspect quaternary assembly predictions.
+
 **Plans**: 3 plans
 
 Plans:
@@ -61,6 +72,7 @@ Plans:
 - [ ] 03-03: Add interactive export triggers and complete end-to-end biological interpretation markdown documentation
 
 ### Phase 4: Standardized UI JSON Data Contract & Benchmark Validation
+
 **Goal**: Formalize the UI JSON export schema and validate the pipeline against *Haemophilus influenzae* uncharacterized proteins and synthetic novel sequences.
 **Depends on**: Phase 3
 **Requirements**: QUAT-08, QUAT-09, QUAT-10
@@ -69,6 +81,7 @@ Plans:
   2. Pipeline successfully processes and benchmarks uncharacterized targets from *H. influenzae* (UP000000579).
   3. Pipeline successfully runs on synthetic/novel unannotated primary sequences, providing meaningful fallback/predictions.
   4. Frontend UI integration guide and data dictionary are delivered to support the UI team member.
+
 **Plans**: 3 plans
 
 Plans:
