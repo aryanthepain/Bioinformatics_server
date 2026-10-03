@@ -6,7 +6,7 @@ This roadmap drives the development of the Quaternary Structure module for the b
 
 ## Phases
 
-- [ ] **Phase 1: Quaternary Ecosystem Survey, Server Benchmarking & Reusable Research Prompt** - Survey quaternary servers/APIs and author reusable discovery prompt.
+- [x] **Phase 1: Quaternary Ecosystem Survey, Server Benchmarking & Reusable Research Prompt** - Survey quaternary servers/APIs and author reusable discovery prompt. (Completed 2026-10-03)
 - [ ] **Phase 2: Core Quaternary Engine & API Abstraction Module** - Implement `quaternary_pipeline.py` abstracting API calls, async polling, and data normalization.
 - [ ] **Phase 3: Abstracted Interactive Jupyter Notebook** - Create `Quaternary_Structure.ipynb` providing high-level analysis with minimal boilerplate.
 - [ ] **Phase 4: Standardized UI JSON Data Contract & Benchmark Validation** - Export standard schema for frontend UI and validate against *H. influenzae* and synthetic sequences.
@@ -24,9 +24,9 @@ This roadmap drives the development of the Quaternary Structure module for the b
 **Plans**: 3 plans
 
 Plans:
-- [ ] 01-01: Research and catalog experimental and homology quaternary databases (UniProtKB SUBUNIT, PDBe PISA, SWISS-MODEL oligomers)
-- [ ] 01-02: Research predictive multimer servers and docking APIs (AlphaFold-Multimer, ColabFold, GalaxyHeteromer, ClusPro, ESM-complex)
-- [ ] 01-03: Synthesize findings and formulate the reusable quaternary server research prompt
+- [x] 01-01: Research and catalog experimental and homology quaternary databases (UniProtKB SUBUNIT, PDBe PISA, SWISS-MODEL oligomers)
+- [x] 01-02: Research predictive multimer servers and docking APIs (AlphaFold-Multimer, ColabFold, GalaxyHeteromer, ClusPro, ESM-complex)
+- [x] 01-03: Synthesize findings and formulate the reusable quaternary server research prompt
 
 ### Phase 2: Core Quaternary Engine & API Abstraction Module
 **Goal**: Build a robust, standalone Python module (`quaternary_pipeline.py`) that handles all quaternary queries, async polling, redirect handling, and data normalization outside of notebook cells.
