@@ -1,0 +1,33 @@
+{
+  "contract": "1.0.0",
+  "flavor": "core",
+  "milestone": null,
+  "phases": [
+    {
+      "number": "1",
+      "name": "Quaternary Ecosystem Survey & Reusable Prompt",
+      "status": "pending"
+    },
+    {
+      "number": "2",
+      "name": "Core Quaternary Engine & API Abstraction Module",
+      "status": "pending"
+    },
+    {
+      "number": "3",
+      "name": "Abstracted Interactive Jupyter Notebook",
+      "status": "pending"
+    },
+    {
+      "number": "4",
+      "name": "UI JSON Data Contract & Benchmark Validation",
+      "status": "pending"
+    }
+  ],
+  "next": {
+    "command": "/gsd-progress",
+    "label": "Show progress",
+    "reason": "Unsure of state — showing progress"
+  },
+  "updated_at": "2026-10-03T19:17:18.510Z"
+}
