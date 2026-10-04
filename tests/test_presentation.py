@@ -23,6 +23,7 @@ from IPython.display import HTML
 from quaternary.presentation import (
     validate_target_input,
     render_validation_status,
+    render_target_selection_card,
     show_json,
     render_quaternary_summary_card,
     render_component_identity_table,
@@ -36,6 +37,8 @@ from quaternary.models import (
     Stoichiometry,
     AssemblyType,
     EvidenceStatus,
+    QueryState,
+    DatabaseAuditRecord,
     TargetSelfAssembly,
     FunctionalComplex,
     ObservedAssembly,
@@ -482,3 +485,149 @@ def test_render_evidence_coverage_dashboard_empty_fallback():
     dash = render_evidence_coverage_dashboard(output)
     assert isinstance(dash, HTML)
     assert "No coverage audit recorded." in dash.data
+
+
+# ---------------------------------------------------------------------------
+# 10. Target Selection Card & Vocabulary Rigor Tests
+# ---------------------------------------------------------------------------
+
+def test_render_target_selection_card_presets_and_custom():
+    """Verify render_target_selection_card renders preset metadata and custom sequence fallback."""
+    # 1. Preset by accession
+    groel_card = render_target_selection_card("P0A6F5")
+    assert isinstance(groel_card, HTML)
+    assert "GroEL Chaperonin" in groel_card.data
+    assert "Escherichia coli" in groel_card.data
+    assert "A14" in groel_card.data
+
+    # 2. Preset with explicit info
+    insulin_card = render_target_selection_card(
+        "P01308",
+        preset_info={
+            "name": "Insulin",
+            "organism": "Homo sapiens",
+            "assembly": "Dynamic Equilibrium (Monomer / Dimer / Hexamer)",
+        },
+    )
+    assert isinstance(insulin_card, HTML)
+    assert "Insulin" in insulin_card.data
+    assert "Homo sapiens" in insulin_card.data
+    assert "Dynamic Equilibrium" in insulin_card.data
+
+    # 3. Custom input
+    custom_seq = "MAAKDVKFGNDARVKMLRGVNVLADAVKVTLGPKGRNVVLDKSFGAPTITKDGV"
+    custom_card = render_target_selection_card(custom_seq)
+    assert isinstance(custom_card, HTML)
+    assert "Custom User Input" in custom_card.data
+    assert "User Specified" in custom_card.data
+    assert "54 AA" in custom_card.data
+
+
+def test_render_quaternary_summary_card_consensus_and_provenance():
+    """Verify honest consensus statuses, provenance tags, and unconfigured multimer runner badge."""
+    # 1. CONFIRMED status with EXPERIMENTAL provenance
+    output_confirmed = QuaternaryStructureOutput(
+        analysis_id="CONFIRMED_001",
+        target_accession_or_sequence="P0A6F5",
+        quaternary_status="CONFIRMED",
+        stoichiometry=Stoichiometry.from_formula("A14"),
+        metadata={"provenance_source": "EXPERIMENTAL"},
+        observed_assemblies=[
+            ObservedAssembly(
+                pdb_id="1AON",
+                assembly_id="1",
+                stoichiometry="A14",
+                biological_assembly_type="Tetradecamer",
+            )
+        ],
+    )
+    card_c = render_quaternary_summary_card(output_confirmed)
+    assert "CONFIRMED" in card_c.data
+    assert "[EXPERIMENTAL]" in card_c.data
+    assert "Status: NOT EXECUTED | Reason: External prediction runner not configured" in card_c.data
+
+    # 2. INSUFFICIENT EVIDENCE status with PREDICTED provenance
+    output_novel = QuaternaryStructureOutput(
+        analysis_id="NOVEL_001",
+        target_accession_or_sequence="MKLLVVLALLA",
+        quaternary_status="INSUFFICIENT_EVIDENCE",
+        stoichiometry=Stoichiometry.from_formula("A"),
+        metadata={"provenance_source": "PREDICTED"},
+        fallback_representation="MONOMER BASELINE",
+    )
+    card_n = render_quaternary_summary_card(output_novel)
+    assert "INSUFFICIENT EVIDENCE" in card_n.data
+    assert "[PREDICTED]" in card_n.data
+
+
+def test_render_functional_inference_card_segregated_fields():
+    """Verify functional inference card clearly presents observed vs predicted function and supporting evidence."""
+    output = QuaternaryStructureOutput(
+        analysis_id="FUNC_TEST_001",
+        target_accession_or_sequence="P0A6F5",
+        quaternary_status="CONFIRMED",
+        stoichiometry=Stoichiometry.from_formula("A14"),
+        inferred_function=InferredFunction(
+            molecular_function="ATP-dependent molecular chaperonin activity",
+            biological_process="Cellular protein folding quality control under thermal stress",
+            oligomeric_mechanism_hypothesis="Heptameric dual-ring barrel sequestering non-native substrates.",
+            observed_function="ATP-dependent molecular chaperonin activity",
+            predicted_function="Cellular protein folding quality control under thermal stress",
+            quaternary_mechanism_hypothesis="Heptameric dual-ring barrel sequestering non-native substrates.",
+            confidence=0.96,
+            supporting_evidence=[
+                "Complex Portal CPX-2113 confirms 14:7 stoichiometric ratio with GroES.",
+                "PISA interface ΔiG of -25.4 kcal/mol indicates high complex stability.",
+            ],
+            functional_homologs=[{"pdb_id": "1AON", "identity": 1.0, "function": "Chaperonin"}],
+        ),
+    )
+    card = render_functional_inference_card(output)
+    assert isinstance(card, HTML)
+    assert "ATP-dependent molecular chaperonin activity" in card.data
+    assert "Cellular protein folding quality control" in card.data
+    assert "Heptameric dual-ring barrel sequestering non-native substrates." in card.data
+    assert "HIGH CONFIDENCE (0.96)" in card.data
+    assert "Supporting Evidence" in card.data
+    assert "CPX-2113" in card.data
+    assert "-25.4 kcal/mol" in card.data
+
+
+def test_render_evidence_coverage_dashboard_query_states():
+    """Verify evidence coverage dashboard renders DatabaseAuditRecord items with granular QueryState badges."""
+    output = QuaternaryStructureOutput(
+        analysis_id="COV_TEST_001",
+        target_accession_or_sequence="P0A6F5",
+        quaternary_status="CONFIRMED",
+        stoichiometry=Stoichiometry.from_formula("A14"),
+        evidence_coverage=EvidenceCoverage(
+            records=[
+                DatabaseAuditRecord(
+                    database="UniProtKB",
+                    query_status=QueryState.QUERY_SUCCESS_WITH_HIT,
+                    hit_count=3,
+                ),
+                DatabaseAuditRecord(
+                    database="PDBe PISA",
+                    query_status=QueryState.QUERY_SUCCESS_NO_HIT,
+                    hit_count=0,
+                ),
+                DatabaseAuditRecord(
+                    database="External Multimer Runner",
+                    query_status=QueryState.PREDICTION_NOT_EXECUTED,
+                    rationale="GPU runner not configured",
+                ),
+            ],
+            evidence_gaps=["Local multimer compute skipped"],
+        ),
+    )
+    dash = render_evidence_coverage_dashboard(output)
+    assert isinstance(dash, HTML)
+    assert "UniProtKB" in dash.data
+    assert "HIT FOUND (3)" in dash.data
+    assert "PDBe PISA" in dash.data
+    assert "NO HITS / MONOMER" in dash.data
+    assert "External Multimer Runner" in dash.data
+    assert "SKIPPED / UNCONFIGURED" in dash.data
+    assert "Local multimer compute skipped" in dash.data
+

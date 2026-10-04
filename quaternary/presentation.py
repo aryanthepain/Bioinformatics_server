@@ -100,6 +100,95 @@ def render_validation_status(is_valid: bool, msg: str) -> HTML:
     return HTML(html.strip())
 
 
+def render_target_selection_card(
+    target_input: str,
+    active_preset: Optional[str] = None,
+    preset_info: Optional[Dict[str, Any]] = None,
+) -> HTML:
+    """
+    Render a styled visual target selection and configuration card.
+
+    Parameters:
+        target_input: Target accession or FASTA sequence.
+        active_preset: Preset identifier or key (e.g. 'groel', 'insulin').
+        preset_info: Optional dict with keys ('name', 'organism', 'assembly', 'description').
+
+    Returns:
+        HTML: Rendered IPython HTML card.
+    """
+    if preset_info:
+        target_name = preset_info.get("name", "Custom Target")
+        target_organism = preset_info.get("organism", "User Specified")
+        target_assembly = preset_info.get("assembly", "Dynamic Resolution")
+    elif active_preset and str(active_preset).lower() in ("groel", "p0a6f5"):
+        target_name = "GroEL Chaperonin"
+        target_organism = "Escherichia coli (strain K12)"
+        target_assembly = "A14 (D7 tetradecamer) / A14B7 with GroES"
+    elif active_preset and str(active_preset).lower() in ("insulin", "p01308"):
+        target_name = "Insulin"
+        target_organism = "Homo sapiens (Human)"
+        target_assembly = "Dynamic Equilibrium (Monomer / Dimer / Hexamer)"
+    elif active_preset and str(active_preset).lower() in ("hemoglobin", "p69905"):
+        target_name = "Hemoglobin Subunit Alpha"
+        target_organism = "Homo sapiens (Human)"
+        target_assembly = "A2B2 Heterotetramer"
+    elif str(target_input).upper() == "P0A6F5":
+        target_name = "GroEL Chaperonin"
+        target_organism = "Escherichia coli (strain K12)"
+        target_assembly = "A14 (D7 tetradecamer) / A14B7 with GroES"
+    elif str(target_input).upper() == "P01308":
+        target_name = "Insulin"
+        target_organism = "Homo sapiens (Human)"
+        target_assembly = "Dynamic Equilibrium (Monomer / Dimer / Hexamer)"
+    elif str(target_input).upper() == "P69905":
+        target_name = "Hemoglobin Subunit Alpha"
+        target_organism = "Homo sapiens (Human)"
+        target_assembly = "A2B2 Heterotetramer"
+    else:
+        target_name = "Custom User Input"
+        target_organism = "User Specified"
+        target_assembly = "Dynamic Resolution"
+
+    clean_target = str(target_input).strip()
+    if clean_target.startswith(">"):
+        first_line = clean_target.splitlines()[0]
+        target_preview = first_line[:24] + "..." if len(first_line) > 24 else first_line
+    elif len(clean_target) <= 20:
+        target_preview = clean_target
+    else:
+        target_preview = f"{clean_target[:16]}... ({len(clean_target)} AA)"
+
+    panel_html = f"""
+    <div style="background-color: #1e1e1e; border: 1px solid #30363d; border-radius: 8px; padding: 18px 22px; margin: 12px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #c9d1d9;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #30363d; padding-bottom: 12px; margin-bottom: 14px;">
+            <span style="font-size: 16px; font-weight: 700; color: #58a6ff;">&#9881; Target Selection & Configuration</span>
+            <span style="background: #1e3a24; color: #7ee787; padding: 3px 12px; border-radius: 12px; font-size: 11px; font-weight: 700;">ACTIVE CONFIGURATION</span>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 16px;">
+            <div style="background: #252526; padding: 12px 14px; border-radius: 6px; border-left: 3px solid #58a6ff;">
+                <div style="font-size: 11px; text-transform: uppercase; color: #8b949e; letter-spacing: 0.5px;">Active Target</div>
+                <div style="font-size: 15px; font-weight: bold; color: #f0f6fc; margin-top: 3px;">{target_preview}</div>
+                <div style="font-size: 12px; color: #8b949e; margin-top: 2px;">{target_name}</div>
+            </div>
+            
+            <div style="background: #252526; padding: 12px 14px; border-radius: 6px; border-left: 3px solid #7ee787;">
+                <div style="font-size: 11px; text-transform: uppercase; color: #8b949e; letter-spacing: 0.5px;">Source Organism</div>
+                <div style="font-size: 15px; font-weight: bold; color: #f0f6fc; margin-top: 3px;">{target_organism}</div>
+                <div style="font-size: 12px; color: #8b949e; margin-top: 2px;">Taxonomic Origin</div>
+            </div>
+            
+            <div style="background: #252526; padding: 12px 14px; border-radius: 6px; border-left: 3px solid #d2a8ff;">
+                <div style="font-size: 11px; text-transform: uppercase; color: #8b949e; letter-spacing: 0.5px;">Expected Architecture</div>
+                <div style="font-size: 15px; font-weight: bold; color: #f0f6fc; margin-top: 3px;">{target_assembly}</div>
+                <div style="font-size: 12px; color: #8b949e; margin-top: 2px;">Literature Benchmark</div>
+            </div>
+        </div>
+    </div>
+    """
+    return HTML(panel_html.strip())
+
+
 def show_json(data: Any, max_depth: int = 1) -> HTML:
     """
     Construct and return an interactive VS Code style dark tree viewer with collapsible arrows.
@@ -226,10 +315,44 @@ def render_quaternary_summary_card(output: QuaternaryStructureOutput) -> HTML:
         interfaces_list = getattr(output, "interfaces", None) or getattr(output, "interface_contacts", [])
         interfaces_count = len(interfaces_list) if interfaces_list else 0
 
-    if conflict_detected:
+    status_raw = ""
+    if isinstance(output, dict):
+        status_raw = str(output.get("quaternary_status") or output.get("evidence_status") or "").upper()
+    else:
+        status_raw = str(getattr(output, "quaternary_status", "") or getattr(output, "evidence_status", "")).upper()
+        if hasattr(status_raw, "value"):
+            status_raw = str(status_raw.value).upper()
+
+    if conflict_detected or status_raw == "CONFLICTING":
         conflict_badge = '<span style="background: #5a1e1e; color: #ff7b72; padding: 3px 10px; border-radius: 12px; font-size: 11.5px; font-weight: 700;">&#9888; CONFLICT DETECTED</span>'
+    elif status_raw == "CONFIRMED":
+        conflict_badge = '<span style="background: #1e3a24; color: #7ee787; padding: 3px 10px; border-radius: 12px; font-size: 11.5px; font-weight: 700;">&#10004; CONFIRMED</span>'
+    elif status_raw == "SUPPORTED":
+        conflict_badge = '<span style="background: #1e3a34; color: #7ee7d8; padding: 3px 10px; border-radius: 12px; font-size: 11.5px; font-weight: 700;">&#10004; SUPPORTED</span>'
+    elif status_raw in ("INSUFFICIENT_EVIDENCE", "INSUFFICIENT EVIDENCE"):
+        conflict_badge = '<span style="background: #342814; color: #d29922; padding: 3px 10px; border-radius: 12px; font-size: 11.5px; font-weight: 700;">&#9888; INSUFFICIENT EVIDENCE</span>'
+    elif status_raw == "PREDICTED":
+        conflict_badge = '<span style="background: #2b1e3a; color: #d2a8ff; padding: 3px 10px; border-radius: 12px; font-size: 11.5px; font-weight: 700;">&#9670; PREDICTED</span>'
+    elif status_raw in ("UNAVAILABLE", "UNKNOWN"):
+        conflict_badge = '<span style="background: #21262d; color: #8b949e; padding: 3px 10px; border-radius: 12px; font-size: 11.5px; font-weight: 700;">&#9675; UNKNOWN</span>'
     else:
         conflict_badge = '<span style="background: #1e3a24; color: #7ee787; padding: 3px 10px; border-radius: 12px; font-size: 11.5px; font-weight: 700;">&#10004; CONSENSUS ALIGNED</span>'
+
+    prov_source = ""
+    if isinstance(output, dict):
+        prov_source = output.get("metadata", {}).get("provenance_source") or ""
+    else:
+        prov_source = (output.metadata.get("provenance_source") if output.metadata else "") or ""
+    
+    if not prov_source:
+        if getattr(output, "observed_assemblies", None) or (isinstance(output, dict) and output.get("observed_assemblies")):
+            prov_source = "EXPERIMENTAL"
+        elif getattr(output, "inferred_function", None) and getattr(output.inferred_function, "confidence", 0) > 0:
+            prov_source = "DATABASE-DERIVED"
+        else:
+            prov_source = "DATABASE-DERIVED"
+
+    prov_badge = f'<span style="background: #161b22; color: #8b949e; border: 1px solid #30363d; padding: 2px 8px; border-radius: 4px; font-size: 10.5px; margin-left: 8px; text-transform: uppercase;">[{prov_source}]</span>'
 
     def _get_val(obj, key, default=None):
         if obj is None:
@@ -272,13 +395,14 @@ def render_quaternary_summary_card(output: QuaternaryStructureOutput) -> HTML:
         else:
             af_iptm = f"{afm_iptm_val:.2f}"
     else:
-        af_iptm = "N/A (Real-execution runner unconfigured)"
+        af_iptm = "Status: NOT EXECUTED | Reason: External prediction runner not configured"
 
     card_html = f"""
     <div style="background-color: #1e1e1e; border: 1px solid #30363d; border-radius: 8px; padding: 20px; margin: 15px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #c9d1d9;">
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #30363d; padding-bottom: 12px; margin-bottom: 16px;">
-            <div style="font-size: 18px; font-weight: 700; color: #58a6ff;">
-                &#129516; Quaternary Structure Summary: <span style="color: #79c0ff;">{analysis_id}</span>
+            <div style="font-size: 18px; font-weight: 700; color: #58a6ff; display: flex; align-items: center; gap: 8px;">
+                <span>&#129516; Quaternary Structure Summary: <span style="color: #79c0ff;">{analysis_id}</span></span>
+                {prov_badge}
             </div>
             <div>{conflict_badge}</div>
         </div>
@@ -523,6 +647,10 @@ def render_functional_inference_card(output: QuaternaryStructureOutput) -> HTML:
         """
         return HTML(html_empty.strip())
 
+    obs_fn = getattr(fn, "observed_function", None) or getattr(fn, "molecular_function", "Uncharacterized")
+    pred_fn = getattr(fn, "predicted_function", None) or getattr(fn, "biological_process", "Dynamic prediction")
+    mech_fn = getattr(fn, "quaternary_mechanism_hypothesis", None) or getattr(fn, "oligomeric_mechanism_hypothesis", "N/A")
+
     conf_score = fn.confidence
     if conf_score >= 0.8:
         badge_style = "background: #1e3a24; color: #7ee787; border: 1px solid #238636;"
@@ -558,6 +686,17 @@ def render_functional_inference_card(output: QuaternaryStructureOutput) -> HTML:
     else:
         go_tags = '<span style="color: #8b949e; font-size: 12px;">No GO terms annotated</span>'
 
+    supp_ev = getattr(fn, "supporting_evidence", []) or []
+    supp_rows = "".join([f'<li style="margin-bottom: 3px; color: #c9d1d9;">{ev}</li>' for ev in supp_ev])
+    supp_panel = f"""
+    <div style="flex: 1; min-width: 220px;">
+        <div style="font-size: 11px; text-transform: uppercase; color: #8b949e; font-weight: 600; margin-bottom: 8px;">
+            Supporting Evidence
+        </div>
+        <ul style="margin: 0; padding-left: 18px; font-size: 12px;">{supp_rows}</ul>
+    </div>
+    """ if supp_ev else ""
+
     html_card = f"""
     <div style="background-color: #1e1e1e; border: 1px solid #30363d; border-radius: 8px; padding: 20px; margin: 15px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #c9d1d9;">
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #30363d; padding-bottom: 12px; margin-bottom: 16px;">
@@ -573,30 +712,31 @@ def render_functional_inference_card(output: QuaternaryStructureOutput) -> HTML:
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 16px;">
             <div style="background: #252526; padding: 14px; border-radius: 6px; border-left: 3px solid #58a6ff;">
-                <div style="font-size: 11px; text-transform: uppercase; color: #8b949e; letter-spacing: 0.5px;">Predicted Molecular Function</div>
-                <div style="font-size: 15px; font-weight: 600; color: #f0f6fc; margin-top: 4px;">{fn.molecular_function}</div>
-                <div style="font-size: 12px; color: #8b949e; margin-top: 6px;"><strong>Process:</strong> {fn.biological_process}</div>
+                <div style="font-size: 11px; text-transform: uppercase; color: #8b949e; letter-spacing: 0.5px;">Observed / Molecular Function</div>
+                <div style="font-size: 15px; font-weight: 600; color: #f0f6fc; margin-top: 4px;">{obs_fn}</div>
+                <div style="font-size: 12px; color: #8b949e; margin-top: 6px;"><strong>Predicted Process:</strong> {pred_fn}</div>
             </div>
             <div style="background: #252526; padding: 14px; border-radius: 6px; border-left: 3px solid #7ee787;">
                 <div style="font-size: 11px; text-transform: uppercase; color: #8b949e; letter-spacing: 0.5px;">Quaternary Mechanism Hypothesis</div>
-                <div style="font-size: 12.5px; color: #c9d1d9; margin-top: 4px; line-height: 1.5;">{fn.oligomeric_mechanism_hypothesis}</div>
+                <div style="font-size: 12.5px; color: #c9d1d9; margin-top: 4px; line-height: 1.5;">{mech_fn}</div>
             </div>
         </div>
 
         <div style="background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 14px;">
             <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
-                <div style="flex: 1; min-width: 240px;">
+                <div style="flex: 1; min-width: 220px;">
                     <div style="font-size: 11px; text-transform: uppercase; color: #8b949e; font-weight: 600; margin-bottom: 8px;">
                         Contributing Structural Homologs
                     </div>
                     {f'<table style="width: 100%; border-collapse: collapse;">{homolog_rows}</table>' if homolog_rows else '<span style="color: #8b949e; font-size: 12px;">No structural homologs</span>'}
                 </div>
-                <div style="flex: 1; min-width: 240px;">
+                <div style="flex: 1; min-width: 220px;">
                     <div style="font-size: 11px; text-transform: uppercase; color: #8b949e; font-weight: 600; margin-bottom: 8px;">
                         Gene Ontology & Functional Terms
                     </div>
                     <div>{go_tags}</div>
                 </div>
+                {supp_panel}
             </div>
         </div>
     </div>
@@ -695,28 +835,65 @@ def render_evidence_coverage_dashboard(output: QuaternaryStructureOutput) -> HTM
         return HTML(html_empty.strip())
 
     db_rows = ""
-    for db in cov.databases_queried:
-        db_name = db.get("database", "Unknown")
-        queried = db.get("queried", False)
-        hit = db.get("hit", False)
+    records = getattr(cov, "records", None) or []
+    if records:
+        for rec in records:
+            db_name = getattr(rec, "database", None) or getattr(rec, "database_name", "Unknown")
+            q_state = getattr(rec, "query_status", None) or getattr(rec, "query_state", "NOT_QUERIED")
+            if hasattr(q_state, "value"):
+                q_state = q_state.value
+            q_state_str = str(q_state).upper()
+            hit_count = getattr(rec, "hit_count", 0)
 
-        if not queried:
-            status_badge = '<span style="background: #21262d; color: #8b949e; padding: 2px 6px; border-radius: 4px; font-size: 10px;">SKIPPED / UNCONFIGURED</span>'
-            hit_badge = '<span style="color: #8b949e;">&mdash;</span>'
-        elif hit:
-            status_badge = '<span style="background: #1e3a24; color: #7ee787; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold;">&#10004; QUERIED</span>'
-            hit_badge = '<span style="background: #1e3a24; color: #7ee787; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold;">HIT FOUND</span>'
-        else:
-            status_badge = '<span style="background: #1e3a24; color: #7ee787; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold;">&#10004; QUERIED</span>'
-            hit_badge = '<span style="background: #342814; color: #d29922; padding: 2px 6px; border-radius: 4px; font-size: 10px;">NO HITS / MONOMER</span>'
+            if q_state_str == "QUERY_SUCCESS_WITH_HIT":
+                status_badge = '<span style="background: #1e3a24; color: #7ee787; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold;">&#10004; QUERIED</span>'
+                hit_badge = f'<span style="background: #1e3a24; color: #7ee787; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold;">HIT FOUND ({hit_count})</span>'
+            elif q_state_str == "QUERY_SUCCESS_NO_HIT":
+                status_badge = '<span style="background: #1e3a24; color: #7ee787; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold;">&#10004; QUERIED</span>'
+                hit_badge = '<span style="background: #342814; color: #d29922; padding: 2px 6px; border-radius: 4px; font-size: 10px;">NO HITS / MONOMER</span>'
+            elif q_state_str == "QUERY_FAILED":
+                status_badge = '<span style="background: #4a1c1c; color: #f85149; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold;">QUERY FAILED</span>'
+                hit_badge = '<span style="color: #f85149;">ERROR</span>'
+            elif q_state_str in ("PREDICTION_NOT_EXECUTED", "SKIPPED"):
+                status_badge = '<span style="background: #21262d; color: #8b949e; padding: 2px 6px; border-radius: 4px; font-size: 10px;">SKIPPED / UNCONFIGURED</span>'
+                hit_badge = '<span style="color: #8b949e;">&mdash;</span>'
+            elif q_state_str == "UNAVAILABLE":
+                status_badge = '<span style="background: #21262d; color: #8b949e; padding: 2px 6px; border-radius: 4px; font-size: 10px;">UNAVAILABLE</span>'
+                hit_badge = '<span style="color: #8b949e;">&mdash;</span>'
+            else:
+                status_badge = '<span style="background: #21262d; color: #8b949e; padding: 2px 6px; border-radius: 4px; font-size: 10px;">NOT QUERIED</span>'
+                hit_badge = '<span style="color: #8b949e;">&mdash;</span>'
 
-        db_rows += f"""
-        <tr style="border-bottom: 1px solid #30363d;">
-            <td style="padding: 6px 10px; font-weight: 600; color: #f0f6fc;">{db_name}</td>
-            <td style="padding: 6px 10px;">{status_badge}</td>
-            <td style="padding: 6px 10px;">{hit_badge}</td>
-        </tr>
-        """
+            db_rows += f"""
+            <tr style="border-bottom: 1px solid #30363d;">
+                <td style="padding: 6px 10px; font-weight: 600; color: #f0f6fc;">{db_name}</td>
+                <td style="padding: 6px 10px;">{status_badge}</td>
+                <td style="padding: 6px 10px;">{hit_badge}</td>
+            </tr>
+            """
+    elif getattr(cov, "databases_queried", None):
+        for db in cov.databases_queried:
+            db_name = db.get("database", "Unknown")
+            queried = db.get("queried", False)
+            hit = db.get("hit", False)
+
+            if not queried:
+                status_badge = '<span style="background: #21262d; color: #8b949e; padding: 2px 6px; border-radius: 4px; font-size: 10px;">SKIPPED / UNCONFIGURED</span>'
+                hit_badge = '<span style="color: #8b949e;">&mdash;</span>'
+            elif hit:
+                status_badge = '<span style="background: #1e3a24; color: #7ee787; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold;">&#10004; QUERIED</span>'
+                hit_badge = '<span style="background: #1e3a24; color: #7ee787; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold;">HIT FOUND</span>'
+            else:
+                status_badge = '<span style="background: #1e3a24; color: #7ee787; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold;">&#10004; QUERIED</span>'
+                hit_badge = '<span style="background: #342814; color: #d29922; padding: 2px 6px; border-radius: 4px; font-size: 10px;">NO HITS / MONOMER</span>'
+
+            db_rows += f"""
+            <tr style="border-bottom: 1px solid #30363d;">
+                <td style="padding: 6px 10px; font-weight: 600; color: #f0f6fc;">{db_name}</td>
+                <td style="padding: 6px 10px;">{status_badge}</td>
+                <td style="padding: 6px 10px;">{hit_badge}</td>
+            </tr>
+            """
 
     if cov.evidence_gaps:
         gaps_items = "".join([f'<li style="margin-bottom: 4px;">{g}</li>' for g in cov.evidence_gaps])
