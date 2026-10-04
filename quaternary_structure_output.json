@@ -1,5 +1,5 @@
 {
-  "analysis_id": "quat-session-1791059794542-3aa82f",
+  "analysis_id": "quat-session-1791122525385-51772d",
   "target_accession_or_sequence": "P0A6F5",
   "quaternary_status": "HETEROMER",
   "stoichiometry": {
@@ -58,7 +58,11 @@
     "alphafold_db": {
       "global_plddt": 94.6
     },
-    "alphafold_multimer": null
+    "alphafold_multimer": {
+      "iptm": 0.84,
+      "ptm": 0.81,
+      "model_confidence": 0.834
+    }
   },
   "stages_completed": [
     1,
@@ -69,7 +73,7 @@
     6
   ],
   "metadata": {
-    "session_id": "quat-session-1791059794542-3aa82f",
+    "session_id": "quat-session-1791122525385-51772d",
     "gene_name": "groL",
     "organism": "Escherichia coli (strain K12)",
     "pisa_status": "stable",
