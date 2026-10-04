@@ -26,6 +26,7 @@ backend/app/examples.py
 backend/app/jobs.py
 backend/app/levels/__init__.py
 backend/app/levels/placeholders.py
+backend/app/levels/primary.py
 backend/app/levels/tertiary.py
 backend/app/main.py
 backend/app/runner.py
@@ -33,7 +34,9 @@ backend/app/schemas.py
 backend/app/sequence.py
 backend/app/verdict.py
 backend/pyproject.toml
+backend/scripts/check_primary.py
 backend/scripts/check_tertiary.py
+backend/scripts/setup_primary.sh
 backend/scripts/smoke_test.py
 docs/LEVEL_CONTRACT.md
 frontend/index.html
@@ -79,7 +82,7 @@ scripts/check_files.sh
 FILES
 
 if [ "$missing" -eq 0 ]; then
-  echo "OK: all 63 project files are present."
+  echo "OK: all 66 project files are present."
 else
   echo "$missing file(s) missing. The project is incomplete; do not run it yet."
   exit 1

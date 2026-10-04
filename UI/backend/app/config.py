@@ -111,3 +111,12 @@ MOCK_DELAY_SCALE = _read_float("PFP_MOCK_DELAY_SCALE", 1.0)
 # Set to primary / secondary / tertiary / quaternary to make that level's
 # placeholder fail on purpose, which is useful for testing error states.
 MOCK_FAIL_LEVEL = os.getenv("PFP_MOCK_FAIL_LEVEL", "").strip().lower() or None
+
+# --- Primary-structure module (DIAMOND, HMMER, ESM-2) -------------------------
+# Databases created by scripts/setup_primary.sh (about 4 GB; ignored by git).
+PRIMARY_DATA_DIR = Path(os.getenv("PFP_PRIMARY_DATA_DIR", "").strip() or BACKEND_DIR / "data" / "primary")
+# Program names (or full paths) for the two command-line tools.
+DIAMOND_BIN = os.getenv("PFP_DIAMOND_BIN", "").strip() or "diamond"
+HMMSCAN_BIN = os.getenv("PFP_HMMSCAN_BIN", "").strip() or "hmmscan"
+# Longest a single DIAMOND or hmmscan run may take.
+PRIMARY_TOOL_TIMEOUT_SECONDS = _read_float("PFP_PRIMARY_TOOL_TIMEOUT", 1800.0)

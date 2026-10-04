@@ -19,7 +19,7 @@ from dataclasses import dataclass
 from ..config import LEVEL_NAMES, MOCK_FAIL_LEVEL, PLACEHOLDER_LEVELS
 from ..jobs import StageContext
 from ..schemas import LevelKey, LevelResult
-from . import placeholders, tertiary
+from . import placeholders, primary, tertiary
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +56,8 @@ LEVELS: tuple[LevelSpec, ...] = (
         "Primary structure",
         ("DIAMOND", "HMMER / Pfam", "ESM-2", "ProtParam"),
         placeholders.primary,
+        live=primary.analyze,
+        cache_version=primary.CACHE_VERSION,
     ),
     _spec(
         "secondary",
