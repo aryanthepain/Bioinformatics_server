@@ -450,3 +450,66 @@ def test_no_hardcoded_statistics_in_markdown(notebook):
 
     for pat in forbidden_patterns:
         assert pat not in md_sources, f"Hardcoded static metric found in markdown: '{pat}'"
+
+
+def test_one_by_one_display_cells(notebook):
+    """
+    Enforce D-14: In Part 1, the 6 visualizer outputs are rendered one-by-one in distinct cells,
+    each accompanied by dedicated biological interpretation.
+    """
+    display_functions = [
+        "render_quaternary_summary_card",
+        "render_component_identity_table",
+        "render_interface_contact_table",
+        "render_dynamic_equilibrium_display",
+        "render_functional_inference_card",
+        "render_evidence_coverage_dashboard",
+    ]
+
+    code_cells = [c.source for c in notebook.cells if c.cell_type == "code"]
+
+    # In Part 1 (cells before Part 2 header), each function must appear in its own cell
+    part1_code_cells = []
+    for c in notebook.cells:
+        if c.cell_type == "markdown" and "Part 2: Step-by-Step Modular Session Walkthrough" in c.source:
+            break
+        if c.cell_type == "code":
+            part1_code_cells.append(c.source)
+
+    for fn in display_functions:
+        matching_cells = [c for c in part1_code_cells if f"display({fn}(" in c]
+        assert len(matching_cells) == 1, (
+            f"Expected exactly 1 dedicated cell for {fn} in Part 1, but found {len(matching_cells)}"
+        )
+
+
+def test_collapsible_details_preset_panes(notebook):
+    """
+    Enforce D-14: Rich collapsible <details> panes are present across stage outputs
+    and visualizer displays, comparing actual preset behaviors.
+    """
+    md_sources = "\n".join(c.source for c in notebook.cells if c.cell_type == "markdown")
+
+    # Assert multiple collapsible details tags exist
+    assert md_sources.count("<details>") >= 6
+    assert md_sources.count("</details>") >= 6
+    assert md_sources.count("<summary>") >= 6
+
+    # Verify preset comparative anchors exist in markdown
+    assert "GroEL Chaperonin" in md_sources
+    assert "Insulin Hormone" in md_sources
+    assert "H. influenzae" in md_sources or "P44101" in md_sources
+    assert "Novel Synthetic Sequence" in md_sources
+
+
+def test_groel_stoichiometry_descriptions(notebook):
+    """
+    Enforce D-06: Markdown commentary strictly describes GroEL as an A14 homo-tetradecamer
+    and GroEL-GroES as an A14B7 functional heterocomplex.
+    """
+    md_sources = "\n".join(c.source for c in notebook.cells if c.cell_type == "markdown")
+
+    assert "A_{14}" in md_sources or "A14" in md_sources
+    assert "A_{14}B_{7}" in md_sources or "A_{14}B_7" in md_sources or "A14B7" in md_sources
+    assert "tetradecamer" in md_sources.lower()
+

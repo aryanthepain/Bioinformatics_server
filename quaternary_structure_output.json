@@ -1,5 +1,5 @@
 {
-  "analysis_id": "quat-session-1791149623152-005957",
+  "analysis_id": "quat-session-1791150309891-6ba9f4",
   "target_accession_or_sequence": "P0A6F5",
   "quaternary_status": "HOMOMER",
   "stoichiometry": {
@@ -69,6 +69,16 @@
       "stoichiometry": "A14",
       "biological_assembly_type": "HOMOMER",
       "conditions": "X-RAY DIFFRACTION",
+      "is_target_self": true,
+      "delta_g_diss_kcal_mol": null,
+      "primary_physiological_state": "Primary Crystallographic Biological Assembly"
+    },
+    {
+      "pdb_id": "1GR5",
+      "assembly_id": "1",
+      "stoichiometry": "A14",
+      "biological_assembly_type": "HOMOMER",
+      "conditions": "ELECTRON MICROSCOPY",
       "is_target_self": true,
       "delta_g_diss_kcal_mol": null,
       "primary_physiological_state": "Primary Crystallographic Biological Assembly"
@@ -3651,7 +3661,7 @@
       {
         "database": "RCSB PDB",
         "query_status": "QUERY_SUCCESS_WITH_HIT",
-        "hit_count": 5,
+        "hit_count": 6,
         "rationale": "Experimental crystallographic/cryo-EM biological assemblies",
         "details": null
       },
@@ -3704,7 +3714,7 @@
     6
   ],
   "metadata": {
-    "session_id": "quat-session-1791149623152-005957",
+    "session_id": "quat-session-1791150309891-6ba9f4",
     "offline_mode": true,
     "pisa_thermodynamic_state": "STABLE"
   }

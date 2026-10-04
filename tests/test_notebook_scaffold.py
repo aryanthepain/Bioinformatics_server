@@ -129,3 +129,34 @@ def test_no_obsolete_stage_methods(notebook):
     for method in obsolete_methods:
         assert method not in code_sources, f"Obsolete method {method} found in notebook code!"
 
+
+def test_target_selection_card_modularization(notebook):
+    """
+    Enforce D-13: Cell 5 renders target selection via render_target_selection_card,
+    with zero inline panel_html raw string formatting.
+    """
+    code_cells = [c.source for c in notebook.cells if c.cell_type == "code"]
+    combined_code = "\n".join(code_cells)
+
+    assert "render_target_selection_card" in combined_code
+    # Locate the cell rendering the target selection card
+    card_cell = next((c for c in code_cells if "render_target_selection_card(" in c), None)
+    assert card_cell is not None, "Target selection card render cell not found in notebook."
+    assert "panel_html =" not in card_cell, "Raw panel_html string assignment found in target selection cell!"
+    assert "display(render_target_selection_card(" in card_cell
+
+
+def test_no_redundant_visual_helper_cells(notebook):
+    """
+    Enforce D-13: The redundant Wave 2 visual helper code cell is absent.
+    All helpers are imported once in setup and not redefined or re-imported.
+    """
+    code_cells = [c.source for c in notebook.cells if c.cell_type == "code"]
+    wave2_helper_cells = [
+        c for c in code_cells
+        if "Interactive Visualization Helpers & Biological Summary Displays" in c
+        or "def render_quaternary_summary_card" in c
+    ]
+    assert len(wave2_helper_cells) == 0, "Redundant visual helper code cell found in notebook!"
+
+
