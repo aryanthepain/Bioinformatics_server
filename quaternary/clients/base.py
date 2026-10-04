@@ -89,8 +89,10 @@ class BaseBioClient:
         candidate_names = [specific_name]
 
         # Only fall back to _sample if the query is a recognized sample benchmark
-        sample_keys = {"p0a6f5", "1gfl", "1aon", "cpx-1882", "sample", "default", ""}
-        if query_key.lower() in sample_keys or any(k in query_key.lower() for k in ("p0a6f5", "1gfl", "1aon", "cpx-1882")):
+        sample_keys = {"p0a6f5", "1gfl", "1aon", "cpx-1882", "sample", "default", "", "mvlspad"}
+        if query_key.lower() in sample_keys or any(k in query_key.lower() for k in ("p0a6f5", "1gfl", "1aon", "cpx-1882", "mvlspad")):
+
+
             candidate_names.extend([
                 f"{endpoint}_sample.json",
                 f"{endpoint}.json",

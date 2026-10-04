@@ -93,13 +93,14 @@ Plans:
 
 Plans:
 **Wave 1**
-- [ ] 03.1-01: Core Domain Models, Canonical 6-Stage Session & Biological Evidence Schemas
+- [x] 03.1-01: Core Domain Models, Canonical 6-Stage Session & Biological Evidence Schemas
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 03.1-02: Biological Disambiguation, Engineering Hardening & Functional Inference Engine
+- [x] 03.1-02: Biological Disambiguation, Engineering Hardening & Functional Inference Engine
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 03.1-03: Jupyter Notebook Overhaul, Dynamic Rendering & Benchmark Showcase
+- [x] 03.1-03: Jupyter Notebook Overhaul, Dynamic Rendering & Benchmark Showcase
+
 
 ### Phase 4: Standardized UI JSON Data Contract & Benchmark Validation
 

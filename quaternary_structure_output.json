@@ -1,17 +1,59 @@
 {
-  "analysis_id": "quat-session-1791127452946-c3997a",
+  "analysis_id": "quat-session-1791141621696-ae1539",
   "target_accession_or_sequence": "P0A6F5",
-  "quaternary_status": "HETEROMER",
+  "quaternary_status": "HOMOMER",
   "stoichiometry": {
-    "formula": "A14B7",
+    "formula": "A14",
     "chains": {
-      "A": 14,
-      "B": 7
+      "A": 14
     },
-    "total_subunits": 21,
-    "assembly_type": "HETEROMER",
-    "symmetry": null
+    "total_subunits": 14,
+    "assembly_type": "HOMOMER",
+    "symmetry": "D7"
   },
+  "target_self_assembly": {
+    "formula": "A14",
+    "assembly_type": "HOMOMER",
+    "subunit_count": 14,
+    "symmetry": "D7",
+    "confidence_status": "CONFIRMED"
+  },
+  "functional_complexes": [
+    {
+      "name": "GroEL-GroES chaperonin complex",
+      "stoichiometry": "A14B7",
+      "partner_uniprot_accessions": [
+        "P0A6F9"
+      ],
+      "partner_names": [
+        "GroES / Cpn10"
+      ],
+      "complex_portal_id": "CPX-1882",
+      "evidence": "Curated biological machine (chaperonin machinery)"
+    }
+  ],
+  "observed_assemblies": [
+    {
+      "pdb_id": "1GFL",
+      "assembly_id": "1",
+      "stoichiometry": "A14",
+      "biological_assembly_type": "HOMOMER",
+      "conditions": "X-RAY DIFFRACTION",
+      "is_target_self": true,
+      "delta_g_diss_kcal_mol": -124.5,
+      "primary_physiological_state": "Primary Crystallographic Biological Assembly"
+    },
+    {
+      "pdb_id": "1AON",
+      "assembly_id": "1",
+      "stoichiometry": "A14",
+      "biological_assembly_type": "HOMOMER",
+      "conditions": "X-RAY DIFFRACTION",
+      "is_target_self": true,
+      "delta_g_diss_kcal_mol": -124.5,
+      "primary_physiological_state": "Primary Crystallographic Biological Assembly"
+    }
+  ],
   "interfaces": [
     {
       "chain_1": "A",
@@ -38,12 +80,16 @@
       ]
     }
   ],
+  "conflicts": [],
   "experimental_conflict": {
-    "conflict_detected": false,
+    "rcsb_author_assembly": "A14",
     "rcsb_annotated_assembly": "A14",
+    "pisa_predicted_assembly": "14",
     "pisa_thermodynamic_state": "stable",
     "dissociation_energy_kcal_mol": -124.5,
-    "conflict_rationale": null
+    "conflict_detected": false,
+    "conflict_rationale": null,
+    "discrepancy_type": null
   },
   "confidence_provenance": {
     "pdbe_pisa": {
@@ -58,22 +104,101 @@
     "alphafold_db": {
       "global_plddt": 94.6
     },
-    "alphafold_multimer": {
-      "iptm": 0.84,
-      "ptm": 0.81,
-      "model_confidence": 0.834
-    }
+    "alphafold_multimer": null
   },
+  "inferred_function": {
+    "molecular_function": "ATP-dependent protein folding chaperone",
+    "biological_process": "Cellular protein refolding under stress conditions",
+    "oligomeric_mechanism_hypothesis": "Double-ring tetradecameric cylindrical cavity enclosing misfolded polypeptide substrates during ATP hydrolysis cycles",
+    "archetype_name": "chaperonin_barrel",
+    "go_terms": [],
+    "functional_homologs": [
+      {
+        "template_pdb_id": "1AON",
+        "template_oligomeric_state": "homo-14-mer",
+        "qmqe": 0.88,
+        "gmqe": 0.92,
+        "seq_identity": 99.5,
+        "coverage": 1.0,
+        "qualifying_homology": true
+      },
+      {
+        "template_pdb_id": "4AAQ",
+        "template_oligomeric_state": "homo-14-mer",
+        "qmqe": 0.76,
+        "gmqe": 0.81,
+        "seq_identity": 91.2,
+        "coverage": 0.95,
+        "qualifying_homology": true
+      },
+      {
+        "template_pdb_id": "2C7C",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.52,
+        "gmqe": 0.55,
+        "seq_identity": 45.0,
+        "coverage": 0.6,
+        "qualifying_homology": false
+      }
+    ],
+    "confidence": 0.7,
+    "status": "SUPPORTED"
+  },
+  "evidence_coverage": {
+    "databases_queried": [
+      {
+        "database": "UniProtKB",
+        "queried": true,
+        "hit": true
+      },
+      {
+        "database": "Complex Portal",
+        "queried": true,
+        "hit": true
+      },
+      {
+        "database": "RCSB PDB",
+        "queried": true,
+        "hit": true
+      },
+      {
+        "database": "PDBe PISA",
+        "queried": true,
+        "hit": true
+      },
+      {
+        "database": "SWISS-MODEL",
+        "queried": true,
+        "hit": true
+      },
+      {
+        "database": "IntAct",
+        "queried": true,
+        "hit": true
+      },
+      {
+        "database": "AlphaFold DB",
+        "queried": true,
+        "hit": true
+      },
+      {
+        "database": "AlphaFold-Multimer",
+        "queried": true,
+        "hit": false
+      }
+    ],
+    "evidence_gaps": []
+  },
+  "status": "CONFIRMED",
   "stages_completed": [
     1,
     2,
     3,
     4,
-    5,
     6
   ],
   "metadata": {
-    "session_id": "quat-session-1791127452946-c3997a",
+    "session_id": "quat-session-1791141621696-ae1539",
     "gene_name": "groL",
     "organism": "Escherichia coli (strain K12)",
     "pisa_status": "stable",

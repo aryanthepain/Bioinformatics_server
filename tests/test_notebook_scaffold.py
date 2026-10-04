@@ -108,3 +108,26 @@ def test_dual_mode_fallback(notebook):
     assert "P0A6F5" in input_cell
     assert "P01308" in input_cell
     assert "P44101" in input_cell
+
+
+def test_canonical_stage_headers(notebook):
+    """Verify notebook contains canonical stage markdown headers for Stages 1 through 6."""
+    md_sources = "\n".join(c.source for c in notebook.cells if c.cell_type == "markdown")
+    for stage_num in range(1, 7):
+        assert f"Stage {stage_num}" in md_sources, f"Missing header for Stage {stage_num}"
+
+
+def test_no_obsolete_stage_methods(notebook):
+    """Verify zero obsolete stage method names exist in any code cell."""
+    code_sources = "\n".join(c.source for c in notebook.cells if c.cell_type == "code")
+    obsolete_methods = [
+        "run_stage_1_uniprot_subunit",
+        "run_stage_2_pdb_experimental",
+        "run_stage_3_pisa_interfaces",
+        "run_stage_4_swiss_model",
+        "run_stage_5_alphafold_context",
+        "run_stage_6_aggregate",
+    ]
+    for method in obsolete_methods:
+        assert method not in code_sources, f"Obsolete method {method} found in notebook code!"
+

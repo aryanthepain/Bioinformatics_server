@@ -107,3 +107,8 @@ def test_notebook_e2e_execution(notebook_path, tmp_path, monkeypatch):
     assert parsed_output.stoichiometry is not None
     assert parsed_output.stoichiometry.assembly_type is not None
     assert parsed_output.confidence_provenance is not None
+    assert parsed_output.target_self_assembly is not None
+    assert isinstance(parsed_output.functional_complexes, list)
+    assert parsed_output.inferred_function is not None
+    assert parsed_output.evidence_coverage is not None
+

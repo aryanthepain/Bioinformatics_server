@@ -47,10 +47,15 @@ class RCSBSearchClient(BaseBioClient):
             resp = self.session.post(url, json=payload, timeout=self.config.timeout)
             if resp.status_code == 204:
                 return {"result_set": []}
-            resp.raise_for_status()
-            return resp.json()
+        cache_key = f"seq_{hashlib.sha256(f'{clean_seq}_{evalue_cutoff}_{identity_cutoff}'.encode()).hexdigest()[:32]}"
+        legacy_key = f"seq_{clean_seq[:32]}"
 
-        res = self.get_with_cache("rcsb", f"seq_{cache_key}", _fetch)
+        res = self.get_with_cache("rcsb", cache_key, _fetch)
+        if not res.get("result_set") and (self.config.offline_mode or self.cache):
+            legacy_res = self.get_with_cache("rcsb", legacy_key, _fetch)
+            if legacy_res and legacy_res.get("result_set"):
+                res = legacy_res
+
         raw_list = res.get("result_set", [])
         hits: List[Dict[str, Any]] = []
 
