@@ -71,6 +71,7 @@ class ObservedAssembly(BaseModel):
     conditions: Optional[str] = None
     is_target_self: bool = False
     delta_g_diss_kcal_mol: Optional[float] = None
+    primary_physiological_state: Optional[str] = None
 
 
 class InferredFunction(BaseModel):

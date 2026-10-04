@@ -18,6 +18,7 @@ from quaternary.clients import (
     UniProtClient,
 )
 from quaternary.config import QuaternaryConfig
+from quaternary.function_inference import FunctionInferenceEngine
 from quaternary.models import QuaternaryStructureOutput
 from quaternary.session import QuaternarySession
 
@@ -38,6 +39,7 @@ class QuaternaryEngine:
         self.intact_client = IntActClient(self.config, self.cache)
         self.alphafold_client = AlphaFoldClient(self.config, self.cache)
         self.multimer_client = MultimerPredictorClient(self.config, self.cache)
+        self.function_inference_engine = FunctionInferenceEngine()
 
     def _generate_session_id(self, target_input: str) -> str:
         """Generate a unique session identifier internally (enforcing D-04)."""
@@ -60,6 +62,7 @@ class QuaternaryEngine:
             intact_client=self.intact_client,
             alphafold_client=self.alphafold_client,
             multimer_client=self.multimer_client,
+            inference_engine=self.function_inference_engine,
         )
 
     def analyze(

@@ -38,8 +38,7 @@ class IntActClient(BaseBioClient):
             # Use IntAct REST interactor search
             url = f"https://www.ebi.ac.uk/intact/ws/interaction/findInteractions/{clean_acc}"
             try:
-                import requests as direct_requests
-                resp = direct_requests.get(url, timeout=3.0)
+                resp = self.session.get(url, timeout=self.config.timeout)
                 if resp.status_code == 404:
                     return {"interactors": []}
                 resp.raise_for_status()

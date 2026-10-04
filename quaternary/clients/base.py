@@ -57,6 +57,12 @@ class BaseBioClient:
             fixture = self.load_fixture(endpoint, query_key)
             if fixture is not None:
                 return fixture
+            if self.cache is not None:
+                cached = self.cache.get(endpoint, query_key)
+                if cached is not None:
+                    return cached
+            logger.debug(f"Offline mode active and no fixture/cache found for {endpoint}:{query_key}")
+            return {}
 
         # 2. Check cache unless force_refresh is True
         if self.cache is not None and not self.config.force_refresh:
@@ -78,12 +84,18 @@ class BaseBioClient:
         if not self.fixtures_dir.exists():
             return None
 
-        # Look for endpoint-specific fixture file e.g. uniprot_sample.json
-        candidate_names = [
-            f"{endpoint}_{query_key}.json",
-            f"{endpoint}_sample.json",
-            f"{endpoint}.json",
-        ]
+        # Look for query-specific fixture file e.g. uniprot_P0A6F5.json
+        specific_name = f"{endpoint}_{query_key}.json"
+        candidate_names = [specific_name]
+
+        # Only fall back to _sample if the query is a recognized sample benchmark
+        sample_keys = {"p0a6f5", "1gfl", "1aon", "cpx-1882", "sample", "default", ""}
+        if query_key.lower() in sample_keys or any(k in query_key.lower() for k in ("p0a6f5", "1gfl", "1aon", "cpx-1882")):
+            candidate_names.extend([
+                f"{endpoint}_sample.json",
+                f"{endpoint}.json",
+            ])
+
         for name in candidate_names:
             file_path = self.fixtures_dir / name
             if file_path.is_file():

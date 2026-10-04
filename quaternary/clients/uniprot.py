@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from typing import Any, Dict, List, Optional
 
 from quaternary.clients.base import BaseBioClient
@@ -12,6 +13,17 @@ logger = logging.getLogger(__name__)
 
 class UniProtClient(BaseBioClient):
     """Client for querying UniProtKB protein records and extracting quaternary annotations."""
+
+    # Strict standard UniProt accession regex without commas (enforcing D-16)
+    ACCESSION_REGEX = re.compile(
+        r"^[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9])([A-Z][A-Z0-9]{2}[0-9])?$"
+    )
+
+    @classmethod
+    def is_valid_accession(cls, accession: str) -> bool:
+        """Validate string against canonical UniProtKB accession grammar."""
+        clean_acc = accession.strip().upper()
+        return bool(cls.ACCESSION_REGEX.fullmatch(clean_acc))
 
     def get_subunit_annotations(self, accession: str) -> Dict[str, Any]:
         """Fetch subunit annotation, gene name, organism, and PDB/ComplexPortal cross-references."""
@@ -42,20 +54,32 @@ class UniProtClient(BaseBioClient):
         # 3. Subunit comments
         comments = data.get("comments", [])
         subunit_texts: List[str] = []
+        function_texts: List[str] = []
+
         for c in comments:
-            if c.get("commentType") == "SUBUNIT":
+            c_type = c.get("commentType")
+            if c_type == "SUBUNIT":
                 texts = c.get("texts", [])
                 for t in texts:
                     val = t.get("value") if isinstance(t, dict) else str(t)
                     if val:
                         subunit_texts.append(val)
+            elif c_type in ("FUNCTION", "CATALYTIC_ACTIVITY"):
+                texts = c.get("texts", [])
+                for t in texts:
+                    val = t.get("value") if isinstance(t, dict) else str(t)
+                    if val:
+                        function_texts.append(val)
 
         subunit_text = " ".join(subunit_texts) if subunit_texts else "No subunit annotation found."
+        function_text = " ".join(function_texts) if function_texts else ""
 
-        # 4. Cross references
+        # 4. Cross references & GO Terms
         pdb_ids: List[str] = []
         complex_portal_ids: List[str] = []
+        go_terms: List[Dict[str, str]] = []
         xrefs = data.get("uniProtKBCrossReferences", [])
+
         for xref in xrefs:
             db = xref.get("database")
             x_id = xref.get("id")
@@ -65,6 +89,10 @@ class UniProtClient(BaseBioClient):
                 pdb_ids.append(x_id)
             elif db == "ComplexPortal" and x_id not in complex_portal_ids:
                 complex_portal_ids.append(x_id)
+            elif db == "GO":
+                props = {p.get("key"): p.get("value") for p in xref.get("properties", []) if isinstance(p, dict)}
+                term_name = props.get("GoTerm", "")
+                go_terms.append({"id": x_id, "name": term_name})
 
         # 5. Canonical Sequence
         seq_data = data.get("sequence", {})
@@ -76,6 +104,8 @@ class UniProtClient(BaseBioClient):
             "organism": organism_name,
             "taxonomy_id": taxon_id,
             "subunit_text": subunit_text,
+            "function_text": function_text,
+            "go_terms": go_terms,
             "pdb_ids": pdb_ids,
             "complex_portal_ids": complex_portal_ids,
             "raw_comments": subunit_texts,

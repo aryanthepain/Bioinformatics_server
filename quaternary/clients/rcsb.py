@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import logging
 from typing import Any, Dict, List, Optional
 
@@ -21,6 +22,8 @@ class RCSBSearchClient(BaseBioClient):
     ) -> List[Dict[str, Any]]:
         """Submit protein sequence to RCSB Search API v2 DSL and return matching polymer entities."""
         clean_seq = "".join(sequence.split()).upper()
+        # Hash full sequence and search parameters for unambiguous caching
+        cache_key = hashlib.sha256(f"{clean_seq}_{evalue_cutoff}_{identity_cutoff}".encode()).hexdigest()[:32]
 
         def _fetch() -> Dict[str, Any]:
             url = "https://search.rcsb.org/rcsbsearch/v2/query"
@@ -47,7 +50,7 @@ class RCSBSearchClient(BaseBioClient):
             resp.raise_for_status()
             return resp.json()
 
-        res = self.get_with_cache("rcsb", f"seq_{clean_seq[:32]}", _fetch)
+        res = self.get_with_cache("rcsb", f"seq_{cache_key}", _fetch)
         raw_list = res.get("result_set", [])
         hits: List[Dict[str, Any]] = []
 
@@ -56,10 +59,10 @@ class RCSBSearchClient(BaseBioClient):
             parts = identifier.split("_")
             pdb_id = parts[0] if parts else identifier
             entity_id = parts[1] if len(parts) > 1 else "1"
+
+            score = item.get("score", 0.0)
             services = item.get("services", [])
             match_context = item.get("match_context", [])
-            
-            score = item.get("score", 0.0)
             evalue = item.get("evalue", evalue_cutoff)
             identity = item.get("identity", identity_cutoff)
 
@@ -75,7 +78,7 @@ class RCSBSearchClient(BaseBioClient):
         return hits
 
     def get_entry_assemblies(self, pdb_id: str) -> Dict[str, Any]:
-        """Fetch experimental determination method, resolution, and biological assemblies."""
+        """Fetch experimental determination method, resolution, symmetry, and biological assemblies."""
         clean_id = pdb_id.strip().upper()
 
         def _fetch() -> Dict[str, Any]:
@@ -91,6 +94,12 @@ class RCSBSearchClient(BaseBioClient):
             if "rcsb_entry_info" in data:
                 resolution = data["rcsb_entry_info"].get("resolution_combined", [None])[0]
 
+            # Parse symmetry
+            symmetry = None
+            symm_list = data.get("rcsb_struct_symmetry", [])
+            if symm_list and isinstance(symm_list, list):
+                symmetry = symm_list[0].get("symbol")
+
             # Parse assemblies
             assemblies: List[Dict[str, Any]] = []
             assemblies_data = data.get("rcsb_entry_container_identifiers", {}).get("assembly_ids", [])
@@ -104,11 +113,11 @@ class RCSBSearchClient(BaseBioClient):
                 "pdb_id": clean_id,
                 "resolution": resolution,
                 "method": method,
+                "symmetry": symmetry,
                 "assemblies": assemblies,
             }
 
         res = self.get_with_cache("rcsb", f"entry_{clean_id}", _fetch)
-        # Handle fixture structure if needed
         if "entry_assemblies" in res:
             ea = dict(res["entry_assemblies"])
             known_resolutions = {
@@ -126,3 +135,7 @@ class RCSBSearchClient(BaseBioClient):
                 ea["resolution"] = known_resolutions[clean_id]
             return ea
         return res
+
+
+# Alias for canonical naming and import compatibility
+RCSBClient = RCSBSearchClient

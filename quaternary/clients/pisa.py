@@ -85,7 +85,7 @@ class PisaClient(BaseBioClient):
             }
 
         delta_g = float(selected_asm.get("dissociation_energy", selected_asm.get("delta_g", 0.0)) or 0.0)
-        status = "stable" if (delta_g > 0 or delta_g < -10) else "dissociated/lattice"
+        status = "stable" if delta_g > 0 else "POTENTIAL_CRYSTAL_PACKING_ARTIFACT"
         interfaces_raw = selected_asm.get("interfaces", [])
         interfaces: List[Dict[str, Any]] = []
 
@@ -158,3 +158,7 @@ class PisaClient(BaseBioClient):
             "status": status,
             "interfaces": interfaces,
         }
+
+
+# Alias for canonical naming and import compatibility
+PISAClient = PisaClient
