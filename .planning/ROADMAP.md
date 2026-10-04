@@ -102,19 +102,22 @@ Plans:
 - [x] 03.1-03: Jupyter Notebook Overhaul, Dynamic Rendering & Benchmark Showcase
 
 
-### Phase 03.2: Notebook Presentation Modularization & Visual Component Extraction (INSERTED)
+### Phase 03.2: Notebook Presentation Modularization & Visual Component Extraction (INSERTED & EXTENDED)
 
-**Goal:** Declutter `Quaternary_Structure.ipynb` by extracting heavy helper and visualizer functions into a standalone presentation module (`quaternary/presentation.py`), making the notebook sleek, presentable, and demo-ready while providing comprehensive, isolated unit tests for all visual and validation utilities.
+**Goal:** Declutter `Quaternary_Structure.ipynb` by extracting heavy helper and visualizer functions into a standalone presentation module (`quaternary/presentation.py`), eliminate hardcoded benchmark cheats and zero-value outputs from the computational pipeline, ground GroEL and novel sequences with rigorous structural biology, separate monolithic presentation calls into clear one-by-one displays, and restore rich collapsible preset explanation panes.
 **Requirements**: QUAT-06, QUAT-07, QUAT-09
 **Depends on**: Phase 03.1
 **Success Criteria** (what must be TRUE):
-  1. Helper and visualization functions (`validate_target_input`, `render_validation_status`, `show_json`, `render_quaternary_summary_card`, `render_component_identity_table`, `render_interface_contact_table`, `render_dynamic_equilibrium_display`, `render_functional_inference_card`, `render_evidence_coverage_dashboard`) are extracted from notebook cells into `quaternary/presentation.py`.
-  2. Functions are exported through `quaternary_pipeline` and `quaternary.presentation`, allowing clean, concise imports in `Quaternary_Structure.ipynb`.
-  3. `scripts/build_notebook.py` is updated to generate the streamlined, presentation-ready notebook without multi-page raw HTML/CSS boilerplate.
-  4. Granular, function-specific tests are implemented in `tests/test_presentation.py` covering inputs, edge cases, and HTML outputs for every extracted function.
-  5. Existing tests (`tests/test_notebook_scaffold.py`, `tests/test_notebook_visuals.py`, `tests/test_notebook_e2e.py`) are realigned to verify modularized presentation imports, maintaining 100% test pass rate across the repository.
+  1. Helper and visualization functions (`validate_target_input`, `render_validation_status`, `render_target_selection_card`, `show_json`, `render_quaternary_summary_card`, `render_component_identity_table`, `render_interface_contact_table`, `render_dynamic_equilibrium_display`, `render_functional_inference_card`, `render_evidence_coverage_dashboard`) are cleanly housed in `quaternary/presentation.py`.
+  2. GroEL biological description is strictly corrected: GroEL self-assembly is $A_{14}$ homo-tetradecamer, whereas GroEL-GroES is $A_{14}B_7$ functional heterocomplex.
+  3. Synthetic/hardcoded benchmark dictionaries (`known_benchmarks`), static `w_pisa = 3.0` cheats, and shortcut branches (`is_groel`, `is_insulin`) are eliminated from `session.py`; all evidence is derived from actual queried upstream responses with explicit provenance tagging.
+  4. PDB candidate selection is assembly-aware, avoiding selecting zero-interface monomeric fragments (e.g. `1DK7`) over full-length multimers (`1OEL`, `1AON`), and extracting real biophysical interface metrics from PISA without 0.0 placeholders.
+  5. Status vocabularies are standardized (`CONFIRMED`, `SUPPORTED`, `CONFLICTING`, `INSUFFICIENT EVIDENCE`, `UNAVAILABLE`, `PREDICTED`, and database-level query states).
+  6. Novel sequence fallback outputs `UNKNOWN` oligomeric state with `MONOMER BASELINE` fallback and `INSUFFICIENT EVIDENCE` status (avoiding claiming biological monomerization).
+  7. Monolithic Part 1 presentation cell is split into focused 1-by-1 display cells with dedicated biological interpretations, redundant helper import cells are removed, and rich `<details>` collapsible panes are restored across all stages and summary cards.
+  8. Full test suite passes deterministically across unit tests, presentation tests, and notebook scaffold/visual tests.
 
-**Plans**: 2 plans
+**Plans**: 5 plans
 
 Plans:
 **Wave 1**
@@ -122,6 +125,15 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 - [x] 03.2-02: Realign `scripts/build_notebook.py`, rebuild `Quaternary_Structure.ipynb`, and update test suites for end-to-end verification
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [x] 03.2-03: Core Engine Rigor, Real Evidence Extraction & Vocabulary Standardization
+
+**Wave 4** *(blocked on Wave 3 completion)*
+- [x] 03.2-04: Presentation Components & Provenance UI Refactoring
+
+**Wave 5** *(blocked on Wave 4 completion)*
+- [x] 03.2-05: Notebook Re-architecting, 1-by-1 Displays & Preset Detail Panes
 
 
 ### Phase 4: Standardized UI JSON Data Contract & Benchmark Validation
@@ -153,7 +165,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 03.1 → 03.2 → 4
 | 2. Core Quaternary Engine & API Abstraction Module | 4/4 | Complete | 2026-10-04 |
 | 3. Abstracted Interactive Jupyter Notebook | 3/3 | Complete | 2026-10-04 |
 | 03.1. Quaternary Engine Rigor & Functional Inference | 3/3 | Complete | 2026-10-04 |
-| 03.2. Notebook Presentation Modularization & Visual Component Extraction | 2/2 | Complete | 2026-10-05 |
+| 03.2. Notebook Presentation Modularization & Visual Component Extraction | 5/5 | Complete | 2026-10-05 |
 | 4. UI JSON Data Contract & Benchmark Validation | 0/3 | Not started | - |
 
 ---
