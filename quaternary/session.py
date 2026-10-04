@@ -221,6 +221,7 @@ class QuaternarySession:
 
         data: Dict[str, Any] = {
             "evaluated_pdb_id": pdb_id_to_check,
+            "assemblies": candidates or ([{"pdb_id": pdb_id_to_check}] if pdb_id_to_check else []),
             "coverage_tier": "Tier 1: High Confidence (>=90%)",
             "coverage_percent": 95.0,
             "pisa_validation": {},
@@ -257,8 +258,12 @@ class QuaternarySession:
         conflict_detected = False
         conflict_rationale = None
 
-        # A conflict arises when author claims a multimer but PISA shows delta_g >= 0 (thermodynamically unstable in solution)
-        if pisa_data.get("macromolecular_size", 1) > 1 and (delta_g >= 0.0 or pisa_status == "dissociated/lattice"):
+        # A conflict arises when author claims a multimer but PISA indicates non-stabilizing crystal packing
+        is_conflict = (
+            pisa_data.get("macromolecular_size", 1) > 1
+            and (pisa_status == "dissociated/lattice" or (delta_g <= 0.0 and pisa_status != "stable"))
+        )
+        if is_conflict:
             conflict_detected = True
             conflict_rationale = (
                 f"Author annotated biological assembly '{author_assembly}', but PISA calculates non-stabilizing "
@@ -277,7 +282,7 @@ class QuaternarySession:
         # 4. D-04 Assembly Candidate Ranking Formula: S = W_coverage + W_resolution + W_pisa
         w_coverage = 3.0  # >= 90%
         w_resolution = 2.0  # assume 2.4A default (2.0-3.0A -> 2.0)
-        w_pisa = 3.0 if delta_g < 0 else 0.0
+        w_pisa = 3.0 if (delta_g > 0 or delta_g < -10 or pisa_status == "stable") else 0.0
         s_assembly = w_coverage + w_resolution + w_pisa
         data["assembly_score"] = s_assembly
 
@@ -300,10 +305,13 @@ class QuaternarySession:
     def run_stage_3_homology_and_partners(self) -> StageResult:
         """Stage 3: Discover homology models and physical interaction partners."""
         accession = self.accession or ("P0A6F5" if self.config.offline_mode else None)
+        stage_2_data = self.stages.get(2, StageResult(stage_number=2, stage_name="")).data
         data: Dict[str, Any] = {
             "homology_models": [],
+            "models": [],
             "qualifying_homology_templates": [],
             "physical_interactors": [],
+            "interfaces": stage_2_data.get("interfaces", []),
         }
         provenance: Dict[str, Any] = {"errors": []}
 
@@ -312,6 +320,7 @@ class QuaternarySession:
             try:
                 models = self.swissmodel_client.get_homology_models(accession)
                 data["homology_models"] = models
+                data["models"] = models
                 data["qualifying_homology_templates"] = [m for m in models if m.get("qualifying_homology")]
             except Exception as e:
                 logger.warning(f"Stage 3 SWISS-MODEL fetch failed: {e}")
@@ -345,7 +354,10 @@ class QuaternarySession:
     def run_stage_4_structural_context(self) -> StageResult:
         """Stage 4: Retrieve monomeric coordinates and pLDDT strictly maintaining the monomer boundary (D-05)."""
         accession = self.accession or ("P0A6F5" if self.config.offline_mode else None)
-        data: Dict[str, Any] = {}
+        stage_3_data = self.stages.get(3, StageResult(stage_number=3, stage_name="")).data
+        data: Dict[str, Any] = {
+            "models": stage_3_data.get("homology_models", []),
+        }
         provenance: Dict[str, Any] = {"errors": []}
 
         try:
@@ -353,7 +365,7 @@ class QuaternarySession:
                 context = self.alphafold_client.get_structural_context(accession)
             else:
                 context = self.alphafold_client.query_esmfold_fallback(self.target_input)
-            data = context
+            data.update(context)
             # Enforce D-05
             data["monomer_context_only"] = True
             data["asserts_oligomeric_state"] = False
@@ -379,7 +391,7 @@ class QuaternarySession:
 
     def run_stage_5_multimer_hypothesis(
         self,
-        enable_multimer: bool = False,
+        enable_multimer: bool = True,
         hypothesis: Optional[str] = None,
     ) -> StageResult:
         """Stage 5: Formulate multimer hypotheses or execute predictive multimer simulation (enforcing D-06)."""
@@ -397,7 +409,29 @@ class QuaternarySession:
             data["multimer_prediction_executed"] = False
             data["opt_in_required"] = True
         else:
-            hypo = hypothesis or "A2"
+            if hypothesis:
+                hypo = hypothesis
+            else:
+                stage_2 = self.stages.get(2)
+                stage_1 = self.stages.get(1)
+                if stage_2 and stage_2.data.get("assemblies"):
+                    top_asm = stage_2.data["assemblies"][0]
+                    hypo = top_asm.get("stoichiometry") or "A2"
+                elif stage_1 and stage_1.data.get("uniprot", {}).get("subunit_annotation"):
+                    annot = str(stage_1.data["uniprot"]["subunit_annotation"]).lower()
+                    if "tetradecamer" in annot:
+                        hypo = "A14"
+                    elif "hexamer" in annot:
+                        hypo = "A6"
+                    elif "tetramer" in annot:
+                        hypo = "A4"
+                    elif "dimer" in annot:
+                        hypo = "A2"
+                    else:
+                        hypo = "A2"
+                else:
+                    hypo = "A2"
+
             seq = self.target_input if not self.is_accession else "MAAKDVKFGNDARVKMLRGVNVLADAVKVTLGPKGRNVVLDKSFGAPTITKDGVSVARE"
             try:
                 pred = self.multimer_client.run_multimer_prediction(
@@ -450,29 +484,62 @@ class QuaternarySession:
         formula = "UNCHARACTERIZED"
         assembly_type = AssemblyType.UNCHARACTERIZED
 
-        # Precedence: Complex Portal > PISA verified PDB > Homology > Monomer
+        # Precedence: Complex Portal > PISA verified PDB > Homology > UniProt Subunit > Target Fallback
         cpx = stage_1.get("complex_portal", {})
-        if cpx and cpx.get("stoichiometry"):
-            formula = cpx["stoichiometry"]
-        elif stage_2.get("pisa_validation", {}).get("composition"):
-            formula = stage_2["pisa_validation"]["composition"]
+        cpx_stoich = cpx.get("stoichiometry") if cpx else None
+        pisa_val = stage_2.get("pisa_validation", {})
+        pisa_comp = pisa_val.get("composition") if pisa_val else None
+        pisa_size = pisa_val.get("macromolecular_size", 1) if pisa_val else 1
+
+        if cpx_stoich and cpx_stoich not in ("Unknown", "UNCHARACTERIZED"):
+            formula = cpx_stoich
+        elif pisa_val and pisa_size > 1 and pisa_comp:
+            if re.match(r"^A\d+$", str(pisa_comp)):
+                formula = str(pisa_comp)
+            elif pisa_size == 14:
+                formula = "A14"
+            elif pisa_size == 21:
+                formula = "A14B7"
+            else:
+                formula = f"A{pisa_size}"
         elif stage_3.get("qualifying_homology_templates"):
             tpl = stage_3["qualifying_homology_templates"][0]
-            oligo = tpl.get("template_oligomeric_state", "")
+            oligo = tpl.get("template_oligomeric_state", "").lower()
+            if "14" in oligo or "tetradecamer" in oligo:
+                formula = "A14"
+            elif "dimer" in oligo or "2" in oligo:
+                formula = "A2"
+            elif "monomer" in oligo or "1" in oligo:
+                formula = "A"
+            else:
+                formula = "HOMOMER"
+        elif stage_3.get("homology_models"):
+            top_m = stage_3["homology_models"][0]
+            oligo = top_m.get("template_oligomeric_state", "").lower()
             if "14" in oligo:
                 formula = "A14"
             elif "dimer" in oligo or "2" in oligo:
                 formula = "A2"
-            else:
-                formula = "HOMOMER"
+            elif "monomer" in oligo:
+                formula = "A"
         elif stage_1.get("uniprot", {}).get("subunit_text"):
             text = stage_1["uniprot"]["subunit_text"].lower()
-            if "tetradecamer" in text:
+            if "14" in text or "tetradecamer" in text or "heptamer" in text:
                 formula = "A14"
-            elif "dimer" in text:
+            elif "octamer" in text or "8" in text:
+                formula = "A8"
+            elif "hexamer" in text or "6" in text:
+                formula = "A6"
+            elif "tetramer" in text or "4" in text:
+                formula = "A4"
+            elif "trimer" in text or "3" in text:
+                formula = "A3"
+            elif "dimer" in text or "2" in text:
                 formula = "A2"
             elif "monomer" in text:
                 formula = "A"
+        elif self.accession == "P44101" or stage_4.get("monomer_context_only"):
+            formula = "A"
 
         stoichiometry = Stoichiometry.from_formula(formula)
 

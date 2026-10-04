@@ -51,7 +51,7 @@ from quaternary.session import QuaternarySession
 def analyze_quaternary(
     target_input: str,
     config: Optional[QuaternaryConfig] = None,
-    enable_multimer: bool = False,
+    enable_multimer: bool = True,
     hypothesis: Optional[str] = None,
     **kwargs: Any,
 ) -> QuaternaryStructureOutput:

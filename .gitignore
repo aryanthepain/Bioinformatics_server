@@ -15,6 +15,7 @@ htmlcov/
 
 # Quaternary Engine Cache & Temporary State
 .cache/
+.quaternary_cache/
 quaternary_config.json
 *.db
 *.tmp

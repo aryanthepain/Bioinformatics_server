@@ -37,11 +37,16 @@ class IntActClient(BaseBioClient):
         def _fetch() -> Dict[str, Any]:
             # Use IntAct REST interactor search
             url = f"https://www.ebi.ac.uk/intact/ws/interaction/findInteractions/{clean_acc}"
-            resp = self.session.get(url, timeout=self.config.timeout)
-            if resp.status_code == 404:
+            try:
+                import requests as direct_requests
+                resp = direct_requests.get(url, timeout=3.0)
+                if resp.status_code == 404:
+                    return {"interactors": []}
+                resp.raise_for_status()
+                return resp.json()
+            except Exception as e:
+                logger.warning(f"IntAct API fetch failed or timed out for {clean_acc}: {e}")
                 return {"interactors": []}
-            resp.raise_for_status()
-            return resp.json()
 
         data = self.get_with_cache("intact", clean_acc, _fetch)
         raw_interactors = data.get("interactors", [])

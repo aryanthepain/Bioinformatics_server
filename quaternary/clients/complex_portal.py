@@ -18,8 +18,10 @@ class ComplexPortalClient(BaseBioClient):
         clean_id = complex_id.strip().upper()
 
         def _fetch() -> Dict[str, Any]:
-            url = f"https://www.ebi.ac.uk/intact/complex-portal/api/complex/{clean_id}"
-            resp = self.session.get(url, timeout=self.config.timeout)
+            url = f"https://www.ebi.ac.uk/intact/complex-ws/complex/{clean_id}"
+            resp = self.session.get(url, headers={"Accept": "application/json"}, timeout=self.config.timeout)
+            if resp.status_code == 404:
+                return {"complex_id": clean_id, "stoichiometry": "Unknown", "participants": []}
             resp.raise_for_status()
             data = resp.json()
             return self._parse_complex_portal_json(data, clean_id)
@@ -30,7 +32,17 @@ class ComplexPortalClient(BaseBioClient):
         """Extract stoichiometry and participants from Complex Portal JSON."""
         name = data.get("name") or data.get("recommendedName") or complex_id
         systematic_name = data.get("systematicName")
-        stoichiometry = data.get("stoichiometry") or "Unknown"
+        stoichiometry = data.get("stoichiometry")
+
+        if not stoichiometry and systematic_name:
+            import re
+            parts = re.findall(r"(\d+)\s*x\s*([A-Za-z0-9_]+)", systematic_name)
+            if parts:
+                stoichiometry = "".join(f"{chr(65+i)}{count}" for i, (count, _) in enumerate(parts))
+            else:
+                stoichiometry = systematic_name
+
+        stoichiometry = stoichiometry or "Unknown"
 
         participants: List[Dict[str, Any]] = []
         raw_participants = data.get("participants", [])

@@ -26,12 +26,22 @@ class SwissModelClient(BaseBioClient):
             return resp.json()
 
         data = self.get_with_cache("swissmodel", clean_acc, _fetch)
-        raw_models = data.get("result", [])
-        if isinstance(data, list):
+        raw_models: List[Dict[str, Any]] = []
+        if isinstance(data, dict):
+            res = data.get("result", {})
+            if isinstance(res, dict):
+                raw_models = res.get("structures", [])
+            elif isinstance(res, list):
+                raw_models = res
+            elif "structures" in data:
+                raw_models = data.get("structures", [])
+        elif isinstance(data, list):
             raw_models = data
 
         parsed_models: List[Dict[str, Any]] = []
         for m in raw_models:
+            if not isinstance(m, dict):
+                continue
             tpl = m.get("template", "")
             tpl_pdb = m.get("template_pdb_id") or (tpl.split(".")[0].upper() if tpl else "UNKNOWN")
             oligo = m.get("template_oligomeric_state") or m.get("oligo-state") or "unknown"
@@ -40,7 +50,10 @@ class SwissModelClient(BaseBioClient):
             identity = float(m.get("seq_identity", m.get("identity", 0.0)))
             coverage = float(m.get("coverage", 0.0))
 
-            qualifying = qmqe >= 0.70
+            if m.get("qualifying_homology") is not None:
+                qualifying = bool(m.get("qualifying_homology"))
+            else:
+                qualifying = qmqe >= 0.70 or gmqe >= 0.70
 
             parsed_models.append({
                 "template_pdb_id": tpl_pdb,

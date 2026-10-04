@@ -65,7 +65,7 @@ class QuaternaryEngine:
     def analyze(
         self,
         target_input: str,
-        enable_multimer: bool = False,
+        enable_multimer: bool = True,
         hypothesis: Optional[str] = None,
     ) -> QuaternaryStructureOutput:
         """Execute full end-to-end analysis across all 6 stages and return final synthesis."""

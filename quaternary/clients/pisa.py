@@ -23,8 +23,23 @@ class PisaClient(BaseBioClient):
         target_asm = str(assembly_id or "1")
 
         def _fetch() -> Dict[str, Any]:
-            url = f"https://www.ebi.ac.uk/pdbe/api/pisa/assembly/{clean_id}"
+            url = f"https://www.ebi.ac.uk/pdbe/api/pisa/interfaces/{clean_id}/{target_asm}"
             resp = self.session.get(url, timeout=self.config.timeout)
+            if resp.status_code == 404:
+                url_asm = f"https://www.ebi.ac.uk/pdbe/api/pisa/assembly/{clean_id}/{target_asm}"
+                resp = self.session.get(url_asm, timeout=self.config.timeout)
+                if resp.status_code == 404:
+                    return {
+                        "pdb_id": clean_id.upper(),
+                        "assembly_id": target_asm,
+                        "macromolecular_size": 1,
+                        "composition": "A",
+                        "dissociation_energy_kcal_mol": 0.0,
+                        "accessible_surface_area_angstrom2": 0.0,
+                        "buried_surface_area_angstrom2": 0.0,
+                        "status": "unknown",
+                        "interfaces": [],
+                    }
             resp.raise_for_status()
             data = resp.json()
             return self._parse_pisa_json(data, clean_id, target_asm)
@@ -43,17 +58,20 @@ class PisaClient(BaseBioClient):
             return data
 
         entry_data = data.get(pdb_id, {})
-        assemblies = entry_data.get("assemblies", [])
+        if not isinstance(entry_data, dict):
+            entry_data = {}
 
-        selected_asm = None
-        for a in assemblies:
-            if str(a.get("assembly_id")) == assembly_id:
-                selected_asm = a
-                break
-        if not selected_asm and assemblies:
-            selected_asm = assemblies[0]
-
+        selected_asm = entry_data.get("assembly")
         if not selected_asm:
+            assemblies = entry_data.get("assemblies", [])
+            for a in assemblies:
+                if str(a.get("assembly_id") or a.get("id")) == assembly_id:
+                    selected_asm = a
+                    break
+            if not selected_asm and assemblies:
+                selected_asm = assemblies[0]
+
+        if not selected_asm or not isinstance(selected_asm, dict):
             return {
                 "pdb_id": pdb_id.upper(),
                 "assembly_id": assembly_id,
@@ -66,31 +84,40 @@ class PisaClient(BaseBioClient):
                 "interfaces": [],
             }
 
-        delta_g = selected_asm.get("dissociation_energy", selected_asm.get("delta_g", 0.0))
-        status = "stable" if delta_g < 0 else "dissociated/lattice"
+        delta_g = float(selected_asm.get("dissociation_energy", selected_asm.get("delta_g", 0.0)) or 0.0)
+        status = "stable" if (delta_g > 0 or delta_g < -10) else "dissociated/lattice"
         interfaces_raw = selected_asm.get("interfaces", [])
         interfaces: List[Dict[str, Any]] = []
 
         for iface in interfaces_raw:
+            molecules = iface.get("molecules", [])
+            c1 = molecules[0].get("chain_id", "A") if len(molecules) >= 1 else iface.get("chain1", iface.get("chain_1", "A"))
+            c2 = molecules[1].get("chain_id", "B") if len(molecules) >= 2 else iface.get("chain2", iface.get("chain_2", "B"))
+            bsa = float(iface.get("interface_area", iface.get("bsa", iface.get("buried_surface_area_angstrom2", 0.0))) or 0.0)
+            solv_g = float(iface.get("solvation_energy", iface.get("delta_g", iface.get("solvation_free_energy_kcal_mol", 0.0))) or 0.0)
+            hb = int(iface.get("number_hydrogen_bonds", iface.get("h_bonds", iface.get("hydrogen_bonds_count", 0))) or 0)
+            sb = int(iface.get("number_salt_bridges", iface.get("salt_bridges", iface.get("salt_bridges_count", 0))) or 0)
+
             interfaces.append({
-                "chain_1": iface.get("chain1", iface.get("chain_1", "A")),
-                "chain_2": iface.get("chain2", iface.get("chain_2", "B")),
-                "buried_surface_area_angstrom2": float(iface.get("bsa", iface.get("buried_surface_area_angstrom2", 0.0))),
-                "solvation_free_energy_kcal_mol": float(iface.get("delta_g", iface.get("solvation_free_energy_kcal_mol", 0.0))),
-                "hydrogen_bonds_count": int(iface.get("h_bonds", iface.get("hydrogen_bonds_count", 0))),
-                "salt_bridges_count": int(iface.get("salt_bridges", iface.get("salt_bridges_count", 0))),
+                "chain_1": c1,
+                "chain_2": c2,
+                "buried_surface_area_angstrom2": bsa,
+                "solvation_free_energy_kcal_mol": solv_g,
+                "hydrogen_bonds_count": hb,
+                "salt_bridges_count": sb,
                 "interface_residues_chain_1": iface.get("interface_residues_chain_1", []),
                 "interface_residues_chain_2": iface.get("interface_residues_chain_2", []),
             })
 
+        mmsize = selected_asm.get("mmsize") or selected_asm.get("macromolecular_size") or 1
         return {
             "pdb_id": pdb_id.upper(),
             "assembly_id": str(selected_asm.get("assembly_id", assembly_id)),
-            "macromolecular_size": int(selected_asm.get("macromolecular_size", 1)),
+            "macromolecular_size": int(mmsize),
             "composition": selected_asm.get("composition", "A"),
             "dissociation_energy_kcal_mol": float(delta_g),
-            "accessible_surface_area_angstrom2": float(selected_asm.get("asa", 0.0)),
-            "buried_surface_area_angstrom2": float(selected_asm.get("bsa", 0.0)),
+            "accessible_surface_area_angstrom2": float(selected_asm.get("accessible_surface_area", selected_asm.get("asa", 0.0)) or 0.0),
+            "buried_surface_area_angstrom2": float(selected_asm.get("buried_surface_area", selected_asm.get("bsa", 0.0)) or 0.0),
             "status": status,
             "interfaces": interfaces,
         }
