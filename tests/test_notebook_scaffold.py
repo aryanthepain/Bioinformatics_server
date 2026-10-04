@@ -59,37 +59,35 @@ def test_notebook_no_raw_http(notebook):
 
 
 def test_preflight_validation_logic(notebook):
-    """Test the extracted validate_target_input function directly."""
-    # Find cell defining validate_target_input
-    validation_cell = None
-    for c in notebook.cells:
-        if c.cell_type == "code" and "def validate_target_input" in c.source:
-            validation_cell = c.source
-            break
+    """Verify validate_target_input is cleanly imported from quaternary.presentation without inline definitions."""
+    code_cells = [c.source for c in notebook.cells if c.cell_type == "code"]
+    combined_code = "\n".join(code_cells)
 
-    assert validation_cell is not None, "validate_target_input cell not found in notebook."
+    # Enforce D-01 & D-03: Modular import and zero inline boilerplate
+    assert "from quaternary.presentation import" in combined_code and "validate_target_input" in combined_code
+    assert "def validate_target_input" not in combined_code, (
+        "Inline definition of validate_target_input found; should be imported from quaternary.presentation"
+    )
 
-    # Execute validation function definition in a clean namespace
-    ns = {"re": re, "display": lambda x: None, "HTML": lambda x: x}
-    exec(validation_cell, ns)
-    validate_func = ns["validate_target_input"]
+    # Execute and test function behavior
+    from quaternary.presentation import validate_target_input
 
     # 1. Valid UniProt Accessions
-    assert validate_func("P0A6F5")[0] is True  # GroEL
-    assert validate_func("P01308")[0] is True  # Insulin
-    assert validate_func("P44101")[0] is True  # H. influenzae
-    assert validate_func("Q9Y263")[0] is True
+    assert validate_target_input("P0A6F5")[0] is True  # GroEL
+    assert validate_target_input("P01308")[0] is True  # Insulin
+    assert validate_target_input("P44101")[0] is True  # H. influenzae
+    assert validate_target_input("Q9Y263")[0] is True
 
     # 2. Valid FASTA format
     fasta_valid = ">sp|P0A6F5|GROEL_ECOLI Chaperonin\nMAAKDVKFGNDARVKMLRGVNVLADAVKVTLGPKGRNVVLDKSFGAPTITKDGVSVAREIELEDKFE"
-    is_valid, msg = validate_func(fasta_valid)
+    is_valid, msg = validate_target_input(fasta_valid)
     assert is_valid is True
 
     # 3. Invalid inputs
-    assert validate_func("")[0] is False
-    assert validate_func("INVALID_123")[0] is False
-    assert validate_func("12345")[0] is False
-    assert validate_func(">header_only_no_sequence\n")[0] is False
+    assert validate_target_input("")[0] is False
+    assert validate_target_input("INVALID_123")[0] is False
+    assert validate_target_input("12345")[0] is False
+    assert validate_target_input(">header_only_no_sequence\n")[0] is False
 
 
 def test_dual_mode_fallback(notebook):

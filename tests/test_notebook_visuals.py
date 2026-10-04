@@ -46,40 +46,58 @@ def notebook():
 
 @pytest.fixture(scope="module")
 def visual_helpers(notebook):
-    """Extract and execute visual helper functions from notebook code cells."""
-    visual_cell = None
-    for c in notebook.cells:
-        if c.cell_type == "code" and "def show_json" in c.source and "def render_quaternary_summary_card" in c.source:
-            visual_cell = c.source
-            break
+    """Verify visual helpers are cleanly imported from quaternary.presentation and provide test harness."""
+    code_sources = [c.source for c in notebook.cells if c.cell_type == "code"]
+    combined_code = "\n".join(code_sources)
 
-    assert visual_cell is not None, "Visual helpers code cell not found in notebook."
+    assert "from quaternary.presentation import" in combined_code
+
+    import quaternary.presentation as qp
 
     displayed_items = []
 
-    def mock_display(item):
-        displayed_items.append(item)
+    def make_wrapper(fn):
+        def wrapper(*args, **kwargs):
+            res = fn(*args, **kwargs)
+            if res is not None:
+                displayed_items.append(res)
+            return res
+        return wrapper
 
-    ns = {
-        "json": json,
-        "uuid": __import__("uuid"),
-        "re": __import__("re"),
-        "display": mock_display,
-        "HTML": HTML,
-        "QuaternaryStructureOutput": QuaternaryStructureOutput,
-    }
-
-    exec(visual_cell, ns)
     return {
-        "show_json": ns["show_json"],
-        "render_quaternary_summary_card": ns["render_quaternary_summary_card"],
-        "render_component_identity_table": ns["render_component_identity_table"],
-        "render_interface_contact_table": ns["render_interface_contact_table"],
-        "render_functional_inference_card": ns["render_functional_inference_card"],
-        "render_dynamic_equilibrium_display": ns["render_dynamic_equilibrium_display"],
-        "render_evidence_coverage_dashboard": ns["render_evidence_coverage_dashboard"],
+        "show_json": make_wrapper(qp.show_json),
+        "render_quaternary_summary_card": make_wrapper(qp.render_quaternary_summary_card),
+        "render_component_identity_table": make_wrapper(qp.render_component_identity_table),
+        "render_interface_contact_table": make_wrapper(qp.render_interface_contact_table),
+        "render_functional_inference_card": make_wrapper(qp.render_functional_inference_card),
+        "render_dynamic_equilibrium_display": make_wrapper(qp.render_dynamic_equilibrium_display),
+        "render_evidence_coverage_dashboard": make_wrapper(qp.render_evidence_coverage_dashboard),
         "displayed_items": displayed_items,
     }
+
+
+def test_notebook_presentation_modularity(notebook):
+    """Enforce D-01, D-03 & D-05: presentation functions are imported from quaternary.presentation and not defined inline."""
+    code_sources = [c.source for c in notebook.cells if c.cell_type == "code"]
+    combined_code = "\n".join(code_sources)
+
+    # Check imports in Cell 2 and Wave 2
+    assert "from quaternary.presentation import" in combined_code
+    for fn in [
+        "validate_target_input",
+        "render_validation_status",
+        "show_json",
+        "render_quaternary_summary_card",
+        "render_component_identity_table",
+        "render_interface_contact_table",
+        "render_dynamic_equilibrium_display",
+        "render_functional_inference_card",
+        "render_evidence_coverage_dashboard",
+    ]:
+        assert fn in combined_code, f"Missing import of {fn} in notebook code."
+        assert f"def {fn}" not in combined_code, (
+            f"Inline definition of {fn} found in notebook! Must be imported from quaternary.presentation"
+        )
 
 
 def test_show_json_renders_valid_html(visual_helpers):
