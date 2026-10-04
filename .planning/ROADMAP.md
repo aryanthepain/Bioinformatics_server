@@ -76,6 +76,31 @@ Plans:
 **Wave 3** *(blocked on Wave 2 completion)*
 - [x] 03-03: Add interactive export triggers and complete end-to-end biological interpretation markdown documentation
 
+### Phase 03.1: Quaternary Engine Rigor, Complex Disambiguation & Functional Inference (INSERTED)
+
+**Goal:** Resolve biological modeling ambiguities (GroEL A14 self-assembly vs GroEL-GroES A14B7 partner complex), recover the core mission of Quaternary-to-Function biological inference, establish canonical 1–6 stage sequencing, ensure absence of evidence yields UNCHARACTERIZED (not MONOMER), and enforce truthful multimer simulation reporting and auditability.
+**Requirements**: QUAT-03, QUAT-04, QUAT-05, QUAT-06, QUAT-07, QUAT-09
+**Depends on:** Phase 3
+**Success Criteria** (what must be TRUE):
+  1. GroEL target self-assembly reports `A14 / HOMOMER` while GroES partner complex reports `A14B7` separately.
+  2. Novel sequences without experimental/homology evidence report `UNCHARACTERIZED` (not `MONOMER`).
+  3. Quaternary-to-Function Inference Engine links oligomeric geometry and homologous complexes to molecular function and biological process.
+  4. Stage 1 to 6 canonical sequence is established on `QuaternarySession` and misleading aliases are removed.
+  5. Stage 5 multimer execution is transparently labeled as `SIMULATED` / `HEURISTIC_PREDICTED` (default `enable_multimer=True`), with prediction disagreements retained in `conflicts[]`.
+  6. `Quaternary_Structure.ipynb` dynamically renders Component Identity, Interface Contact, Evidence Coverage, and Functional Inference tables without hardcoded markdown metrics.
+
+**Plans:** 3 plans
+
+Plans:
+**Wave 1**
+- [ ] 03.1-01: Core Domain Models, Canonical 6-Stage Session & Biological Evidence Schemas
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 03.1-02: Biological Disambiguation, Engineering Hardening & Functional Inference Engine
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 03.1-03: Jupyter Notebook Overhaul, Dynamic Rendering & Benchmark Showcase
+
 ### Phase 4: Standardized UI JSON Data Contract & Benchmark Validation
 
 **Goal**: Formalize the UI JSON export schema and validate the pipeline against *Haemophilus influenzae* uncharacterized proteins and synthetic novel sequences.
@@ -104,6 +129,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | 1. Quaternary Ecosystem Survey & Reusable Prompt | 3/3 | Complete | 2026-10-03 |
 | 2. Core Quaternary Engine & API Abstraction Module | 4/4 | Complete | 2026-10-04 |
 | 3. Abstracted Interactive Jupyter Notebook | 3/3 | Complete | 2026-10-04 |
+| 03.1. Quaternary Engine Rigor & Functional Inference | 0/3 | In progress | - |
 | 4. UI JSON Data Contract & Benchmark Validation | 0/3 | Not started | - |
 
 ---
