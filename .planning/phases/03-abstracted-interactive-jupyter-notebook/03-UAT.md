@@ -33,3 +33,15 @@
 3. **Stage Metrics Outputting "0":**
    - *Problem:* Cells 16-17 inspected `r2.data.get('assemblies')` and `r3.data.get('interfaces')`, but Stage 2 stored candidates in `rcsb_candidates` and Stage 3 had `homology_models`.
    - *Fix:* Provided cross-stage convenience keys in `r2.data` and `r3.data` so that `Assemblies Found: 5` and `Interfaces Analyzed: 42` accurately reflect the discovered structural data.
+
+4. **SWISS-MODEL QMQE Showing 0.00:**
+   - *Problem:* SWISS-MODEL API returned Quaternary Structure Quality Estimates under the key `template_qsqe` (or `qsqe`), while `SwissModelClient` checked only `m.get("qmqe")`. Additionally, `top_sm` was picking the first structure (`sm_models[0]`), which for GroEL was a raw experimental PDB entry without computed comparative modeling scores.
+   - *Fix:* Updated `SwissModelClient` to parse `template_qsqe` / `qsqe` into `qmqe`, and updated `QuaternarySession` Stage 6 to select the top model with valid QMQE/GMQE scores (e.g., `8BM1` / `8BL7`, reporting QMQE `0.79` and GMQE `0.85`).
+
+5. **`show_json` Inconsistency with UniProtKB.ipynb:**
+   - *Problem:* `show_json` was displaying static pre-formatted text blocks due to `<pre>` wrappers rather than the clean interactive collapsible tree from `UniProtKB.ipynb`.
+   - *Fix:* Re-aligned `show_json` with `UniProtKB.ipynb`, using `renderjson@1.4.0` with custom dark-mode styling, collapsible disclosure arrows (`▶`, `▼`), and auto-expansion to `max_depth`.
+
+6. **Target Selection Ambiguity & Multi-Sequence Inspection:**
+   - *Problem:* Cell 4/6 output static configuration cards without clear interaction guidance, and lacked a structured way to inspect the multiple preset sequences.
+   - *Fix:* Added an explicit "How to Interact & Switch Presets" guide inside the configuration dashboard, and introduced expandable `<details>` panes in the markdown cell below featuring complete biological summaries, expected oligomeric states, and full amino acid sequences for GroEL (`P0A6F5`), Insulin (`P01308`), uncharacterized *H. influenzae* (`P44101`), and novel arbitrary synthetic constructs.

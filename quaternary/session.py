@@ -568,7 +568,13 @@ class QuaternarySession:
         )
 
         sm_models = stage_3.get("homology_models", [])
-        top_sm = sm_models[0] if sm_models else {}
+        qualifying = stage_3.get("qualifying_homology_templates", [])
+        if qualifying:
+            top_sm = max(qualifying, key=lambda m: (m.get("qmqe") or 0.0, m.get("gmqe") or 0.0))
+        elif sm_models:
+            top_sm = max(sm_models, key=lambda m: (m.get("qmqe") or 0.0, m.get("gmqe") or 0.0))
+        else:
+            top_sm = {}
         swiss_conf = (
             SwissModelConfidence(
                 qmqe=top_sm.get("qmqe"),

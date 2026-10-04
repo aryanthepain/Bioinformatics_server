@@ -45,8 +45,10 @@ class SwissModelClient(BaseBioClient):
             tpl = m.get("template", "")
             tpl_pdb = m.get("template_pdb_id") or (tpl.split(".")[0].upper() if tpl else "UNKNOWN")
             oligo = m.get("template_oligomeric_state") or m.get("oligo-state") or "unknown"
-            qmqe = float(m.get("qmqe", 0.0)) if m.get("qmqe") is not None else 0.0
-            gmqe = float(m.get("gmqe", 0.0)) if m.get("gmqe") is not None else 0.0
+            raw_qmqe = m.get("template_qsqe") or m.get("qsqe") or m.get("qmqe")
+            qmqe = float(raw_qmqe) if raw_qmqe is not None else 0.0
+            raw_gmqe = m.get("gmqe")
+            gmqe = float(raw_gmqe) if raw_gmqe is not None else 0.0
             identity = float(m.get("seq_identity", m.get("identity", 0.0)))
             coverage = float(m.get("coverage", 0.0))
 

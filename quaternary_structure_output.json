@@ -1,5 +1,5 @@
 {
-  "analysis_id": "quat-session-1791122525385-51772d",
+  "analysis_id": "quat-session-1791123084998-25ec4f",
   "target_accession_or_sequence": "P0A6F5",
   "quaternary_status": "HETEROMER",
   "stoichiometry": {
@@ -73,7 +73,7 @@
     6
   ],
   "metadata": {
-    "session_id": "quat-session-1791122525385-51772d",
+    "session_id": "quat-session-1791123084998-25ec4f",
     "gene_name": "groL",
     "organism": "Escherichia coli (strain K12)",
     "pisa_status": "stable",
