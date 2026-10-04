@@ -98,6 +98,43 @@ class PisaClient(BaseBioClient):
             hb = int(iface.get("number_hydrogen_bonds", iface.get("h_bonds", iface.get("hydrogen_bonds_count", 0))) or 0)
             sb = int(iface.get("number_salt_bridges", iface.get("salt_bridges", iface.get("salt_bridges_count", 0))) or 0)
 
+            # Extract interface residues with buried surface area > 0
+            res1: List[int] = []
+            res2: List[int] = []
+            if len(molecules) >= 1:
+                m1 = molecules[0]
+                seq_ids1 = m1.get("residue_seq_ids") or m1.get("residue_label_seq_ids") or []
+                bsas1 = m1.get("buried_surface_areas", [])
+                for idx, b in enumerate(bsas1):
+                    if b > 0 and idx < len(seq_ids1):
+                        try:
+                            res1.append(int(seq_ids1[idx]))
+                        except (ValueError, TypeError):
+                            pass
+            if len(molecules) >= 2:
+                m2 = molecules[1]
+                seq_ids2 = m2.get("residue_seq_ids") or m2.get("residue_label_seq_ids") or []
+                bsas2 = m2.get("buried_surface_areas", [])
+                for idx, b in enumerate(bsas2):
+                    if b > 0 and idx < len(seq_ids2):
+                        try:
+                            res2.append(int(seq_ids2[idx]))
+                        except (ValueError, TypeError):
+                            pass
+
+            if not res1 and iface.get("interface_residues_chain_1"):
+                for r in iface["interface_residues_chain_1"]:
+                    try:
+                        res1.append(int(r))
+                    except (ValueError, TypeError):
+                        pass
+            if not res2 and iface.get("interface_residues_chain_2"):
+                for r in iface["interface_residues_chain_2"]:
+                    try:
+                        res2.append(int(r))
+                    except (ValueError, TypeError):
+                        pass
+
             interfaces.append({
                 "chain_1": c1,
                 "chain_2": c2,
@@ -105,8 +142,8 @@ class PisaClient(BaseBioClient):
                 "solvation_free_energy_kcal_mol": solv_g,
                 "hydrogen_bonds_count": hb,
                 "salt_bridges_count": sb,
-                "interface_residues_chain_1": iface.get("interface_residues_chain_1", []),
-                "interface_residues_chain_2": iface.get("interface_residues_chain_2", []),
+                "interface_residues_chain_1": res1,
+                "interface_residues_chain_2": res2,
             })
 
         mmsize = selected_asm.get("mmsize") or selected_asm.get("macromolecular_size") or 1
