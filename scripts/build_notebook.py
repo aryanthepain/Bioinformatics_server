@@ -57,8 +57,17 @@ import re
 import json
 import time
 import uuid
+import importlib
 from pathlib import Path
 from IPython.display import display, HTML, Markdown
+
+# Ensure freshly modified modules are reloaded if the notebook kernel is already running
+for mod_name in list(sys.modules.keys()):
+    if mod_name == "quaternary_pipeline" or mod_name.startswith("quaternary."):
+        try:
+            importlib.reload(sys.modules[mod_name])
+        except Exception:
+            pass
 
 # High-Level Quaternary Pipeline Façade API
 # NOTE: Zero raw HTTP calls (requests.get, urllib) are permitted in this notebook.
@@ -74,6 +83,7 @@ from quaternary_pipeline import (
 
 print(" Quaternary Pipeline high-level API successfully initialized.")
 """
+
     cells.append(create_code_cell(imports_code))
 
     # 3. Configuration Cell
