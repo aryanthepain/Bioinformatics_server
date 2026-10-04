@@ -102,10 +102,32 @@ Plans:
 - [x] 03.1-03: Jupyter Notebook Overhaul, Dynamic Rendering & Benchmark Showcase
 
 
+### Phase 03.2: Notebook Presentation Modularization & Visual Component Extraction (INSERTED)
+
+**Goal:** Declutter `Quaternary_Structure.ipynb` by extracting heavy helper and visualizer functions into a standalone presentation module (`quaternary/presentation.py`), making the notebook sleek, presentable, and demo-ready while providing comprehensive, isolated unit tests for all visual and validation utilities.
+**Requirements**: QUAT-06, QUAT-07, QUAT-09
+**Depends on**: Phase 03.1
+**Success Criteria** (what must be TRUE):
+  1. Helper and visualization functions (`validate_target_input`, `render_validation_status`, `show_json`, `render_quaternary_summary_card`, `render_component_identity_table`, `render_interface_contact_table`, `render_dynamic_equilibrium_display`, `render_functional_inference_card`, `render_evidence_coverage_dashboard`) are extracted from notebook cells into `quaternary/presentation.py`.
+  2. Functions are exported through `quaternary_pipeline` and `quaternary.presentation`, allowing clean, concise imports in `Quaternary_Structure.ipynb`.
+  3. `scripts/build_notebook.py` is updated to generate the streamlined, presentation-ready notebook without multi-page raw HTML/CSS boilerplate.
+  4. Granular, function-specific tests are implemented in `tests/test_presentation.py` covering inputs, edge cases, and HTML outputs for every extracted function.
+  5. Existing tests (`tests/test_notebook_scaffold.py`, `tests/test_notebook_visuals.py`, `tests/test_notebook_e2e.py`) are realigned to verify modularized presentation imports, maintaining 100% test pass rate across the repository.
+
+**Plans**: 2 plans
+
+Plans:
+**Wave 1**
+- [x] 03.2-01: Extract presentation & validation functions to `quaternary/presentation.py` and implement comprehensive unit tests in `tests/test_presentation.py`
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [x] 03.2-02: Realign `scripts/build_notebook.py`, rebuild `Quaternary_Structure.ipynb`, and update test suites for end-to-end verification
+
+
 ### Phase 4: Standardized UI JSON Data Contract & Benchmark Validation
 
 **Goal**: Formalize the UI JSON export schema and validate the pipeline against *Haemophilus influenzae* uncharacterized proteins and synthetic novel sequences.
-**Depends on**: Phase 3
+**Depends on**: Phase 3, Phase 03.1, Phase 03.2
 **Requirements**: QUAT-08, QUAT-09, QUAT-10
 **Success Criteria** (what must be TRUE):
   1. Standardized JSON payload (`quaternary_structure_output.json`) is exported with complete metadata, ready for frontend UI ingestion.
@@ -123,16 +145,17 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4
+Phases execute in numeric order: 1 → 2 → 3 → 03.1 → 03.2 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Quaternary Ecosystem Survey & Reusable Prompt | 3/3 | Complete | 2026-10-03 |
 | 2. Core Quaternary Engine & API Abstraction Module | 4/4 | Complete | 2026-10-04 |
 | 3. Abstracted Interactive Jupyter Notebook | 3/3 | Complete | 2026-10-04 |
-| 03.1. Quaternary Engine Rigor & Functional Inference | 0/3 | In progress | - |
+| 03.1. Quaternary Engine Rigor & Functional Inference | 3/3 | Complete | 2026-10-04 |
+| 03.2. Notebook Presentation Modularization & Visual Component Extraction | 2/2 | Complete | 2026-10-05 |
 | 4. UI JSON Data Contract & Benchmark Validation | 0/3 | Not started | - |
 
 ---
 *Roadmap defined: 2026-10-03*
-*Last updated: 2026-10-04 after Phase 3 execution*
+*Last updated: 2026-10-05 after Phase 03.2 insertion*
