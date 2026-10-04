@@ -141,9 +141,18 @@ PFP_MOCK_FAIL_LEVEL=secondary uv run uvicorn app.main:app --reload --port 8000
 
 ## Real analysis modules
 
-Connected so far: **tertiary structure** (`backend/app/levels/tertiary.py`, ported
-from the team notebook with its logic unchanged). The other levels still use
-placeholders.
+Connected so far: **primary structure** (`backend/app/levels/primary.py`) and
+**tertiary structure** (`backend/app/levels/tertiary.py`), ported from the team
+notebooks with their logic unchanged (one documented bug fix in primary). The
+other levels still use placeholders.
+
+**Primary structure needs a one-time setup** (about 5 GB of disk):
+
+```bash
+brew install diamond hmmer
+cd backend && uv sync && bash scripts/setup_primary.sh
+uv run python scripts/check_primary.py   # compares with the notebook's recorded results
+```
 
 **Secrets live in `backend/.env`** (never committed; see `.env.example`):
 
@@ -158,8 +167,8 @@ Without a token, the tertiary level is skipped with an explanation.
 - **Cache:** real results are saved in `backend/data/cache`, so the same
   sequence is instant the second time. Delete that folder to clear it, or set
   `PFP_CACHE=off`.
-- **Fast interface work:** `PFP_PLACEHOLDER_LEVELS=tertiary` uses placeholder
-  data even though the real module exists.
+- **Fast interface work:** `PFP_PLACEHOLDER_LEVELS=primary,tertiary` uses
+  placeholder data even though the real modules exist.
 
 ## Testing the backend
 
@@ -180,7 +189,7 @@ backend with `PFP_PLACEHOLDER_LEVELS=tertiary` to run them too.
 2. Data contract and mock API (placeholder results for all four levels) ✅
 3. Input screen: sequence entry, validation, examples, job progress ✅
 4. Results screen: verdict, residue map, level cards, detailed analyses, print ✅
-5. Integrate primary-structure analysis (DIAMOND, HMMER, ESM-2, ProtParam)
+5. Integrate primary-structure analysis (DIAMOND, HMMER, ESM-2, ProtParam) ✅
 6. Integrate secondary-structure analysis (JPred, ProtBert, RCSB/PDBe)
 7. Integrate tertiary-structure analysis (Swiss-Model, Foldseek, ProtParam) ✅
 8. Integrate quaternary-structure analysis, then evidence aggregation

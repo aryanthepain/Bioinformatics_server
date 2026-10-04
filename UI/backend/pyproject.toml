@@ -12,5 +12,17 @@ dependencies = [
     "biopython>=1.84,<2",
 ]
 
+[dependency-groups]
+# Machine-learning libraries for the primary-structure module (ESM-2).
+# `uv sync` installs them (see default-groups below); the free hosted build
+# leaves them out with `uv export --no-group primary`.
+primary = [
+    "torch>=2.4,<3",
+    "transformers>=4.44,<6",
+]
+
+[tool.uv]
+default-groups = ["primary"]
+
 # No [build-system] table on purpose: uv treats this as an application,
 # installs only the dependencies, and never tries to package the code.
