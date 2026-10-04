@@ -7,6 +7,7 @@ from quaternary.models.provenance import (
     ConfidenceProvenance,
     MultimerConfidence,
     PisaConfidence,
+    ProvenanceSource,
     SwissModelConfidence,
 )
 from quaternary.models.session_state import (
@@ -16,11 +17,13 @@ from quaternary.models.session_state import (
 )
 from quaternary.models.stoichiometry import (
     AssemblyType,
+    DatabaseAuditRecord,
     EvidenceCoverage,
     EvidenceStatus,
     FunctionalComplex,
     InferredFunction,
     ObservedAssembly,
+    QueryState,
     Stoichiometry,
     TargetSelfAssembly,
 )
@@ -28,6 +31,9 @@ from quaternary.models.stoichiometry import (
 __all__ = [
     "AssemblyType",
     "EvidenceStatus",
+    "QueryState",
+    "ProvenanceSource",
+    "DatabaseAuditRecord",
     "TargetSelfAssembly",
     "FunctionalComplex",
     "ObservedAssembly",
@@ -47,3 +53,4 @@ __all__ = [
     "StageResult",
     "QuaternaryStructureOutput",
 ]
+

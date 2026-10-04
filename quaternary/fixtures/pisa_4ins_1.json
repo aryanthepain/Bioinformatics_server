@@ -1,0 +1,22 @@
+{
+  "pdb_id": "4INS",
+  "assembly_id": "1",
+  "macromolecular_size": 6,
+  "composition": "A6",
+  "dissociation_energy_kcal_mol": 14.2,
+  "accessible_surface_area_angstrom2": 18500.0,
+  "buried_surface_area_angstrom2": 4200.0,
+  "status": "stable",
+  "interfaces": [
+    {
+      "chain_1": "A",
+      "chain_2": "B",
+      "buried_surface_area_angstrom2": 1420.0,
+      "solvation_free_energy_kcal_mol": -12.4,
+      "hydrogen_bonds_count": 8,
+      "salt_bridges_count": 4,
+      "interface_residues_chain_1": [1, 2, 5, 9, 12, 16],
+      "interface_residues_chain_2": [25, 26, 28, 30]
+    }
+  ]
+}

@@ -54,13 +54,16 @@ class BaseBioClient:
         """Wrap an API fetch call with cache inspection and storage."""
         # 1. Offline fixture mode
         if self.config.offline_mode:
-            fixture = self.load_fixture(endpoint, query_key)
+            fixture = self.load_fixture(endpoint, query_key, allow_sample=False)
             if fixture is not None:
                 return fixture
             if self.cache is not None:
                 cached = self.cache.get(endpoint, query_key)
                 if cached is not None:
                     return cached
+            sample_fixture = self.load_fixture(endpoint, query_key, allow_sample=True)
+            if sample_fixture is not None:
+                return sample_fixture
             logger.debug(f"Offline mode active and no fixture/cache found for {endpoint}:{query_key}")
             return {}
 
@@ -79,7 +82,12 @@ class BaseBioClient:
 
         return data
 
-    def load_fixture(self, endpoint: str, query_key: str) -> Optional[Dict[str, Any]]:
+    def load_fixture(
+        self,
+        endpoint: str,
+        query_key: str,
+        allow_sample: bool = True,
+    ) -> Optional[Dict[str, Any]]:
         """Load bundled JSON fixture for offline testing."""
         if not self.fixtures_dir.exists():
             return None
@@ -88,15 +96,15 @@ class BaseBioClient:
         specific_name = f"{endpoint}_{query_key}.json"
         candidate_names = [specific_name]
 
-        # Only fall back to _sample if the query is a recognized sample benchmark
-        sample_keys = {"p0a6f5", "1gfl", "1aon", "cpx-1882", "sample", "default", "", "mvlspad"}
-        if query_key.lower() in sample_keys or any(k in query_key.lower() for k in ("p0a6f5", "1gfl", "1aon", "cpx-1882", "mvlspad")):
+        # Only fall back to _sample if allowed and the query is a recognized sample benchmark
+        if allow_sample:
+            sample_keys = {"p0a6f5", "1gfl", "1aon", "cpx-1882", "sample", "default", "", "mvlspad"}
+            if query_key.lower() in sample_keys or any(k in query_key.lower() for k in ("p0a6f5", "1gfl", "1aon", "cpx-1882", "mvlspad")):
+                candidate_names.extend([
+                    f"{endpoint}_sample.json",
+                    f"{endpoint}.json",
+                ])
 
-
-            candidate_names.extend([
-                f"{endpoint}_sample.json",
-                f"{endpoint}.json",
-            ])
 
         for name in candidate_names:
             file_path = self.fixtures_dir / name

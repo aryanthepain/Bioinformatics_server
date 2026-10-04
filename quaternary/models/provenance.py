@@ -42,3 +42,16 @@ class ConfidenceProvenance(BaseModel):
     swissmodel: Optional[SwissModelConfidence] = None
     alphafold_db: Optional[AlphaFoldConfidence] = None
     alphafold_multimer: Optional[MultimerConfidence] = None
+
+
+from enum import Enum
+
+
+class ProvenanceSource(str, Enum):
+    """Provenance origin tag for evidence records."""
+    EXPERIMENTAL = "EXPERIMENTAL"
+    DATABASE_DERIVED = "DATABASE-DERIVED"
+    PREDICTED = "PREDICTED"
+    HEURISTIC = "HEURISTIC"
+    HARDCODED_BENCHMARK = "HARDCODED_BENCHMARK"
+

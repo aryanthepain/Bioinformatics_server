@@ -1,0 +1,15 @@
+{
+  "pdb_id": "1DK7",
+  "resolution": 2.02,
+  "method": "X-RAY DIFFRACTION",
+  "coverage": 33.8,
+  "assemblies": [
+    {
+      "assembly_id": "1",
+      "details": "isolated_apical_domain_monomer",
+      "oligomeric_details": "Monomer",
+      "stoichiometry": "A",
+      "total_subunits": 1
+    }
+  ]
+}

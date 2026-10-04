@@ -57,11 +57,13 @@ class AlphaFoldClient(BaseBioClient):
             "cif_url": cif_url,
             "pae_doc_url": pae_doc_url,
             "global_plddt": float(plddt) if plddt is not None else None,
+            "plddt_disclaimer": "Monomer tertiary fold confidence only — does not validate quaternary multimeric assembly.",
             "uniprot_sequence": record.get("uniprotSequence") or record.get("uniprot_sequence"),
             "monomer_context_only": True,
             "asserts_oligomeric_state": False,
             "quaternary_status": "uncharacterized",
         }
+
 
     def query_esmfold_fallback(self, sequence: str) -> Dict[str, Any]:
         """Fallback for orphan sequences lacking AlphaFold DB models (enforcing D-05)."""

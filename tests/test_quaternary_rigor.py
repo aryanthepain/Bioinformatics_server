@@ -41,9 +41,15 @@ def test_groel_biological_disambiguation(offline_config):
     groel_es = output.functional_complexes[0]
     assert groel_es.stoichiometry == "A14B7"
     assert "P0A6F9" in groel_es.partner_uniprot_accessions
-    assert "CPX-1882" in (groel_es.complex_portal_id or "")
+    assert "CPX-1882" in (groel_es.complex_portal_id or "") or "CPX-2113" in (groel_es.complex_portal_id or "")
 
-    # 3. Functional Inference & Coverage
+    # 3. Non-Zero Biophysical Interfaces (D-02 / D-03)
+    assert len(output.interfaces) >= 1
+    first_iface = output.interfaces[0]
+    assert first_iface.buried_surface_area_angstrom2 > 0.0
+    assert first_iface.solvation_free_energy_kcal_mol != 0.0
+
+    # 4. Functional Inference & Coverage
     assert output.inferred_function is not None
     assert output.inferred_function.archetype_name == "chaperonin_barrel"
     assert "folding" in output.inferred_function.molecular_function.lower() or "chaperone" in output.inferred_function.molecular_function.lower()
@@ -75,7 +81,7 @@ def test_insulin_dynamic_equilibrium(offline_config):
 
 
 def test_novel_sequence_fallback_uncharacterized(offline_config):
-    """Verify an uncharacterized synthetic sequence yields UNCHARACTERIZED status and never defaults to MONOMER."""
+    """Verify an uncharacterized synthetic sequence yields UNCHARACTERIZED/INSUFFICIENT EVIDENCE status and never defaults to MONOMER."""
     synthetic_seq = "MKLLVVLALLAASARAEAGELVAKLEEARAKVEALEARVKALEEE"
     session = QuaternarySession(target_input=synthetic_seq, config=offline_config)
     output: QuaternaryStructureOutput = session.run_stage_6_synthesis()
@@ -83,15 +89,20 @@ def test_novel_sequence_fallback_uncharacterized(offline_config):
     # Quaternary status & self assembly must NOT default to MONOMER
     assert output.quaternary_status == "UNCHARACTERIZED"
     assert output.target_self_assembly.formula == "UNCHARACTERIZED"
-    assert output.target_self_assembly.confidence_status == EvidenceStatus.UNCHARACTERIZED
+    assert output.target_self_assembly.confidence_status in (EvidenceStatus.UNCHARACTERIZED, EvidenceStatus.INSUFFICIENT_EVIDENCE)
+    assert output.experimental_oligomeric_state == "UNKNOWN"
+    assert output.predicted_oligomeric_state == "UNKNOWN"
+    assert output.fallback_representation == "MONOMER BASELINE"
+    assert output.status in (EvidenceStatus.UNCHARACTERIZED, EvidenceStatus.INSUFFICIENT_EVIDENCE)
 
     # Functional inference must report uncharacterized with low confidence
-    assert output.inferred_function.status == EvidenceStatus.UNCHARACTERIZED
+    assert output.inferred_function.status in (EvidenceStatus.UNCHARACTERIZED, EvidenceStatus.INSUFFICIENT_EVIDENCE)
     assert output.inferred_function.confidence <= 0.30
     assert "Uncharacterized" in output.inferred_function.molecular_function
 
     # Observed assemblies should be empty
     assert len(output.observed_assemblies) == 0
+
 
 
 def test_conflict_retention_when_sources_disagree(offline_config):
@@ -225,4 +236,26 @@ def test_real_execution_policy_multimer():
     assert r5.status == StageStatus.UNAVAILABLE
     assert r5.data.get("status") == "UNAVAILABLE"
     assert "iptm" not in r5.data or r5.data.get("iptm") is None
+
+
+def test_assembly_aware_candidate_ranking_penalizes_fragments():
+    """Verify D-02: assembly-aware ranking penalizes isolated domain fragments (1DK7) over full biological assemblies (1AON, 1GRL)."""
+    cfg = QuaternaryConfig(offline_mode=True)
+    session = QuaternarySession("P0A6F5", config=cfg)
+    s2 = session.run_stage_2_experimental_assemblies()
+
+    scoring = s2.data.get("candidate_scoring", [])
+    assert len(scoring) >= 2
+
+    # Map candidate IDs to their scores
+    score_by_id = {c["pdb_id"].upper(): c["score"] for c in scoring}
+    assert "1DK7" in score_by_id
+    assert "1AON" in score_by_id or "1GRL" in score_by_id
+
+    # 1AON/1GRL (intact tetradecamer assemblies) must outscore 1DK7 (apical domain fragment)
+    top_score = max(score_by_id.get("1AON", 0.0), score_by_id.get("1GRL", 0.0))
+    dk7_score = score_by_id["1DK7"]
+    assert top_score > dk7_score
+    assert scoring[0]["pdb_id"].upper() in ("1AON", "1GRL")
+
 

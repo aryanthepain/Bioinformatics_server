@@ -23,7 +23,39 @@ class EvidenceStatus(str, Enum):
     PREDICTED = "PREDICTED"
     UNCHARACTERIZED = "UNCHARACTERIZED"
     CONFLICTING = "CONFLICTING"
+    INSUFFICIENT_EVIDENCE = "INSUFFICIENT EVIDENCE"
+    UNAVAILABLE = "UNAVAILABLE"
+    UNKNOWN = "UNKNOWN"
     NO_EVIDENCE = "NO_EVIDENCE"
+
+    @classmethod
+    def _missing_(cls, value: object):
+        if isinstance(value, str):
+            normalized = value.strip().upper().replace("_", " ")
+            for member in cls:
+                if member.value.replace("_", " ") == normalized or member.name.replace("_", " ") == normalized:
+                    return member
+        return super()._missing_(value)
+
+
+class QueryState(str, Enum):
+    """Audit status of biological database query execution."""
+    NOT_QUERIED = "NOT_QUERIED"
+    QUERY_SUCCESS_NO_HIT = "QUERY_SUCCESS_NO_HIT"
+    QUERY_SUCCESS_WITH_HIT = "QUERY_SUCCESS_WITH_HIT"
+    QUERY_FAILED = "QUERY_FAILED"
+    UNAVAILABLE = "UNAVAILABLE"
+    SKIPPED = "SKIPPED"
+    PREDICTION_NOT_EXECUTED = "PREDICTION_NOT_EXECUTED"
+
+    @classmethod
+    def _missing_(cls, value: object):
+        if isinstance(value, str):
+            normalized = value.strip().upper().replace(" ", "_").replace("-", "_")
+            for member in cls:
+                if member.value == normalized or member.name == normalized:
+                    return member
+        return super()._missing_(value)
 
 
 class TargetSelfAssembly(BaseModel):
@@ -84,12 +116,28 @@ class InferredFunction(BaseModel):
     functional_homologs: List[Dict[str, Any]] = Field(default_factory=list)
     confidence: float = 0.0
     status: EvidenceStatus = EvidenceStatus.UNCHARACTERIZED
+    # Dedicated segregated fields per D-09 / Plan 03.2-03
+    observed_function: Optional[str] = None
+    predicted_function: Optional[str] = None
+    quaternary_mechanism_hypothesis: Optional[str] = None
+    supporting_evidence: List[str] = Field(default_factory=list)
+
+
+class DatabaseAuditRecord(BaseModel):
+    """Detailed query audit status for a single biological database."""
+    database: str
+    query_status: QueryState = QueryState.NOT_QUERIED
+    hit_count: int = 0
+    rationale: Optional[str] = None
+    details: Optional[Dict[str, Any]] = None
 
 
 class EvidenceCoverage(BaseModel):
     """Audit of evidence databases queried and remaining evidence gaps."""
     databases_queried: List[Dict[str, Any]] = Field(default_factory=list)
     evidence_gaps: List[str] = Field(default_factory=list)
+    records: List[DatabaseAuditRecord] = Field(default_factory=list)
+
 
 
 class Stoichiometry(BaseModel):

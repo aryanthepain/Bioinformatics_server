@@ -75,5 +75,9 @@ class QuaternaryStructureOutput(BaseModel):
     inferred_function: Optional[InferredFunction] = None
     evidence_coverage: Optional[EvidenceCoverage] = None
     status: EvidenceStatus = EvidenceStatus.UNCHARACTERIZED
+    experimental_oligomeric_state: Optional[str] = None
+    predicted_oligomeric_state: Optional[str] = None
+    fallback_representation: Optional[str] = None
     stages_completed: List[int] = Field(default_factory=list)
     metadata: Dict[str, Any] = Field(default_factory=dict)
+

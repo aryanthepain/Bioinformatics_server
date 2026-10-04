@@ -1,0 +1,13 @@
+{
+  "accession": "P01308",
+  "gene_name": "INS",
+  "organism": "Homo sapiens (Human)",
+  "taxonomy_id": 9606,
+  "subunit_text": "Produces a storage hexamer in the presence of zinc in pancreatic beta cells. Active circulating form is monomeric, with intermediate dimer formation.",
+  "pdb_ids": ["4INS", "2INS", "9INS"],
+  "complex_portal_ids": [],
+  "raw_comments": [
+    "Produces a storage hexamer in the presence of zinc in pancreatic beta cells. Active circulating form is monomeric, with intermediate dimer formation."
+  ],
+  "sequence": "MALWMRLLPLLALLALWGPDPAAAFVNQHLCGSHLVEALYLVCGERGFFYTPKTRREAEDLQVGQVELGGGPGAGSLQPLALEGSLQKRGIVEQCCTSICSLYQLENYCN"
+}

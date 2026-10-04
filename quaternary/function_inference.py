@@ -232,6 +232,15 @@ class FunctionInferenceEngine:
                 bio_proc = "Cellular biochemical pathway"
                 mechanism = "Single polypeptide chain functional unit without permanent quaternary interfaces"
 
+        observed_fn = clean_fn_text or (all_go[0]["name"] if all_go else "Unknown")
+        supporting_ev: List[str] = []
+        if archetype_name:
+            supporting_ev.append(f"Mechanistic Archetype: {archetype_name}")
+        if has_experimental_pisa:
+            supporting_ev.append("Experimental PDBe PISA quaternary interface corroboration")
+        if all_go:
+            supporting_ev.append(f"Validated Gene Ontology: {all_go[0].get('name', 'GO annotation')}")
+
         return InferredFunction(
             molecular_function=molecular_func,
             biological_process=bio_proc,
@@ -241,7 +250,12 @@ class FunctionInferenceEngine:
             functional_homologs=all_homologs,
             confidence=final_confidence,
             status=status,
+            observed_function=observed_fn,
+            predicted_function=molecular_func,
+            quaternary_mechanism_hypothesis=mechanism,
+            supporting_evidence=supporting_ev,
         )
+
 
     # Alias for synthesize
     synthesize = infer_function

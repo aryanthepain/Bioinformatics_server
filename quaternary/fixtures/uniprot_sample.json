@@ -4,7 +4,8 @@
   "organism": "Escherichia coli (strain K12)",
   "taxonomy_id": 83333,
   "subunit_text": "Tetradecamer consisting of two stacked heptameric rings of GroEL subunits forming a hollow cylinder.",
-  "pdb_ids": ["1GFL", "1AON", "1DER", "4AAQ"],
+  "pdb_ids": ["1AON", "1GRL", "1GFL", "1DER", "4AAQ", "1DK7"],
+
   "complex_portal_ids": ["CPX-1882"],
   "raw_comments": [
     "Tetradecamer consisting of two stacked heptameric rings of GroEL subunits forming a hollow cylinder."
