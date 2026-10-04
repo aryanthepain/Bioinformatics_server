@@ -1,0 +1,91 @@
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.site-header__inner {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: -8px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-ink);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.brand:hover {
+  background: var(--color-surface);
+}
+
+.brand__mark {
+  display: inline-flex;
+  color: var(--color-accent);
+}
+
+.server-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.server-status__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-faint);
+}
+
+.server-status--online .server-status__dot {
+  background: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
+}
+
+.server-status--offline {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+.server-status--offline .server-status__dot {
+  background: var(--color-danger);
+}
+
+@media (max-width: 480px) {
+  .brand__name {
+    font-size: 14px;
+  }
+
+  .server-status {
+    padding: 8px;
+  }
+
+  /* Show only the coloured dot; the text stays available to screen readers. */
+  .server-status__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}

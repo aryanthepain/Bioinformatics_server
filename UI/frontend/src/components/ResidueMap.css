@@ -1,0 +1,282 @@
+.rmap {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.rmap__scroll {
+  overflow-x: auto;
+  /* room for the focus ring and the crosshair caps */
+  padding: 6px 6px 8px;
+  margin: -6px -6px -8px;
+}
+
+.rmap__grid {
+  display: grid;
+  grid-template-columns: 168px minmax(0, 1fr);
+  column-gap: 20px;
+  row-gap: 6px;
+  min-width: 680px;
+}
+
+/* ---- Ruler ------------------------------------------------------------- */
+
+.rmap__axis {
+  position: relative;
+  height: 22px;
+  border-bottom: 1px solid var(--color-border-strong);
+}
+
+.rmap__tick {
+  position: absolute;
+  bottom: 5px;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
+.rmap__tick::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  height: 4px;
+  border-left: 1px solid var(--color-border-strong);
+}
+
+.rmap__tick--first {
+  transform: none;
+}
+
+.rmap__tick--first::after {
+  left: 0.5ch;
+}
+
+.rmap__tick--last {
+  transform: translateX(-100%);
+}
+
+.rmap__tick--last::after {
+  left: auto;
+  right: 0.5ch;
+}
+
+/* ---- Rows ---------------------------------------------------------------- */
+
+.rmap__labels,
+.rmap__lanes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rmap__label {
+  height: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.rmap__label-title {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rmap__label-caption {
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--color-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rmap__lanes {
+  position: relative;
+  cursor: crosshair;
+  touch-action: pan-y;
+  border-radius: 6px;
+}
+
+.rmap__lanes:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+}
+
+.rmap__lane {
+  height: 40px;
+  display: flex;
+  align-items: center;
+}
+
+.rmap__bar {
+  position: relative;
+  width: 100%;
+  height: 22px;
+  border-radius: 4px;
+  background: var(--color-surface);
+  overflow: hidden;
+}
+
+.rmap__bar--blocks {
+  height: 30px;
+}
+
+.rmap__seg {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  min-width: 1px;
+}
+
+/* Coil is drawn as a thin line, so helices and strands stand out. */
+.rmap__seg--states.tone--coil {
+  top: 9px;
+  bottom: 9px;
+}
+
+.rmap__seg--blocks {
+  top: 2px;
+  bottom: 2px;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.rmap__seg-label {
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rmap__seg--marks {
+  top: 4px;
+  bottom: 4px;
+  min-width: 2px;
+  border-radius: 2px;
+}
+
+.rmap__crosshair {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 0;
+  margin-left: -1px;
+  border-left: 2px solid var(--color-ink);
+  pointer-events: none;
+}
+
+/* ---- Readout and legend ---------------------------------------------------- */
+
+.rmap__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px 24px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+}
+
+.rmap__readout {
+  flex: 1 1 420px;
+  min-width: 0;
+  min-height: 40px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.rmap__hint {
+  padding-top: 10px;
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+.rmap__residue {
+  flex: none;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 84px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--color-ink);
+  color: #ffffff;
+  font-family: var(--font-mono);
+}
+
+.rmap__aa {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.rmap__number {
+  font-size: 13px;
+  opacity: 0.8;
+  font-variant-numeric: tabular-nums;
+}
+
+.rmap__facts {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 4px 16px;
+}
+
+.rmap__fact {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.rmap__fact-label {
+  font-size: 12px;
+  color: var(--color-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rmap__fact-value {
+  font-size: 14px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rmap__legend {
+  list-style: none;
+  margin: 0;
+  padding: 10px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  font-size: 12px;
+  color: var(--color-ink-3);
+}
+
+.rmap__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rmap__swatch {
+  width: 14px;
+  height: 10px;
+  border-radius: 2px;
+}
