@@ -13,9 +13,15 @@ from quaternary.models import (
     AlphaFoldConfidence,
     AssemblyType,
     ConfidenceProvenance,
+    ConflictRecord,
+    EvidenceCoverage,
+    EvidenceStatus,
     ExperimentalConflict,
+    FunctionalComplex,
+    InferredFunction,
     InterfaceContact,
     MultimerConfidence,
+    ObservedAssembly,
     PisaConfidence,
     QuaternaryStructureOutput,
     ResidueRange,
@@ -23,6 +29,7 @@ from quaternary.models import (
     StageStatus,
     Stoichiometry,
     SwissModelConfidence,
+    TargetSelfAssembly,
 )
 
 
@@ -156,6 +163,189 @@ def test_quaternary_structure_output() -> None:
     )
     assert out.analysis_id == "quat-test-001"
     assert out.stoichiometry.total_subunits == 2
+
+
+def test_new_biological_domain_models() -> None:
+    # TargetSelfAssembly
+    tsa = TargetSelfAssembly(
+        formula="A14",
+        assembly_type=AssemblyType.HOMOMER,
+        subunit_count=14,
+        symmetry="D7",
+        confidence_status=EvidenceStatus.CONFIRMED,
+    )
+    assert tsa.formula == "A14"
+    assert tsa.subunit_count == 14
+    assert tsa.confidence_status == EvidenceStatus.CONFIRMED
+
+    # FunctionalComplex
+    fc = FunctionalComplex(
+        name="GroEL-GroES complex",
+        stoichiometry="A14B7",
+        partner_uniprot_accessions=["P0A6F9"],
+        partner_names=["GroES"],
+        complex_portal_id="CPX-1882",
+        evidence="Complex Portal curated",
+    )
+    assert fc.name == "GroEL-GroES complex"
+    assert fc.partner_uniprot_accessions == ["P0A6F9"]
+
+    # ObservedAssembly
+    oa = ObservedAssembly(
+        pdb_id="1GFL",
+        assembly_id="1",
+        stoichiometry="A14",
+        biological_assembly_type="HOMOMER",
+        is_target_self=True,
+        delta_g_diss_kcal_mol=20.11,
+    )
+    assert oa.delta_g_diss_kcal_mol == 20.11
+    assert oa.is_target_self is True
+
+    # InferredFunction
+    inf = InferredFunction(
+        molecular_function="ATP-dependent protein folding chaperone",
+        biological_process="Protein folding",
+        oligomeric_mechanism_hypothesis="Chaperonin barrel",
+        archetype_name="chaperonin_barrel",
+        confidence=0.92,
+        status=EvidenceStatus.CONFIRMED,
+    )
+    assert inf.archetype_name == "chaperonin_barrel"
+    assert inf.confidence == 0.92
+
+    # EvidenceCoverage
+    ec = EvidenceCoverage(
+        databases_queried=[{"database": "UniProtKB", "queried": True}],
+        evidence_gaps=["No live multimer runner"],
+    )
+    assert len(ec.databases_queried) == 1
+    assert len(ec.evidence_gaps) == 1
+
+    # ConflictRecord
+    cr = ConflictRecord(
+        source_a="RCSB PDB",
+        source_b="PDBe PISA",
+        stoichiometry_a="A14B7",
+        stoichiometry_b="A14",
+        rationale="Author annotated complex vs isolated self-assembly",
+    )
+    assert cr.source_a == "RCSB PDB"
+
+
+def test_quaternary_structure_output_roundtrip() -> None:
+    stoich = Stoichiometry.from_formula("A14", symmetry="D7")
+    tsa = TargetSelfAssembly(
+        formula="A14",
+        assembly_type=AssemblyType.HOMOMER,
+        subunit_count=14,
+        symmetry="D7",
+        confidence_status=EvidenceStatus.CONFIRMED,
+    )
+    fc = FunctionalComplex(
+        name="GroEL-GroES complex",
+        stoichiometry="A14B7",
+        partner_uniprot_accessions=["P0A6F9"],
+        partner_names=["GroES"],
+        complex_portal_id="CPX-1882",
+        evidence="Complex Portal curated",
+    )
+    oa = ObservedAssembly(
+        pdb_id="1GFL",
+        assembly_id="1",
+        stoichiometry="A14",
+        biological_assembly_type="HOMOMER",
+        is_target_self=True,
+        delta_g_diss_kcal_mol=20.11,
+    )
+    iface = InterfaceContact(
+        chain_1="A",
+        chain_2="B",
+        buried_surface_area_angstrom2=1450.0,
+        solvation_free_energy_kcal_mol=-12.5,
+        hydrogen_bonds_count=12,
+        salt_bridges_count=4,
+    )
+    cr = ConflictRecord(
+        source_a="RCSB PDB Author",
+        source_b="PDBe PISA",
+        stoichiometry_a="A14",
+        stoichiometry_b="A14",
+        rationale="No conflict detected",
+    )
+    prov = ConfidenceProvenance(
+        pdbe_pisa=PisaConfidence(dissociation_energy_kcal_mol=20.11, buried_surface_area_angstrom2=69000.0),
+        swissmodel=SwissModelConfidence(qmqe=0.85, gmqe=0.90, coverage=0.98),
+        alphafold_db=AlphaFoldConfidence(global_plddt=92.5),
+    )
+    inf = InferredFunction(
+        molecular_function="ATP-dependent protein folding chaperone",
+        biological_process="Protein folding",
+        oligomeric_mechanism_hypothesis="Double-ring chaperonin barrel",
+        archetype_name="chaperonin_barrel",
+        confidence=0.95,
+        status=EvidenceStatus.CONFIRMED,
+    )
+    ec = EvidenceCoverage(
+        databases_queried=[{"database": "UniProtKB", "queried": True}],
+        evidence_gaps=[],
+    )
+
+    out = QuaternaryStructureOutput(
+        analysis_id="quat-test-roundtrip",
+        target_accession_or_sequence="P0A6F5",
+        quaternary_status="HOMOMER",
+        stoichiometry=stoich,
+        target_self_assembly=tsa,
+        functional_complexes=[fc],
+        observed_assemblies=[oa],
+        interfaces=[iface],
+        conflicts=[cr],
+        confidence_provenance=prov,
+        inferred_function=inf,
+        evidence_coverage=ec,
+        status=EvidenceStatus.CONFIRMED,
+        stages_completed=[1, 2, 3, 4, 6],
+    )
+
+    json_str = out.model_dump_json()
+    reloaded = QuaternaryStructureOutput.model_validate_json(json_str)
+
+    assert reloaded.analysis_id == "quat-test-roundtrip"
+    assert reloaded.target_self_assembly is not None
+    assert reloaded.target_self_assembly.formula == "A14"
+    assert len(reloaded.functional_complexes) == 1
+    assert reloaded.functional_complexes[0].name == "GroEL-GroES complex"
+    assert len(reloaded.observed_assemblies) == 1
+    assert reloaded.observed_assemblies[0].delta_g_diss_kcal_mol == 20.11
+    assert len(reloaded.interfaces) == 1
+    assert reloaded.interfaces[0].solvation_free_energy_kcal_mol == -12.5
+    assert reloaded.inferred_function is not None
+    assert reloaded.inferred_function.archetype_name == "chaperonin_barrel"
+    assert reloaded.status == EvidenceStatus.CONFIRMED
+
+
+def test_thermodynamic_sign_conventions() -> None:
+    # Enforce D-11:
+    # Stable assemblies have positive dissociation free energy: delta_g_diss_kcal_mol > 0
+    # Favorable pairwise interfaces have negative solvation free energy: solvation_free_energy_kcal_mol < 0
+    stable_assembly = ObservedAssembly(
+        pdb_id="1GFL",
+        assembly_id="1",
+        stoichiometry="A14",
+        biological_assembly_type="HOMOMER",
+        delta_g_diss_kcal_mol=20.11,
+    )
+    assert stable_assembly.delta_g_diss_kcal_mol is not None
+    assert stable_assembly.delta_g_diss_kcal_mol > 0, "Stable biological assembly must have positive Delta G diss"
+
+    favorable_interface = InterfaceContact(
+        chain_1="A",
+        chain_2="B",
+        buried_surface_area_angstrom2=1250.0,
+        solvation_free_energy_kcal_mol=-15.3,
+    )
+    assert favorable_interface.solvation_free_energy_kcal_mol < 0, "Favorable interface must have negative solvation free energy"
 
 
 # ==========================================

@@ -6,19 +6,40 @@ from enum import Enum
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
-from quaternary.models.conflict import ExperimentalConflict
+from quaternary.models.conflict import ConflictRecord, ExperimentalConflict
 from quaternary.models.interface import InterfaceContact
 from quaternary.models.provenance import ConfidenceProvenance
-from quaternary.models.stoichiometry import Stoichiometry
+from quaternary.models.stoichiometry import (
+    EvidenceCoverage,
+    EvidenceStatus,
+    FunctionalComplex,
+    InferredFunction,
+    ObservedAssembly,
+    Stoichiometry,
+    TargetSelfAssembly,
+)
 
 
 class StageStatus(str, Enum):
     """Execution status for an individual analysis stage."""
-    SUCCESS = "SUCCESS"
-    UNAVAILABLE = "UNAVAILABLE"
-    FAILED = "FAILED"
-    PENDING = "PENDING"
-    SKIPPED = "SKIPPED"
+    NOT_STARTED = "not_started"
+    RUNNING = "running"
+    SUCCESS = "success"
+    FAILED = "failed"
+    UNAVAILABLE = "unavailable"
+    SKIPPED = "skipped"
+    # Backward compatibility alias
+    PENDING = "not_started"
+
+    @classmethod
+    def _missing_(cls, value: object):
+        # Case-insensitive resolution so legacy uppercase works smoothly
+        if isinstance(value, str):
+            val_lower = value.lower()
+            for member in cls:
+                if member.value == val_lower or member.name.lower() == val_lower:
+                    return member
+        return super()._missing_(value)
 
 
 class StageResult(BaseModel):
@@ -26,7 +47,7 @@ class StageResult(BaseModel):
 
     stage_number: int
     stage_name: str
-    status: StageStatus = StageStatus.PENDING
+    status: StageStatus = StageStatus.NOT_STARTED
     data: Dict[str, Any] = Field(default_factory=dict)
     provenance: Dict[str, Any] = Field(default_factory=dict)
     error_message: Optional[str] = None
@@ -44,16 +65,15 @@ class QuaternaryStructureOutput(BaseModel):
     target_accession_or_sequence: str
     quaternary_status: str
     stoichiometry: Stoichiometry
+    target_self_assembly: Optional[TargetSelfAssembly] = None
+    functional_complexes: List[FunctionalComplex] = Field(default_factory=list)
+    observed_assemblies: List[ObservedAssembly] = Field(default_factory=list)
     interfaces: List[InterfaceContact] = Field(default_factory=list)
-    experimental_conflict: ExperimentalConflict = Field(default_factory=ExperimentalConflict)
+    conflicts: List[ConflictRecord] = Field(default_factory=list)
+    experimental_conflict: Optional[ExperimentalConflict] = Field(default_factory=ExperimentalConflict)
     confidence_provenance: ConfidenceProvenance = Field(default_factory=ConfidenceProvenance)
+    inferred_function: Optional[InferredFunction] = None
+    evidence_coverage: Optional[EvidenceCoverage] = None
+    status: EvidenceStatus = EvidenceStatus.UNCHARACTERIZED
     stages_completed: List[int] = Field(default_factory=list)
     metadata: Dict[str, Any] = Field(default_factory=dict)
-
-    @property
-    def status(self) -> StageStatus:
-        """Convenience property aligning with stage runner return types."""
-        try:
-            return StageStatus(self.quaternary_status)
-        except Exception:
-            return StageStatus.SUCCESS

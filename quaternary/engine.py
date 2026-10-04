@@ -70,11 +70,11 @@ class QuaternaryEngine:
     ) -> QuaternaryStructureOutput:
         """Execute full end-to-end analysis across all 6 stages and return final synthesis."""
         session = self.create_session(target_input)
-        session.run_stage_1_primary_evidence()
-        session.run_stage_2_experimental_qualification()
-        session.run_stage_3_homology_and_partners()
-        session.run_stage_4_structural_context()
-        session.run_stage_5_multimer_hypothesis(
+        session.run_stage_1_sequence_and_accession()
+        session.run_stage_2_experimental_assemblies()
+        session.run_stage_3_thermodynamic_qualification()
+        session.run_stage_4_homology_and_partners()
+        session.run_stage_5_predictive_multimer(
             enable_multimer=enable_multimer,
             hypothesis=hypothesis,
         )

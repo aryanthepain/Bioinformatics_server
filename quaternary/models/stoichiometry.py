@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 from enum import Enum
-from typing import Dict, Optional
+from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
 
@@ -14,6 +14,81 @@ class AssemblyType(str, Enum):
     HOMOMER = "HOMOMER"
     HETEROMER = "HETEROMER"
     UNCHARACTERIZED = "UNCHARACTERIZED"
+
+
+class EvidenceStatus(str, Enum):
+    """Tiered evidence status for quaternary structure and functional predictions."""
+    CONFIRMED = "CONFIRMED"
+    SUPPORTED = "SUPPORTED"
+    PREDICTED = "PREDICTED"
+    UNCHARACTERIZED = "UNCHARACTERIZED"
+    CONFLICTING = "CONFLICTING"
+    NO_EVIDENCE = "NO_EVIDENCE"
+
+
+class TargetSelfAssembly(BaseModel):
+    """Oligomeric state of the target protein alone (homomer or monomer)."""
+    formula: str
+    assembly_type: AssemblyType = AssemblyType.UNCHARACTERIZED
+    subunit_count: int = 1
+    symmetry: Optional[str] = None
+    confidence_status: EvidenceStatus = EvidenceStatus.UNCHARACTERIZED
+
+
+class FunctionalComplex(BaseModel):
+    """Hetero-oligomeric functional machinery involving target and partner proteins."""
+    name: str
+    stoichiometry: str
+    partner_uniprot_accessions: List[str] = Field(default_factory=list)
+    partner_names: List[str] = Field(default_factory=list)
+    complex_portal_id: Optional[str] = None
+    evidence: str = ""
+
+    from pydantic import field_validator
+
+    @field_validator("partner_uniprot_accessions", mode="before")
+    @classmethod
+    def _normalize_accessions(cls, v: Any) -> List[str]:
+        if not isinstance(v, list):
+            return []
+        res = []
+        for item in v:
+            if isinstance(item, dict):
+                acc = item.get("identifier") or item.get("accession") or item.get("id") or ""
+                if acc:
+                    res.append(str(acc))
+            elif item is not None:
+                res.append(str(item))
+        return res
+
+
+class ObservedAssembly(BaseModel):
+    """Specific biological or asymmetric assembly observed in an experimental structure."""
+    pdb_id: str
+    assembly_id: str
+    stoichiometry: str
+    biological_assembly_type: str
+    conditions: Optional[str] = None
+    is_target_self: bool = False
+    delta_g_diss_kcal_mol: Optional[float] = None
+
+
+class InferredFunction(BaseModel):
+    """Biological and mechanistic functional inference derived from quaternary architecture."""
+    molecular_function: str
+    biological_process: str
+    oligomeric_mechanism_hypothesis: str
+    archetype_name: Optional[str] = None
+    go_terms: List[Dict[str, str]] = Field(default_factory=list)
+    functional_homologs: List[Dict[str, Any]] = Field(default_factory=list)
+    confidence: float = 0.0
+    status: EvidenceStatus = EvidenceStatus.UNCHARACTERIZED
+
+
+class EvidenceCoverage(BaseModel):
+    """Audit of evidence databases queried and remaining evidence gaps."""
+    databases_queried: List[Dict[str, Any]] = Field(default_factory=list)
+    evidence_gaps: List[str] = Field(default_factory=list)
 
 
 class Stoichiometry(BaseModel):
