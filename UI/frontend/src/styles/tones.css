@@ -1,0 +1,58 @@
+/*
+ * One class per Tone in the data contract (backend/app/schemas.py).
+ * Components add "tone--<name>"; the colours themselves live in tokens.css.
+ */
+.tone--accent {
+  background: var(--color-accent);
+  color: #ffffff;
+}
+
+.tone--ink {
+  background: var(--color-ink-3);
+  color: #ffffff;
+}
+
+.tone--neutral {
+  background: #6b7280;
+  color: #ffffff;
+}
+
+.tone--helix {
+  background: var(--ss-helix);
+  color: #ffffff;
+}
+
+.tone--strand {
+  background: var(--ss-strand);
+  color: var(--color-ink);
+}
+
+.tone--coil {
+  background: var(--ss-coil);
+  color: var(--color-ink);
+}
+
+.tone--uncertain {
+  background: var(--ss-uncertain);
+  color: var(--color-ink);
+}
+
+.tone--confidence-very-high {
+  background: var(--confidence-very-high);
+  color: #ffffff;
+}
+
+.tone--confidence-high {
+  background: var(--confidence-high);
+  color: var(--color-ink);
+}
+
+.tone--confidence-low {
+  background: var(--confidence-low);
+  color: var(--color-ink);
+}
+
+.tone--confidence-very-low {
+  background: var(--confidence-very-low);
+  color: var(--color-ink);
+}

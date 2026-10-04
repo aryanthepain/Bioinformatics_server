@@ -1,0 +1,26 @@
+# ---- macOS ----
+.DS_Store
+
+# ---- Python / backend ----
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+
+# ---- Node / frontend ----
+node_modules/
+dist/
+*.log
+
+# ---- Editors (keep the shared VS Code settings) ----
+.idea/
+.vscode/*
+!.vscode/settings.json
+
+# ---- Environment files (secrets) — the template .env.example is kept ----
+.env
+.env.*
+!.env.example
+
+# ---- Large bioinformatics databases (added in Step 5) ----
+backend/data/

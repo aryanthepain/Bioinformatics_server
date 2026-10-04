@@ -1,0 +1,63 @@
+/*
+ * Design tokens — the single source of truth for the look of the app.
+ * Every component reads these variables instead of hard-coding values,
+ * which is what keeps new sections (tertiary, quaternary) consistent.
+ */
+:root {
+  /* Surfaces */
+  --color-bg: #ffffff;
+  --color-surface: #f7f8fa;
+  --color-surface-muted: #fbfbfc;
+  --color-border: #e4e6ea;
+  --color-border-strong: #cdd1d7;
+
+  /* Text, darkest to lightest (all pass 4.5:1 on white except --color-faint,
+     which is for decorative marks only, never for text) */
+  --color-ink: #0b0c0e;
+  --color-ink-2: #262a30;
+  --color-ink-3: #3b4048;
+  --color-muted: #4b515a;
+  --color-faint: #9aa0a8;
+
+  /* Accent */
+  --color-accent: #2448c8;
+  --color-accent-strong: #142e8a;
+  --color-accent-soft: #eef2fd;
+
+  /* Status */
+  --color-placeholder: #8a5a10;
+  --color-placeholder-soft: #fcf3e3;
+  --color-danger: #b42318;
+  --color-danger-soft: #fdecea;
+
+  /* Secondary structure (differ in lightness, not just hue) */
+  --ss-helix: #1e3a8a;
+  --ss-strand: #f08a24;
+  --ss-coil: #9aa0a8;
+  --ss-uncertain: repeating-linear-gradient(135deg, #6b7280 0 2px, #ffffff 2px 4px);
+
+  /* Confidence / model-quality bands (the familiar AlphaFold colour scale) */
+  --confidence-very-high: #0053d6;
+  --confidence-high: #65cbf3;
+  --confidence-low: #ffdb13;
+  --confidence-very-low: #ff7d45;
+
+  /* Typography */
+  --font-sans: "Instrument Sans", "Helvetica Neue", Helvetica, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* Shape */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-pill: 999px;
+
+  /* Layout */
+  --container-width: 1280px;
+  --page-gutter: 40px;
+}
+
+@media (max-width: 720px) {
+  :root {
+    --page-gutter: 20px;
+  }
+}
