@@ -66,6 +66,10 @@ class UniProtClient(BaseBioClient):
             elif db == "ComplexPortal" and x_id not in complex_portal_ids:
                 complex_portal_ids.append(x_id)
 
+        # 5. Canonical Sequence
+        seq_data = data.get("sequence", {})
+        sequence = seq_data.get("value") if isinstance(seq_data, dict) else (seq_data if isinstance(seq_data, str) else None)
+
         return {
             "accession": accession,
             "gene_name": gene_name,
@@ -75,4 +79,5 @@ class UniProtClient(BaseBioClient):
             "pdb_ids": pdb_ids,
             "complex_portal_ids": complex_portal_ids,
             "raw_comments": subunit_texts,
+            "sequence": sequence,
         }

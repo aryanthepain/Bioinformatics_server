@@ -192,3 +192,67 @@ def test_analyze_quaternary_convenience_function() -> None:
     assert isinstance(output, qp.QuaternaryStructureOutput)
     assert output.analysis_id.startswith("quat-session-")
     assert len(output.stages_completed) == 6
+
+
+def test_candidate_specific_scoring_protocol() -> None:
+    """Verifies D-04: Candidate scores are fully computed per candidate's actual resolution without defaults."""
+    cfg = qp.QuaternaryConfig(offline_mode=True)
+    engine = qp.QuaternaryEngine(cfg)
+    session = engine.create_session("P0A6F5")
+
+    # Pre-populate Stage 1 with mock candidates having distinct resolutions
+    session.stages[1] = qp.StageResult(
+        stage_number=1,
+        stage_name="Primary Evidence",
+        status=StageStatus.SUCCESS,
+        data={
+            "rcsb_candidates": [
+                {"pdb_id": "TEST_HIGHRES", "resolution": 1.50, "coverage": 95.0, "method": "X-RAY DIFFRACTION"},
+                {"pdb_id": "TEST_STDRES", "resolution": 2.40, "coverage": 95.0, "method": "X-RAY DIFFRACTION"},
+                {"pdb_id": "TEST_LOWRES", "resolution": 3.40, "coverage": 95.0, "method": "X-RAY DIFFRACTION"},
+            ],
+            "uniprot": {"accession": "P0A6F5"},
+        },
+    )
+
+    s2 = session.run_stage_2_experimental_qualification()
+    assert s2.status == StageStatus.SUCCESS
+
+    scoring = s2.data["candidate_scoring"]
+    assert len(scoring) == 3
+
+    by_id = {c["pdb_id"]: c for c in scoring}
+    # 1.50 Å -> w_res = 3.0, total = 3.0 + 3.0 + 3.0 = 9.0
+    assert by_id["TEST_HIGHRES"]["w_resolution"] == 3.0
+    assert by_id["TEST_HIGHRES"]["assembly_score"] == 9.0
+
+    # 2.40 Å -> w_res = 2.0, total = 3.0 + 2.0 + 3.0 = 8.0
+    assert by_id["TEST_STDRES"]["w_resolution"] == 2.0
+    assert by_id["TEST_STDRES"]["assembly_score"] == 8.0
+
+    # 3.40 Å -> w_res = 1.0, total = 3.0 + 1.0 + 3.0 = 7.0
+    assert by_id["TEST_LOWRES"]["w_resolution"] == 1.0
+    assert by_id["TEST_LOWRES"]["assembly_score"] == 7.0
+
+    # Highest-scoring candidate is designated primary
+    assert s2.data["primary_assembly_candidate"]["pdb_id"] == "TEST_HIGHRES"
+    assert s2.data["assembly_score"] == 9.0
+    assert len(s2.data["alternative_assembly_candidates"]) == 2
+
+
+def test_multimer_actual_execution_not_simulation() -> None:
+    """Verifies D-06: Stage 5 executes actual predictive modeling rather than simulation dry run."""
+    cfg = qp.QuaternaryConfig(offline_mode=True)
+    engine = qp.QuaternaryEngine(cfg)
+    session = engine.create_session("P0A6F5")
+
+    s5 = session.run_stage_5_multimer_hypothesis(enable_multimer=True, hypothesis="A14")
+    assert s5.status == StageStatus.SUCCESS
+    assert s5.data["multimer_prediction_executed"] is True
+    assert s5.data["simulation_mode"] is False
+    assert s5.data["execution_type"] == "actual"
+    assert s5.data["status"] == "COMPLETED"
+    assert s5.data["iptm"] > 0
+    assert s5.data["ptm"] > 0
+    assert s5.data["model_confidence"] > 0
+

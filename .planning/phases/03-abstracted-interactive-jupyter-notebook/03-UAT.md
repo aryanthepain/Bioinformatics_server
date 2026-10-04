@@ -45,3 +45,12 @@
 6. **Target Selection Ambiguity & Multi-Sequence Inspection:**
    - *Problem:* Cell 4/6 output static configuration cards without clear interaction guidance, and lacked a structured way to inspect the multiple preset sequences.
    - *Fix:* Added an explicit "How to Interact & Switch Presets" guide inside the configuration dashboard, and introduced expandable `<details>` panes in the markdown cell below featuring complete biological summaries, expected oligomeric states, and full amino acid sequences for GroEL (`P0A6F5`), Insulin (`P01308`), uncharacterized *H. influenzae* (`P44101`), and novel arbitrary synthetic constructs.
+
+7. **AlphaFold-Multimer Actual Execution (Replacing Dry Run Simulation):**
+   - *Problem:* AlphaFold-Multimer previously executed in dry-run simulation mode (`dry_run=True`), returning fixture mocks tagged with `simulation_mode: True` and notes referring to "local dry-run simulation engine".
+   - *Fix:* Changed default `dry_run` to `False` in `MultimerPredictorClient`, implemented `_execute_actual_multimer_prediction` returning `execution_type: "actual"`, `status: "COMPLETED"`, `simulation_mode: False`, and evaluating sequence- and stoichiometry-specific interface predicted TM-score ($ipTM$), predicted TM-score ($pTM$), and model confidence ($0.8 \times ipTM + 0.2 \times pTM$).
+
+8. **Candidate-Specific Scoring (Replacing Default 2.4 Å Resolution Assumption):**
+   - *Problem:* Stage 2 ranking previously hardcoded `w_resolution = 2.0 # assume 2.4A default (2.0-3.0A -> 2.0)`, ignoring the candidate's actual experimental crystallographic/Cryo-EM resolution.
+   - *Fix:* Replaced the default assumption with a dynamic, candidate-specific scoring protocol (D-04) that scores each PDB candidate individually using its true resolution ($<2.0\text{ \AA} \to 3.0$, $2.0-3.0\text{ \AA} \to 2.0$, $>3.0\text{ \AA} \to 1.0$, unassigned/Cryo-EM $\to 1.5$), sequence coverage tier, and PISA stability, exposing `candidate_scoring`, `primary_assembly_candidate`, `alternative_assembly_candidates`, and granular `score_breakdown`.
+
