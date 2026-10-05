@@ -1,0 +1,35 @@
+{
+  "accession": "P0A6F5",
+  "result": [
+    {
+      "template": "1aon.1.A",
+      "template_pdb_id": "1AON",
+      "template_oligomeric_state": "homo-14-mer",
+      "qmqe": 0.88,
+      "gmqe": 0.92,
+      "seq_identity": 99.5,
+      "coverage": 1.0,
+      "qualifying_homology": true
+    },
+    {
+      "template": "4aaq.1.A",
+      "template_pdb_id": "4AAQ",
+      "template_oligomeric_state": "homo-14-mer",
+      "qmqe": 0.76,
+      "gmqe": 0.81,
+      "seq_identity": 91.2,
+      "coverage": 0.95,
+      "qualifying_homology": true
+    },
+    {
+      "template": "2c7c.1.A",
+      "template_pdb_id": "2C7C",
+      "template_oligomeric_state": "monomer",
+      "qmqe": 0.52,
+      "gmqe": 0.55,
+      "seq_identity": 45.0,
+      "coverage": 0.60,
+      "qualifying_homology": false
+    }
+  ]
+}

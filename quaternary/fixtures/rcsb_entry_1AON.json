@@ -1,0 +1,15 @@
+{
+  "pdb_id": "1AON",
+  "resolution": 3.0,
+  "method": "X-RAY DIFFRACTION",
+  "symmetry": "D7",
+  "assemblies": [
+    {
+      "assembly_id": "1",
+      "details": "author_defined_assembly",
+      "oligomeric_details": "Tetradecamer",
+      "stoichiometry": "A14",
+      "total_subunits": 14
+    }
+  ]
+}

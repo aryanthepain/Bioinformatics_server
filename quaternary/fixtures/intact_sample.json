@@ -1,0 +1,23 @@
+{
+  "accession": "P0A6F5",
+  "interactors": [
+    {
+      "partner_accession": "P0A6F9",
+      "gene_name": "groS",
+      "interaction_type": "physical association",
+      "confidence": 0.95
+    },
+    {
+      "partner_accession": "P0A699",
+      "gene_name": "dnaK",
+      "interaction_type": "direct interaction",
+      "confidence": 0.88
+    },
+    {
+      "partner_accession": "P0A6Y8",
+      "gene_name": "dnaJ",
+      "interaction_type": "synthetic genetic interaction",
+      "confidence": 0.40
+    }
+  ]
+}

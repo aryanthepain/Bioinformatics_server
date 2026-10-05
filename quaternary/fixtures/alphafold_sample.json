@@ -1,0 +1,12 @@
+{
+  "accession": "P0A6F5",
+  "entryId": "AF-P0A6F5-F1",
+  "pdb_url": "https://alphafold.ebi.ac.uk/files/AF-P0A6F5-F1-model_v4.pdb",
+  "cif_url": "https://alphafold.ebi.ac.uk/files/AF-P0A6F5-F1-model_v4.cif",
+  "pae_doc_url": "https://alphafold.ebi.ac.uk/files/AF-P0A6F5-F1-predicted_aligned_error_v4.json",
+  "global_plddt": 94.6,
+  "uniprot_sequence": "MAAKDVKFGNDARVKMLRGVNVLADAVKVTLGPKGRNVVLDKSFGAPTITKDGVSVAREIELEDKFENMGAQMVKEVASKANDAAGDGTTTATVLAQAIITEGLKAV",
+  "monomer_context_only": true,
+  "asserts_oligomeric_state": false,
+  "quaternary_status": "uncharacterized"
+}

@@ -1,0 +1,971 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "QuaternaryStructureOutput",
+  "description": "Canonical data contract for protein quaternary structure synthesis and UI export.",
+  "$defs": {
+    "AlphaFoldConfidence": {
+      "description": "Monomeric coordinate confidence from AlphaFold DB.",
+      "properties": {
+        "global_plddt": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Global Plddt"
+        }
+      },
+      "title": "AlphaFoldConfidence",
+      "type": "object"
+    },
+    "AssemblyType": {
+      "description": "Classification of quaternary arrangement.",
+      "enum": [
+        "MONOMER",
+        "HOMOMER",
+        "HETEROMER",
+        "UNCHARACTERIZED"
+      ],
+      "title": "AssemblyType",
+      "type": "string"
+    },
+    "ConfidenceProvenance": {
+      "description": "Segregated confidence metrics across all evidence sources.\n\nStrictly prohibits synthetic mathematical blending or weighted averaging of\nincommensurable biophysical and machine-learning scores (enforcing D-08).",
+      "properties": {
+        "pdbe_pisa": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PisaConfidence"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "swissmodel": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SwissModelConfidence"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "alphafold_db": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AlphaFoldConfidence"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "alphafold_multimer": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MultimerConfidence"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "ConfidenceProvenance",
+      "type": "object"
+    },
+    "ConflictRecord": {
+      "description": "Structured record of conflict between sources regarding quaternary state.",
+      "properties": {
+        "source_a": {
+          "title": "Source A",
+          "type": "string"
+        },
+        "source_b": {
+          "title": "Source B",
+          "type": "string"
+        },
+        "stoichiometry_a": {
+          "title": "Stoichiometry A",
+          "type": "string"
+        },
+        "stoichiometry_b": {
+          "title": "Stoichiometry B",
+          "type": "string"
+        },
+        "rationale": {
+          "title": "Rationale",
+          "type": "string"
+        },
+        "resolution": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Resolution"
+        }
+      },
+      "required": [
+        "source_a",
+        "source_b",
+        "stoichiometry_a",
+        "stoichiometry_b",
+        "rationale"
+      ],
+      "title": "ConflictRecord",
+      "type": "object"
+    },
+    "DatabaseAuditRecord": {
+      "description": "Detailed query audit status for a single biological database.",
+      "properties": {
+        "database": {
+          "title": "Database",
+          "type": "string"
+        },
+        "query_status": {
+          "$ref": "#/$defs/QueryState",
+          "default": "NOT_QUERIED"
+        },
+        "hit_count": {
+          "default": 0,
+          "title": "Hit Count",
+          "type": "integer"
+        },
+        "rationale": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rationale"
+        },
+        "details": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Details"
+        }
+      },
+      "required": [
+        "database"
+      ],
+      "title": "DatabaseAuditRecord",
+      "type": "object"
+    },
+    "EvidenceCoverage": {
+      "description": "Audit of evidence databases queried and remaining evidence gaps.",
+      "properties": {
+        "databases_queried": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Databases Queried",
+          "type": "array"
+        },
+        "evidence_gaps": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Gaps",
+          "type": "array"
+        },
+        "records": {
+          "items": {
+            "$ref": "#/$defs/DatabaseAuditRecord"
+          },
+          "title": "Records",
+          "type": "array"
+        }
+      },
+      "title": "EvidenceCoverage",
+      "type": "object"
+    },
+    "EvidenceStatus": {
+      "description": "Tiered evidence status for quaternary structure and functional predictions.",
+      "enum": [
+        "CONFIRMED",
+        "SUPPORTED",
+        "PREDICTED",
+        "UNCHARACTERIZED",
+        "CONFLICTING",
+        "INSUFFICIENT EVIDENCE",
+        "UNAVAILABLE",
+        "UNKNOWN",
+        "NO_EVIDENCE"
+      ],
+      "title": "EvidenceStatus",
+      "type": "string"
+    },
+    "ExperimentalConflict": {
+      "description": "Retains conflicting assertions between crystal packing, biological assembly, and PISA.",
+      "properties": {
+        "rcsb_author_assembly": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rcsb Author Assembly"
+        },
+        "rcsb_annotated_assembly": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rcsb Annotated Assembly"
+        },
+        "pisa_predicted_assembly": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pisa Predicted Assembly"
+        },
+        "pisa_thermodynamic_state": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pisa Thermodynamic State"
+        },
+        "dissociation_energy_kcal_mol": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dissociation Energy Kcal Mol"
+        },
+        "conflict_detected": {
+          "default": false,
+          "title": "Conflict Detected",
+          "type": "boolean"
+        },
+        "conflict_rationale": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Conflict Rationale"
+        },
+        "discrepancy_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Discrepancy Type"
+        }
+      },
+      "title": "ExperimentalConflict",
+      "type": "object"
+    },
+    "FunctionalComplex": {
+      "description": "Hetero-oligomeric functional machinery involving target and partner proteins.",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "stoichiometry": {
+          "title": "Stoichiometry",
+          "type": "string"
+        },
+        "partner_uniprot_accessions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Partner Uniprot Accessions",
+          "type": "array"
+        },
+        "partner_names": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Partner Names",
+          "type": "array"
+        },
+        "complex_portal_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Complex Portal Id"
+        },
+        "evidence": {
+          "default": "",
+          "title": "Evidence",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "stoichiometry"
+      ],
+      "title": "FunctionalComplex",
+      "type": "object"
+    },
+    "InferredFunction": {
+      "description": "Biological and mechanistic functional inference derived from quaternary architecture.",
+      "properties": {
+        "molecular_function": {
+          "title": "Molecular Function",
+          "type": "string"
+        },
+        "biological_process": {
+          "title": "Biological Process",
+          "type": "string"
+        },
+        "oligomeric_mechanism_hypothesis": {
+          "title": "Oligomeric Mechanism Hypothesis",
+          "type": "string"
+        },
+        "archetype_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Archetype Name"
+        },
+        "go_terms": {
+          "items": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "title": "Go Terms",
+          "type": "array"
+        },
+        "functional_homologs": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Functional Homologs",
+          "type": "array"
+        },
+        "confidence": {
+          "default": 0.0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "status": {
+          "$ref": "#/$defs/EvidenceStatus",
+          "default": "UNCHARACTERIZED"
+        },
+        "observed_function": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Observed Function"
+        },
+        "predicted_function": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Predicted Function"
+        },
+        "quaternary_mechanism_hypothesis": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Quaternary Mechanism Hypothesis"
+        },
+        "supporting_evidence": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Supporting Evidence",
+          "type": "array"
+        }
+      },
+      "required": [
+        "molecular_function",
+        "biological_process",
+        "oligomeric_mechanism_hypothesis"
+      ],
+      "title": "InferredFunction",
+      "type": "object"
+    },
+    "InterfaceContact": {
+      "description": "Detailed biophysical and structural metrics for a pairwise interface.",
+      "properties": {
+        "chain_1": {
+          "title": "Chain 1",
+          "type": "string"
+        },
+        "chain_2": {
+          "title": "Chain 2",
+          "type": "string"
+        },
+        "buried_surface_area_angstrom2": {
+          "title": "Buried Surface Area Angstrom2",
+          "type": "number"
+        },
+        "solvation_free_energy_kcal_mol": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Solvation Free Energy Kcal Mol"
+        },
+        "hydrogen_bonds_count": {
+          "default": 0,
+          "title": "Hydrogen Bonds Count",
+          "type": "integer"
+        },
+        "salt_bridges_count": {
+          "default": 0,
+          "title": "Salt Bridges Count",
+          "type": "integer"
+        },
+        "interface_residues_chain_1": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Interface Residues Chain 1",
+          "type": "array"
+        },
+        "interface_residues_chain_2": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Interface Residues Chain 2",
+          "type": "array"
+        }
+      },
+      "required": [
+        "chain_1",
+        "chain_2",
+        "buried_surface_area_angstrom2"
+      ],
+      "title": "InterfaceContact",
+      "type": "object"
+    },
+    "MultimerConfidence": {
+      "description": "Predictive multimer interface and complex confidence from AlphaFold-Multimer / ColabFold.",
+      "properties": {
+        "iptm": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Iptm"
+        },
+        "ptm": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ptm"
+        },
+        "model_confidence": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Confidence"
+        }
+      },
+      "title": "MultimerConfidence",
+      "type": "object"
+    },
+    "ObservedAssembly": {
+      "description": "Specific biological or asymmetric assembly observed in an experimental structure.",
+      "properties": {
+        "pdb_id": {
+          "title": "Pdb Id",
+          "type": "string"
+        },
+        "assembly_id": {
+          "title": "Assembly Id",
+          "type": "string"
+        },
+        "stoichiometry": {
+          "title": "Stoichiometry",
+          "type": "string"
+        },
+        "biological_assembly_type": {
+          "title": "Biological Assembly Type",
+          "type": "string"
+        },
+        "conditions": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Conditions"
+        },
+        "is_target_self": {
+          "default": false,
+          "title": "Is Target Self",
+          "type": "boolean"
+        },
+        "delta_g_diss_kcal_mol": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Delta G Diss Kcal Mol"
+        },
+        "primary_physiological_state": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Primary Physiological State"
+        }
+      },
+      "required": [
+        "pdb_id",
+        "assembly_id",
+        "stoichiometry",
+        "biological_assembly_type"
+      ],
+      "title": "ObservedAssembly",
+      "type": "object"
+    },
+    "PisaConfidence": {
+      "description": "Biophysical thermodynamic confidence from PDBe PISA.",
+      "properties": {
+        "dissociation_energy_kcal_mol": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dissociation Energy Kcal Mol"
+        },
+        "buried_surface_area_angstrom2": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Buried Surface Area Angstrom2"
+        }
+      },
+      "title": "PisaConfidence",
+      "type": "object"
+    },
+    "QueryState": {
+      "description": "Audit status of biological database query execution.",
+      "enum": [
+        "NOT_QUERIED",
+        "QUERY_SUCCESS_NO_HIT",
+        "QUERY_SUCCESS_WITH_HIT",
+        "QUERY_FAILED",
+        "UNAVAILABLE",
+        "SKIPPED",
+        "PREDICTION_NOT_EXECUTED"
+      ],
+      "title": "QueryState",
+      "type": "string"
+    },
+    "Stoichiometry": {
+      "description": "Symbolic and quantitative representation of oligomeric stoichiometry.",
+      "properties": {
+        "formula": {
+          "title": "Formula",
+          "type": "string"
+        },
+        "chains": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Chains",
+          "type": "object"
+        },
+        "total_subunits": {
+          "default": 0,
+          "title": "Total Subunits",
+          "type": "integer"
+        },
+        "assembly_type": {
+          "$ref": "#/$defs/AssemblyType",
+          "default": "UNCHARACTERIZED"
+        },
+        "symmetry": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Symmetry"
+        }
+      },
+      "required": [
+        "formula"
+      ],
+      "title": "Stoichiometry",
+      "type": "object"
+    },
+    "SwissModelConfidence": {
+      "description": "Homology modeling confidence metrics from SWISS-MODEL.",
+      "properties": {
+        "qmqe": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Qmqe"
+        },
+        "gmqe": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Gmqe"
+        },
+        "coverage": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Coverage"
+        }
+      },
+      "title": "SwissModelConfidence",
+      "type": "object"
+    },
+    "TargetSelfAssembly": {
+      "description": "Oligomeric state of the target protein alone (homomer or monomer).",
+      "properties": {
+        "formula": {
+          "title": "Formula",
+          "type": "string"
+        },
+        "assembly_type": {
+          "$ref": "#/$defs/AssemblyType",
+          "default": "UNCHARACTERIZED"
+        },
+        "subunit_count": {
+          "default": 1,
+          "title": "Subunit Count",
+          "type": "integer"
+        },
+        "symmetry": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Symmetry"
+        },
+        "confidence_status": {
+          "$ref": "#/$defs/EvidenceStatus",
+          "default": "UNCHARACTERIZED"
+        }
+      },
+      "required": [
+        "formula"
+      ],
+      "title": "TargetSelfAssembly",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "analysis_id": {
+      "title": "Analysis Id",
+      "type": "string"
+    },
+    "target_accession_or_sequence": {
+      "title": "Target Accession Or Sequence",
+      "type": "string"
+    },
+    "quaternary_status": {
+      "title": "Quaternary Status",
+      "type": "string"
+    },
+    "stoichiometry": {
+      "$ref": "#/$defs/Stoichiometry"
+    },
+    "target_self_assembly": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TargetSelfAssembly"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "functional_complexes": {
+      "items": {
+        "$ref": "#/$defs/FunctionalComplex"
+      },
+      "title": "Functional Complexes",
+      "type": "array"
+    },
+    "observed_assemblies": {
+      "items": {
+        "$ref": "#/$defs/ObservedAssembly"
+      },
+      "title": "Observed Assemblies",
+      "type": "array"
+    },
+    "interfaces": {
+      "items": {
+        "$ref": "#/$defs/InterfaceContact"
+      },
+      "title": "Interfaces",
+      "type": "array"
+    },
+    "conflicts": {
+      "items": {
+        "$ref": "#/$defs/ConflictRecord"
+      },
+      "title": "Conflicts",
+      "type": "array"
+    },
+    "experimental_conflict": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ExperimentalConflict"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "confidence_provenance": {
+      "$ref": "#/$defs/ConfidenceProvenance"
+    },
+    "inferred_function": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/InferredFunction"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "evidence_coverage": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/EvidenceCoverage"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "status": {
+      "$ref": "#/$defs/EvidenceStatus",
+      "default": "UNCHARACTERIZED"
+    },
+    "experimental_oligomeric_state": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Experimental Oligomeric State"
+    },
+    "predicted_oligomeric_state": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Predicted Oligomeric State"
+    },
+    "fallback_representation": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Fallback Representation"
+    },
+    "stages_completed": {
+      "items": {
+        "type": "integer"
+      },
+      "title": "Stages Completed",
+      "type": "array"
+    },
+    "metadata": {
+      "additionalProperties": true,
+      "title": "Metadata",
+      "type": "object"
+    }
+  },
+  "required": [
+    "analysis_id",
+    "target_accession_or_sequence",
+    "quaternary_status",
+    "stoichiometry"
+  ],
+  "type": "object"
+}

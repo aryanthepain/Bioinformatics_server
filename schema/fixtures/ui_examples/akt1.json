@@ -1,0 +1,1316 @@
+{
+  "analysis_id": "quat-session-1791161046226-2fe99aa7",
+  "target_accession_or_sequence": "P31749",
+  "quaternary_status": "MONOMER",
+  "stoichiometry": {
+    "formula": "A",
+    "chains": {
+      "A": 1
+    },
+    "total_subunits": 1,
+    "assembly_type": "MONOMER",
+    "symmetry": null
+  },
+  "target_self_assembly": {
+    "formula": "A",
+    "assembly_type": "MONOMER",
+    "subunit_count": 1,
+    "symmetry": null,
+    "confidence_status": "CONFIRMED"
+  },
+  "functional_complexes": [],
+  "observed_assemblies": [
+    {
+      "pdb_id": "1UNQ",
+      "assembly_id": "1",
+      "stoichiometry": "A",
+      "biological_assembly_type": "MONOMER",
+      "conditions": "X-RAY DIFFRACTION",
+      "is_target_self": true,
+      "delta_g_diss_kcal_mol": 3.26,
+      "primary_physiological_state": "Primary Crystallographic Biological Assembly"
+    },
+    {
+      "pdb_id": "1UNR",
+      "assembly_id": "1",
+      "stoichiometry": "A",
+      "biological_assembly_type": "MONOMER",
+      "conditions": "X-RAY DIFFRACTION",
+      "is_target_self": true,
+      "delta_g_diss_kcal_mol": null,
+      "primary_physiological_state": "Primary Crystallographic Biological Assembly"
+    },
+    {
+      "pdb_id": "1H10",
+      "assembly_id": "1",
+      "stoichiometry": "A",
+      "biological_assembly_type": "MONOMER",
+      "conditions": "X-RAY DIFFRACTION",
+      "is_target_self": true,
+      "delta_g_diss_kcal_mol": null,
+      "primary_physiological_state": "Primary Crystallographic Biological Assembly"
+    },
+    {
+      "pdb_id": "1UNP",
+      "assembly_id": "1",
+      "stoichiometry": "A",
+      "biological_assembly_type": "MONOMER",
+      "conditions": "X-RAY DIFFRACTION",
+      "is_target_self": true,
+      "delta_g_diss_kcal_mol": null,
+      "primary_physiological_state": "Primary Crystallographic Biological Assembly"
+    },
+    {
+      "pdb_id": "2UVM",
+      "assembly_id": "1",
+      "stoichiometry": "A",
+      "biological_assembly_type": "MONOMER",
+      "conditions": "X-RAY DIFFRACTION",
+      "is_target_self": true,
+      "delta_g_diss_kcal_mol": null,
+      "primary_physiological_state": "Primary Crystallographic Biological Assembly"
+    },
+    {
+      "pdb_id": "2UZR",
+      "assembly_id": "1",
+      "stoichiometry": "A",
+      "biological_assembly_type": "MONOMER",
+      "conditions": "X-RAY DIFFRACTION",
+      "is_target_self": true,
+      "delta_g_diss_kcal_mol": null,
+      "primary_physiological_state": "Primary Crystallographic Biological Assembly"
+    }
+  ],
+  "interfaces": [],
+  "conflicts": [],
+  "experimental_conflict": {
+    "rcsb_author_assembly": "A[ACE][4IP]",
+    "rcsb_annotated_assembly": "A[ACE][4IP]",
+    "pisa_predicted_assembly": "1",
+    "pisa_thermodynamic_state": "STABLE",
+    "dissociation_energy_kcal_mol": 3.26,
+    "conflict_detected": false,
+    "conflict_rationale": null,
+    "discrepancy_type": null
+  },
+  "confidence_provenance": {
+    "pdbe_pisa": {
+      "dissociation_energy_kcal_mol": 3.26,
+      "buried_surface_area_angstrom2": 728.54
+    },
+    "swissmodel": {
+      "qmqe": 0.0,
+      "gmqe": 0.798,
+      "coverage": 0.921
+    },
+    "alphafold_db": {
+      "global_plddt": 83.06
+    },
+    "alphafold_multimer": null
+  },
+  "inferred_function": {
+    "molecular_function": "Monomeric enzyme or binding module",
+    "biological_process": "Cellular biochemical pathway",
+    "oligomeric_mechanism_hypothesis": "Single polypeptide chain functional unit without permanent quaternary interfaces",
+    "archetype_name": null,
+    "go_terms": [
+      {
+        "id": "GO:0005938",
+        "name": "C:cell cortex"
+      },
+      {
+        "id": "GO:0005911",
+        "name": "C:cell-cell junction"
+      },
+      {
+        "id": "GO:0036064",
+        "name": "C:ciliary basal body"
+      },
+      {
+        "id": "GO:0005737",
+        "name": "C:cytoplasm"
+      },
+      {
+        "id": "GO:0005829",
+        "name": "C:cytosol"
+      },
+      {
+        "id": "GO:0098978",
+        "name": "C:glutamatergic synapse"
+      },
+      {
+        "id": "GO:0030027",
+        "name": "C:lamellipodium"
+      },
+      {
+        "id": "GO:0016020",
+        "name": "C:membrane"
+      },
+      {
+        "id": "GO:0005758",
+        "name": "C:mitochondrial intermembrane space"
+      },
+      {
+        "id": "GO:0005654",
+        "name": "C:nucleoplasm"
+      },
+      {
+        "id": "GO:0005634",
+        "name": "C:nucleus"
+      },
+      {
+        "id": "GO:0005886",
+        "name": "C:plasma membrane"
+      },
+      {
+        "id": "GO:0098794",
+        "name": "C:postsynapse"
+      },
+      {
+        "id": "GO:0032991",
+        "name": "C:protein-containing complex"
+      },
+      {
+        "id": "GO:0005819",
+        "name": "C:spindle"
+      },
+      {
+        "id": "GO:0031982",
+        "name": "C:vesicle"
+      },
+      {
+        "id": "GO:0071889",
+        "name": "F:14-3-3 protein binding"
+      },
+      {
+        "id": "GO:0005524",
+        "name": "F:ATP binding"
+      },
+      {
+        "id": "GO:0005516",
+        "name": "F:calmodulin binding"
+      },
+      {
+        "id": "GO:0019899",
+        "name": "F:enzyme binding"
+      },
+      {
+        "id": "GO:0042802",
+        "name": "F:identical protein binding"
+      },
+      {
+        "id": "GO:0016301",
+        "name": "F:kinase activity"
+      },
+      {
+        "id": "GO:0019900",
+        "name": "F:kinase binding"
+      },
+      {
+        "id": "GO:0030235",
+        "name": "F:nitric-oxide synthase regulator activity"
+      },
+      {
+        "id": "GO:0005547",
+        "name": "F:phosphatidylinositol-3,4,5-trisphosphate binding"
+      },
+      {
+        "id": "GO:0043325",
+        "name": "F:phosphatidylinositol-3,4-bisphosphate binding"
+      },
+      {
+        "id": "GO:0099104",
+        "name": "F:potassium channel activator activity"
+      },
+      {
+        "id": "GO:0042803",
+        "name": "F:protein homodimerization activity"
+      },
+      {
+        "id": "GO:0004672",
+        "name": "F:protein kinase activity"
+      },
+      {
+        "id": "GO:0019901",
+        "name": "F:protein kinase binding"
+      },
+      {
+        "id": "GO:0106310",
+        "name": "F:protein serine kinase activity"
+      },
+      {
+        "id": "GO:0004674",
+        "name": "F:protein serine/threonine kinase activity"
+      },
+      {
+        "id": "GO:0030291",
+        "name": "F:protein serine/threonine kinase inhibitor activity"
+      },
+      {
+        "id": "GO:0004712",
+        "name": "F:protein serine/threonine/tyrosine kinase activity"
+      },
+      {
+        "id": "GO:1904841",
+        "name": "F:TORC2 complex binding"
+      },
+      {
+        "id": "GO:0006924",
+        "name": "P:activation-induced cell death of T cells"
+      },
+      {
+        "id": "GO:0043276",
+        "name": "P:anoikis"
+      },
+      {
+        "id": "GO:0048266",
+        "name": "P:behavioral response to pain"
+      },
+      {
+        "id": "GO:0160213",
+        "name": "P:beta-arrestin-dependent dopamine receptor signaling pathway"
+      },
+      {
+        "id": "GO:0030154",
+        "name": "P:cell differentiation"
+      },
+      {
+        "id": "GO:0002042",
+        "name": "P:cell migration involved in sprouting angiogenesis"
+      },
+      {
+        "id": "GO:0008283",
+        "name": "P:cell population proliferation"
+      },
+      {
+        "id": "GO:0071364",
+        "name": "P:cellular response to epidermal growth factor stimulus"
+      },
+      {
+        "id": "GO:0032869",
+        "name": "P:cellular response to insulin stimulus"
+      },
+      {
+        "id": "GO:1990090",
+        "name": "P:cellular response to nerve growth factor stimulus"
+      },
+      {
+        "id": "GO:0140052",
+        "name": "P:cellular response to oxidised low-density lipoprotein particle stimulus"
+      },
+      {
+        "id": "GO:0072752",
+        "name": "P:cellular response to rapamycin"
+      },
+      {
+        "id": "GO:0033554",
+        "name": "P:cellular response to stress"
+      },
+      {
+        "id": "GO:0002430",
+        "name": "P:complement receptor mediated signaling pathway"
+      },
+      {
+        "id": "GO:0019221",
+        "name": "P:cytokine-mediated signaling pathway"
+      },
+      {
+        "id": "GO:0007173",
+        "name": "P:epidermal growth factor receptor signaling pathway"
+      },
+      {
+        "id": "GO:0060079",
+        "name": "P:excitatory postsynaptic potential"
+      },
+      {
+        "id": "GO:0010761",
+        "name": "P:fibroblast migration"
+      },
+      {
+        "id": "GO:0007186",
+        "name": "P:G protein-coupled receptor signaling pathway"
+      },
+      {
+        "id": "GO:0008286",
+        "name": "P:insulin receptor signaling pathway"
+      },
+      {
+        "id": "GO:0048009",
+        "name": "P:insulin-like growth factor receptor signaling pathway"
+      },
+      {
+        "id": "GO:0035655",
+        "name": "P:interleukin-18-mediated signaling pathway"
+      },
+      {
+        "id": "GO:0035556",
+        "name": "P:intracellular signal transduction"
+      },
+      {
+        "id": "GO:0072656",
+        "name": "P:maintenance of protein location in mitochondrion"
+      },
+      {
+        "id": "GO:0060644",
+        "name": "P:mammary gland epithelial cell differentiation"
+      },
+      {
+        "id": "GO:0043066",
+        "name": "P:negative regulation of apoptotic process"
+      },
+      {
+        "id": "GO:0010507",
+        "name": "P:negative regulation of autophagy"
+      },
+      {
+        "id": "GO:0160049",
+        "name": "P:negative regulation of cGAS/STING signaling pathway"
+      },
+      {
+        "id": "GO:1902018",
+        "name": "P:negative regulation of cilium assembly"
+      },
+      {
+        "id": "GO:2001240",
+        "name": "P:negative regulation of extrinsic apoptotic signaling pathway in absence of ligand"
+      },
+      {
+        "id": "GO:0031999",
+        "name": "P:negative regulation of fatty acid beta-oxidation"
+      },
+      {
+        "id": "GO:1903384",
+        "name": "P:negative regulation of hydrogen peroxide-induced neuron intrinsic apoptotic signaling pathway"
+      },
+      {
+        "id": "GO:1903038",
+        "name": "P:negative regulation of leukocyte cell-cell adhesion"
+      },
+      {
+        "id": "GO:0010748",
+        "name": "P:negative regulation of long-chain fatty acid import across plasma membrane"
+      },
+      {
+        "id": "GO:2000402",
+        "name": "P:negative regulation of lymphocyte migration"
+      },
+      {
+        "id": "GO:0016242",
+        "name": "P:negative regulation of macroautophagy"
+      },
+      {
+        "id": "GO:0045746",
+        "name": "P:negative regulation of Notch signaling pathway"
+      },
+      {
+        "id": "GO:1902176",
+        "name": "P:negative regulation of oxidative stress-induced intrinsic apoptotic signaling pathway"
+      },
+      {
+        "id": "GO:1903898",
+        "name": "P:negative regulation of PERK-mediated unfolded protein response"
+      },
+      {
+        "id": "GO:0150033",
+        "name": "P:negative regulation of protein localization to lysosome"
+      },
+      {
+        "id": "GO:1903318",
+        "name": "P:negative regulation of protein maturation"
+      },
+      {
+        "id": "GO:0031397",
+        "name": "P:negative regulation of protein ubiquitination"
+      },
+      {
+        "id": "GO:0045861",
+        "name": "P:negative regulation of proteolysis"
+      },
+      {
+        "id": "GO:0090201",
+        "name": "P:negative regulation of release of cytochrome c from mitochondria"
+      },
+      {
+        "id": "GO:0006809",
+        "name": "P:nitric oxide biosynthetic process"
+      },
+      {
+        "id": "GO:0046209",
+        "name": "P:nitric oxide metabolic process"
+      },
+      {
+        "id": "GO:0001649",
+        "name": "P:osteoblast differentiation"
+      },
+      {
+        "id": "GO:0018105",
+        "name": "P:peptidyl-serine phosphorylation"
+      },
+      {
+        "id": "GO:0018107",
+        "name": "P:peptidyl-threonine phosphorylation"
+      },
+      {
+        "id": "GO:0043491",
+        "name": "P:phosphatidylinositol 3-kinase/protein kinase B signal transduction"
+      },
+      {
+        "id": "GO:1905786",
+        "name": "P:positive regulation of anaphase-promoting complex-dependent catabolic process"
+      },
+      {
+        "id": "GO:0043536",
+        "name": "P:positive regulation of blood vessel endothelial cell migration"
+      },
+      {
+        "id": "GO:0030307",
+        "name": "P:positive regulation of cell growth"
+      },
+      {
+        "id": "GO:0030335",
+        "name": "P:positive regulation of cell migration"
+      },
+      {
+        "id": "GO:0046326",
+        "name": "P:positive regulation of D-glucose import across plasma membrane"
+      },
+      {
+        "id": "GO:0032079",
+        "name": "P:positive regulation of endodeoxyribonuclease activity"
+      },
+      {
+        "id": "GO:0010595",
+        "name": "P:positive regulation of endothelial cell migration"
+      },
+      {
+        "id": "GO:0001938",
+        "name": "P:positive regulation of endothelial cell proliferation"
+      },
+      {
+        "id": "GO:0045600",
+        "name": "P:positive regulation of fat cell differentiation"
+      },
+      {
+        "id": "GO:1900087",
+        "name": "P:positive regulation of G1/S transition of mitotic cell cycle"
+      },
+      {
+        "id": "GO:0010628",
+        "name": "P:positive regulation of gene expression"
+      },
+      {
+        "id": "GO:0010907",
+        "name": "P:positive regulation of glucose metabolic process"
+      },
+      {
+        "id": "GO:0045725",
+        "name": "P:positive regulation of glycogen biosynthetic process"
+      },
+      {
+        "id": "GO:0046889",
+        "name": "P:positive regulation of lipid biosynthetic process"
+      },
+      {
+        "id": "GO:0045429",
+        "name": "P:positive regulation of nitric oxide biosynthetic process"
+      },
+      {
+        "id": "GO:0033138",
+        "name": "P:positive regulation of peptidyl-serine phosphorylation"
+      },
+      {
+        "id": "GO:0051897",
+        "name": "P:positive regulation of phosphatidylinositol 3-kinase/protein kinase B signal transduction"
+      },
+      {
+        "id": "GO:0032436",
+        "name": "P:positive regulation of proteasomal ubiquitin-dependent protein catabolic process"
+      },
+      {
+        "id": "GO:0042307",
+        "name": "P:positive regulation of protein import into nucleus"
+      },
+      {
+        "id": "GO:2000010",
+        "name": "P:positive regulation of protein localization to cell surface"
+      },
+      {
+        "id": "GO:1905552",
+        "name": "P:positive regulation of protein localization to endoplasmic reticulum"
+      },
+      {
+        "id": "GO:1900182",
+        "name": "P:positive regulation of protein localization to nucleus"
+      },
+      {
+        "id": "GO:1903078",
+        "name": "P:positive regulation of protein localization to plasma membrane"
+      },
+      {
+        "id": "GO:0051247",
+        "name": "P:positive regulation of protein metabolic process"
+      },
+      {
+        "id": "GO:0048661",
+        "name": "P:positive regulation of smooth muscle cell proliferation"
+      },
+      {
+        "id": "GO:1904263",
+        "name": "P:positive regulation of TORC1 signaling"
+      },
+      {
+        "id": "GO:1904515",
+        "name": "P:positive regulation of TORC2 signaling"
+      },
+      {
+        "id": "GO:0045944",
+        "name": "P:positive regulation of transcription by RNA polymerase II"
+      },
+      {
+        "id": "GO:0070585",
+        "name": "P:protein localization to mitochondrion"
+      },
+      {
+        "id": "GO:0006468",
+        "name": "P:protein phosphorylation"
+      },
+      {
+        "id": "GO:0042981",
+        "name": "P:regulation of apoptotic process"
+      },
+      {
+        "id": "GO:0030334",
+        "name": "P:regulation of cell migration"
+      },
+      {
+        "id": "GO:0005979",
+        "name": "P:regulation of glycogen biosynthetic process"
+      },
+      {
+        "id": "GO:0043488",
+        "name": "P:regulation of mRNA stability"
+      },
+      {
+        "id": "GO:0010975",
+        "name": "P:regulation of neuron projection development"
+      },
+      {
+        "id": "GO:0099175",
+        "name": "P:regulation of postsynapse organization"
+      },
+      {
+        "id": "GO:1901796",
+        "name": "P:regulation of signal transduction by p53 class mediator"
+      },
+      {
+        "id": "GO:0110002",
+        "name": "P:regulation of tRNA methylation"
+      },
+      {
+        "id": "GO:2000074",
+        "name": "P:regulation of type B pancreatic cell development"
+      },
+      {
+        "id": "GO:0034405",
+        "name": "P:response to fluid shear stress"
+      },
+      {
+        "id": "GO:0070848",
+        "name": "P:response to growth factor"
+      },
+      {
+        "id": "GO:0060416",
+        "name": "P:response to growth hormone"
+      },
+      {
+        "id": "GO:0009408",
+        "name": "P:response to heat"
+      },
+      {
+        "id": "GO:1990418",
+        "name": "P:response to insulin-like growth factor stimulus"
+      },
+      {
+        "id": "GO:0006979",
+        "name": "P:response to oxidative stress"
+      },
+      {
+        "id": "GO:0070141",
+        "name": "P:response to UV-A"
+      },
+      {
+        "id": "GO:0007165",
+        "name": "P:signal transduction"
+      },
+      {
+        "id": "GO:0003376",
+        "name": "P:sphingosine-1-phosphate receptor signaling pathway"
+      },
+      {
+        "id": "GO:0031295",
+        "name": "P:T cell costimulation"
+      },
+      {
+        "id": "GO:0031929",
+        "name": "P:TOR signaling"
+      },
+      {
+        "id": "GO:0097700",
+        "name": "P:vascular endothelial cell response to laminar fluid shear stress"
+      }
+    ],
+    "functional_homologs": [
+      {
+        "template_pdb_id": "8UW7",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.91,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "7APJ",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.91,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8UVY",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.91,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8UW2",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.904,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8UW9",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.887,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9ZBK",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.704,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6NPZ",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.702,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "3QKL",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.698,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "3CQW",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.698,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "3CQU",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.698,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "3QKK",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.698,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6BUU",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.698,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "3OW4",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.698,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "3MV5",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.696,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "4EKK",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.696,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8JOW",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.025,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8ZPU",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.015,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "7NH5",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.921,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6HHG",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.921,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6HHJ",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.921,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6S9W",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.921,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6HHI",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.921,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "7NH4",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.919,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6S9X",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.919,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6HHH",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.912,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6HHF",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.91,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "29MJ",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.908,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "4EJN",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.906,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5KCV",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.902,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9TMV",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.896,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "3O96",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.892,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9TMT",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.887,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9TN1",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.887,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9TMY",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.887,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9TMZ",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.887,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9TN2",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.887,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9TN0",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.887,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9TN4",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.887,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9TN3",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.887,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9TMU",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.887,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9TMW",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.885,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "4EKL",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.698,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "3QKM",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.698,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "3OCB",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.698,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "4GV1",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.696,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "3MVH",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.692,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6CCY",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.673,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "7MYX",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.248,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "1UNP",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.248,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "1UNR",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.246,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2UZR",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.246,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "1UNQ",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.244,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2UZS",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.244,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "1H10",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.242,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2UVM",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.242,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6HHJ",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.798,
+        "seq_identity": 99.326,
+        "coverage": 0.921,
+        "qualifying_homology": true
+      },
+      {
+        "template_pdb_id": "4Y93",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.498,
+        "seq_identity": 20.26,
+        "coverage": 0.838,
+        "qualifying_homology": false
+      }
+    ],
+    "confidence": 0.6,
+    "status": "SUPPORTED",
+    "observed_function": "interacts with btbd10 (by similarity). interacts with kctd20 (by similarity). interacts (via the c-terminus) with ccdc88a (via its c-terminus). interacts with grb10; the interaction leads to grb10 phosphorylation thus promoting ywhae-binding (by similarity). interacts with agap2 (isoform 2/pike-a); the interaction occurs in the presence of guanine nucleotides. interacts with aktip. interacts (via ph domain) with mtcp1, tcl1a and tcl1b. interacts with cdkn1b; the interaction phosphorylates cdkn1b promoting 14-3-3 binding and cell-cycle progression. interacts with map3k5 and traf6. interacts with bad, ppp2r5b, stk3 and stk4. interacts (via ph domain) with sirt1. interacts with srpk2 in a phosphorylation-dependent manner. interacts with raf1. interacts with trim13; the interaction ubiquitinates akt1 leading to its proteasomal degradation. interacts with tnk2 and clk2. interacts (via the c-terminus) with them4 (via its c-terminus). interacts with and phosphorylated by pdpk1. interacts with pa2g4 (by similarity). interacts with kif14; the interaction is detected in the plasma membrane upon ins stimulation and promotes akt1 phosphorylation (pubmed:24784001). interacts with fam83b; activates the pi3k/akt signaling cascade (pubmed:23676467). interacts with wdfy2 (via wd repeats 1-3) (pubmed:16792529). forms a complex with wdfy2 and foxo1 (by similarity). interacts with fam168a (pubmed:23251525). interacts with syap1 (via phosphorylated form and bsd domain); this interaction is enhanced in a mtorc2-mediated manner in response to epidermal growth factor (egf) stimulation and activates akt1 (pubmed:23300339). interacts with pkhm3 (by similarity). interacts with fkbp5/fkbp51; promoting interaction between akt/akt1 and phlpp1, thereby enhancing dephosphorylation and subsequent activation of akt/akt1 (pubmed:28147277). interacts with tmem175; leading to formation of the lysok(gf) complex (pubmed:32228865). acts as a negative regulator of the cgas-sting pathway by mediating phosphorylation of cgas during mitosis, leading to its inhibition (pubmed:26440888). interacts with slc9d1 (when phosphorylated); the interaction facilitates the membrane translocation and activation of akt1 (pubmed:40285646)",
+    "predicted_function": "Monomeric enzyme or binding module",
+    "quaternary_mechanism_hypothesis": "Single polypeptide chain functional unit without permanent quaternary interfaces",
+    "supporting_evidence": [
+      "Experimental PDBe PISA quaternary interface corroboration",
+      "Validated Gene Ontology: C:cell cortex"
+    ]
+  },
+  "evidence_coverage": {
+    "databases_queried": [
+      {
+        "database": "UniProtKB",
+        "queried": true,
+        "hit": true,
+        "query_status": "QUERY_SUCCESS_WITH_HIT"
+      },
+      {
+        "database": "Complex Portal",
+        "queried": true,
+        "hit": false,
+        "query_status": "QUERY_SUCCESS_NO_HIT"
+      },
+      {
+        "database": "RCSB PDB",
+        "queried": true,
+        "hit": true,
+        "query_status": "QUERY_SUCCESS_WITH_HIT"
+      },
+      {
+        "database": "PDBe PISA",
+        "queried": true,
+        "hit": false,
+        "query_status": "QUERY_SUCCESS_NO_HIT"
+      },
+      {
+        "database": "SWISS-MODEL",
+        "queried": true,
+        "hit": true,
+        "query_status": "QUERY_SUCCESS_WITH_HIT"
+      },
+      {
+        "database": "IntAct",
+        "queried": true,
+        "hit": false,
+        "query_status": "QUERY_SUCCESS_NO_HIT"
+      },
+      {
+        "database": "AlphaFold DB",
+        "queried": true,
+        "hit": true,
+        "query_status": "QUERY_SUCCESS_WITH_HIT"
+      },
+      {
+        "database": "AlphaFold-Multimer",
+        "queried": true,
+        "hit": false,
+        "query_status": "PREDICTION_NOT_EXECUTED"
+      }
+    ],
+    "evidence_gaps": [
+      "External multimer live compute absent"
+    ],
+    "records": [
+      {
+        "database": "UniProtKB",
+        "query_status": "QUERY_SUCCESS_WITH_HIT",
+        "hit_count": 1,
+        "rationale": "Curated subunit annotation and sequence entry",
+        "details": null
+      },
+      {
+        "database": "Complex Portal",
+        "query_status": "QUERY_SUCCESS_NO_HIT",
+        "hit_count": 0,
+        "rationale": "No partner complex annotation",
+        "details": null
+      },
+      {
+        "database": "RCSB PDB",
+        "query_status": "QUERY_SUCCESS_WITH_HIT",
+        "hit_count": 6,
+        "rationale": "Experimental crystallographic/cryo-EM biological assemblies",
+        "details": null
+      },
+      {
+        "database": "PDBe PISA",
+        "query_status": "QUERY_SUCCESS_NO_HIT",
+        "hit_count": 0,
+        "rationale": "Thermodynamic assembly stability and interface chemistry",
+        "details": null
+      },
+      {
+        "database": "SWISS-MODEL",
+        "query_status": "QUERY_SUCCESS_WITH_HIT",
+        "hit_count": 57,
+        "rationale": "Homology multimer templates",
+        "details": null
+      },
+      {
+        "database": "IntAct",
+        "query_status": "QUERY_SUCCESS_NO_HIT",
+        "hit_count": 0,
+        "rationale": "Physical protein-protein interaction network",
+        "details": null
+      },
+      {
+        "database": "AlphaFold DB",
+        "query_status": "QUERY_SUCCESS_WITH_HIT",
+        "hit_count": 1,
+        "rationale": "Monomer fold confidence (pLDDT); tertiary coordinate prediction",
+        "details": null
+      },
+      {
+        "database": "AlphaFold-Multimer",
+        "query_status": "PREDICTION_NOT_EXECUTED",
+        "hit_count": 0,
+        "rationale": "External prediction runner not configured",
+        "details": null
+      }
+    ]
+  },
+  "status": "CONFIRMED",
+  "experimental_oligomeric_state": "A",
+  "predicted_oligomeric_state": "A",
+  "fallback_representation": null,
+  "stages_completed": [
+    1,
+    2,
+    3,
+    4,
+    6
+  ],
+  "metadata": {
+    "session_id": "quat-session-1791161046226-2fe99aa7",
+    "offline_mode": false,
+    "pisa_thermodynamic_state": "STABLE"
+  }
+}

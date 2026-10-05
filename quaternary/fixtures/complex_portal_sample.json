@@ -1,0 +1,20 @@
+{
+  "complex_id": "CPX-1882",
+  "name": "GroEL-GroES chaperonin complex",
+  "systematic_name": "GroEL(14)-GroES(7)",
+  "stoichiometry": "A14B7",
+  "participants": [
+    {
+      "identifier": "P0A6F5",
+      "name": "GroEL",
+      "stoichiometry": 14,
+      "role": "copolypeptide"
+    },
+    {
+      "identifier": "P0A6F9",
+      "name": "GroES",
+      "stoichiometry": 7,
+      "role": "copolypeptide"
+    }
+  ]
+}

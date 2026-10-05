@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "quaternary-structure-pipeline"
+version = "0.3.1"
+description = "Deterministic quaternary structure analysis, biological assembly disambiguation, and functional inference engine"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "pydantic>=2.7.0",
+    "requests>=2.31.0",
+    "urllib3>=2.2.0",
+    "pandas>=2.0.0",
+    "ipython>=8.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "nbformat>=5.9.0",
+]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+pythonpath = ["."]
