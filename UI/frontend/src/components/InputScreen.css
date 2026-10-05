@@ -1,0 +1,336 @@
+.input-screen {
+  padding-top: 56px;
+}
+
+.input-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 64px;
+  align-items: start;
+}
+
+.input-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.input-intro {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-bottom: 8px;
+}
+
+/* ---- Composer (the sequence form) ----------------------------------- */
+
+.composer {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  box-shadow:
+    0 1px 2px rgba(11, 12, 14, 0.04),
+    0 10px 30px rgba(11, 12, 14, 0.05);
+  overflow: hidden;
+}
+
+.composer__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 16px;
+  padding: 18px 20px 0;
+}
+
+.composer__label {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.composer__hint {
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+.composer__field {
+  padding: 12px 20px 0;
+}
+
+.composer__textarea {
+  display: block;
+  width: 100%;
+  min-height: 210px;
+  padding: 14px 16px;
+  resize: vertical;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.7;
+  word-break: break-all;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.composer__textarea::placeholder {
+  color: var(--color-muted);
+}
+
+.composer__textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  background: var(--color-bg);
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
+}
+
+.composer__textarea[aria-invalid="true"] {
+  border-color: var(--color-danger);
+}
+
+.composer__textarea[aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 3px var(--color-danger-soft);
+}
+
+.composer__textarea:disabled {
+  opacity: 0.7;
+}
+
+.composer__field--dragging .composer__textarea {
+  border-style: dashed;
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+
+.composer__status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 22px;
+  padding: 10px 20px 0;
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+.composer__status--ok {
+  color: var(--color-accent-strong);
+}
+
+.composer__status--error {
+  color: var(--color-danger);
+}
+
+.composer__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 16px;
+  padding: 16px 20px 20px;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface-muted);
+}
+
+.composer__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.composer__error {
+  padding: 0 20px 20px;
+  background: var(--color-surface-muted);
+}
+
+.composer__shortcut {
+  margin-top: -8px;
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+.composer__shortcut kbd {
+  display: inline-block;
+  min-width: 22px;
+  padding: 0 6px;
+  border: 1px solid var(--color-border-strong);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: var(--color-bg);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  line-height: 18px;
+  text-align: center;
+  color: var(--color-ink-3);
+}
+
+/* ---- Name field ----------------------------------------------------------- */
+
+.name-field {
+  flex: 1 1 220px;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.name-field label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-ink-3);
+}
+
+.name-field input {
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  font-size: 14px;
+}
+
+.name-field input::placeholder {
+  color: var(--color-muted);
+}
+
+.name-field input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
+}
+
+/* ---- Examples ------------------------------------------------------------- */
+
+.examples {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.examples__label {
+  margin-right: 4px;
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+.examples__pending {
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-size: 14px;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.chip:hover:not(:disabled) {
+  border-color: var(--color-border-strong);
+  background: var(--color-surface);
+}
+
+.chip:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.chip__meta {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-muted);
+}
+
+/* ---- Level guide (right column) ----------------------------------------- */
+
+.levels-guide {
+  padding-top: 6px;
+}
+
+.levels-guide__title {
+  margin-bottom: 14px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.levels-guide__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.levels-guide__item {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 4px 10px;
+  padding: 18px 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.levels-guide__number {
+  padding-top: 1px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--color-accent);
+}
+
+.levels-guide__name {
+  font-weight: 600;
+}
+
+.levels-guide__text {
+  grid-column: 2;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--color-muted);
+}
+
+/* ---- Narrow screens ---------------------------------------------------- */
+
+@media (max-width: 1040px) {
+  .input-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 48px;
+  }
+}
+
+@media (max-width: 560px) {
+  .input-screen {
+    padding-top: 36px;
+  }
+
+  .name-field {
+    max-width: none;
+  }
+
+  .composer__shortcut {
+    display: none;
+  }
+
+  .composer__actions {
+    width: 100%;
+  }
+
+  .composer__actions .btn--primary {
+    flex: 1;
+  }
+}

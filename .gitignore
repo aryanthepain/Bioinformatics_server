@@ -19,3 +19,6 @@ htmlcov/
 quaternary_config.json
 *.db
 *.tmp
+
+# macOS Finder files
+.DS_Store
