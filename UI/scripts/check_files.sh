@@ -36,6 +36,7 @@ backend/app/sequence.py
 backend/app/verdict.py
 backend/pyproject.toml
 backend/scripts/check_primary.py
+backend/scripts/check_secondary.py
 backend/scripts/check_tertiary.py
 backend/scripts/setup_primary.sh
 backend/scripts/smoke_test.py
