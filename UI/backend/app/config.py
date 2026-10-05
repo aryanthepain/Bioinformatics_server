@@ -100,6 +100,8 @@ SWISSMODEL_TOKEN = os.getenv("SWISSMODEL_TOKEN", "").strip() or None
 SWISSMODEL_TIMEOUT_SECONDS = _read_float("PFP_SWISSMODEL_TIMEOUT", 2400.0)
 # Longest we wait for a Foldseek search.
 FOLDSEEK_TIMEOUT_SECONDS = _read_float("PFP_FOLDSEEK_TIMEOUT", 900.0)
+# Longest we wait for JPred (secondary structure; the notebook's jpred_max_wait).
+JPRED_TIMEOUT_SECONDS = _read_float("PFP_JPRED_TIMEOUT", 900.0)
 # Longest a single web request may take before it counts as a failure.
 HTTP_TIMEOUT_SECONDS = 60.0
 

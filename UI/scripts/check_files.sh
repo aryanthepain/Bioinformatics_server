@@ -27,6 +27,7 @@ backend/app/jobs.py
 backend/app/levels/__init__.py
 backend/app/levels/placeholders.py
 backend/app/levels/primary.py
+backend/app/levels/secondary.py
 backend/app/levels/tertiary.py
 backend/app/main.py
 backend/app/runner.py
