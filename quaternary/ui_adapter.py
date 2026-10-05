@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import re
 from datetime import datetime
-from typing import Any, Dict, List, Literal, Optional, Tuple, Union
+from typing import Any, Dict, List, Literal, Optional, Protocol, Tuple, Union, runtime_checkable
 from pydantic import BaseModel, Field
 
 from quaternary.clients import UniProtClient
@@ -25,6 +25,18 @@ from quaternary.models import (
     QuaternaryStructureOutput,
 )
 from quaternary.session import QuaternarySession
+
+
+@runtime_checkable
+class StageContextProtocol(Protocol):
+    """Protocol representing the UI runner StageContext interface."""
+    is_cancelled: bool
+
+    def report(self, message: str, *args: Any, **kwargs: Any) -> Any:
+        ...
+
+
+StageContext = StageContextProtocol
 
 
 # =============================================================================
@@ -466,7 +478,7 @@ def quaternary_to_level_result(output: QuaternaryStructureOutput) -> LevelResult
 # Main Public Entrypoint: analyze()
 # =============================================================================
 
-def analyze(sequence: str, ctx: Any = None) -> LevelResult:
+def analyze(sequence: str, ctx: Optional[StageContextProtocol] = None) -> LevelResult:
     """Drop-in quaternary analysis level runner for the UI backend.
 
     Conforms to the function signature:
