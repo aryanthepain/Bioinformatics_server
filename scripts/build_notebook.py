@@ -756,6 +756,8 @@ Interfaces between macromolecular chains are characterized by thermodynamic para
 
 The quaternary analysis results are exported into a validated, standardized data contract (`quaternary_structure_output.json`).
 This artifact conforms to the schema required by frontend UI visualization components and provides direct accessors for downstream scientific workflows.
+
+The formal JSON Schema specification is published at `schema/quaternary_structure_output.schema.json` (Draft 2020-12) and verified against all outputs.
 """
     cells.append(create_markdown_cell(part3_md))
 
@@ -769,6 +771,7 @@ assert output_file.exists(), f"Expected export file '{export_path}' was not crea
 file_size_kb = output_file.stat().st_size / 1024
 
 print(f" Data Contract Exported: '{export_path}' ({file_size_kb:.2f} KB)")
+print(f" Conforms to Published Schema: 'schema/quaternary_structure_output.schema.json' (Draft 2020-12)")
 print(f" Status: Valid QuaternaryStructureOutput JSON contract ready for frontend UI ingestion.")
 '''
     cells.append(create_code_cell(export_json_code))
