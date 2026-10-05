@@ -1,5 +1,5 @@
 {
-  "analysis_id": "quat-session-1791160720767-dff1d2",
+  "analysis_id": "quat-session-1791161312005-a5380a",
   "target_accession_or_sequence": "P0A6F5",
   "quaternary_status": "HOMOMER",
   "stoichiometry": {
@@ -3714,7 +3714,7 @@
     6
   ],
   "metadata": {
-    "session_id": "quat-session-1791160720767-dff1d2",
+    "session_id": "quat-session-1791161312005-a5380a",
     "offline_mode": true,
     "pisa_thermodynamic_state": "STABLE"
   }
