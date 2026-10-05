@@ -138,21 +138,21 @@ Plans:
 
 ### Phase 4: Standardized UI JSON Data Contract & Benchmark Validation
 
-**Goal**: Formalize the UI JSON export schema and validate the pipeline against *Haemophilus influenzae* uncharacterized proteins and synthetic novel sequences.
+**Goal**: Formalize the UI JSON export schema, validate the pipeline against the 5 canonical UI examples from `origin/UI`, and deliver the UI developer handoff guide and LevelResult adapter.
 **Depends on**: Phase 3, Phase 03.1, Phase 03.2
-**Requirements**: QUAT-08, QUAT-09, QUAT-10
+**Requirements**: QUAT-08, QUAT-09 (Amended to UI examples), QUAT-10 (Deferred to Issue #7)
 **Success Criteria** (what must be TRUE):
-  1. Standardized JSON payload (`quaternary_structure_output.json`) is exported with complete metadata, ready for frontend UI ingestion.
-  2. Pipeline successfully processes and benchmarks uncharacterized targets from *H. influenzae* (UP000000579).
-  3. Pipeline successfully runs on synthetic/novel unannotated primary sequences, providing meaningful fallback/predictions.
-  4. Frontend UI integration guide and data dictionary are delivered to support the UI team member.
+  1. Standardized JSON Schema Draft 2020-12 (`schema/quaternary_structure_output.schema.json`) and canonical output payload (`quaternary_structure_output.json`) are exported with complete metadata.
+  2. Pipeline successfully processes and benchmarks the 5 canonical UI examples (`ubiquitin`, `hemoglobin-alpha`, `bacteriorhodopsin`, `p53`, and `akt1`), persisting verified fixtures and authoring `BENCHMARK_REPORT.md`.
+  3. UI backend drop-in adapter (`quaternary/ui_adapter.py`) conforming to `LevelResult`, strict TypeScript interfaces (`schema/types/quaternary.ts`), and developer handoff guide (`docs/UI_INTEGRATION_GUIDE.md`) are delivered.
+  4. Full test suite passes deterministically (112 of 112 tests).
 
 **Plans**: 3 plans
 
 Plans:
-- [ ] 04-01: Formalize JSON schema contract (`quaternary_structure_output.json`) and write schema validation checks
-- [ ] 04-02: Run benchmarking suite on *Haemophilus influenzae* uncharacterized proteome entries (UP000000579)
-- [ ] 04-03: Run validation on novel/synthetic unannotated sequences and deliver the UI developer handoff guide
+- [x] 04-01: Formalize JSON Schema Contract, Exporter CLI & Automated Verification Tests
+- [x] 04-02: UI Branch 5-Example Proteome Benchmarking & Empirical Report
+- [x] 04-03: UI Backend LevelResult Adapter, TypeScript Interface & Developer Handoff Guide
 
 ## Progress
 
@@ -166,8 +166,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 03.1 → 03.2 → 4
 | 3. Abstracted Interactive Jupyter Notebook | 3/3 | Complete | 2026-10-04 |
 | 03.1. Quaternary Engine Rigor & Functional Inference | 3/3 | Complete | 2026-10-04 |
 | 03.2. Notebook Presentation Modularization & Visual Component Extraction | 5/5 | Complete | 2026-10-05 |
-| 4. UI JSON Data Contract & Benchmark Validation | 0/3 | Not started | - |
+| 4. UI JSON Data Contract & Benchmark Validation | 3/3 | Complete | 2026-10-05 |
 
 ---
 *Roadmap defined: 2026-10-03*
-*Last updated: 2026-10-05 after Phase 03.2 insertion*
+*Last updated: 2026-10-05 after Phase 4 completion*
