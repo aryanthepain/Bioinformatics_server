@@ -27,6 +27,7 @@ backend/app/jobs.py
 backend/app/levels/__init__.py
 backend/app/levels/placeholders.py
 backend/app/levels/primary.py
+backend/app/levels/secondary.py
 backend/app/levels/tertiary.py
 backend/app/main.py
 backend/app/runner.py
@@ -35,6 +36,7 @@ backend/app/sequence.py
 backend/app/verdict.py
 backend/pyproject.toml
 backend/scripts/check_primary.py
+backend/scripts/check_secondary.py
 backend/scripts/check_tertiary.py
 backend/scripts/setup_primary.sh
 backend/scripts/smoke_test.py

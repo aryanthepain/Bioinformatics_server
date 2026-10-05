@@ -19,7 +19,7 @@ from dataclasses import dataclass
 from ..config import LEVEL_NAMES, MOCK_FAIL_LEVEL, PLACEHOLDER_LEVELS
 from ..jobs import StageContext
 from ..schemas import LevelKey, LevelResult
-from . import placeholders, primary, tertiary
+from . import placeholders, primary, secondary, tertiary
 
 logger = logging.getLogger(__name__)
 
@@ -64,6 +64,8 @@ LEVELS: tuple[LevelSpec, ...] = (
         "Secondary structure",
         ("JPred 4", "ProtBert-BFD-SS3", "RCSB PDB / PDBe"),
         placeholders.secondary,
+        live=secondary.analyze,
+        cache_version=secondary.CACHE_VERSION,
     ),
     _spec(
         "tertiary",
