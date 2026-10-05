@@ -731,7 +731,7 @@ class QuaternarySession:
 
             # Delineate from UniProt subunit annotations
             subunit_text = (stage_1.get("uniprot", {}).get("subunit_text") or "").lower()
-            if "tetradecamer" in subunit_text or "14" in subunit_text or "heptameric rings" in subunit_text:
+            if "tetradecamer" in subunit_text or "14 subunits" in subunit_text or "heptameric rings" in subunit_text or bool(re.search(r"\b14\s*(?:subunits?|-mer)\b", subunit_text)):
                 formula = "A14"
                 subunit_count = 14
                 symmetry = "D7"

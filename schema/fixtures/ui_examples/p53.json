@@ -1,0 +1,3888 @@
+{
+  "analysis_id": "quat-session-1791161046153-d7f07820",
+  "target_accession_or_sequence": "P04637",
+  "quaternary_status": "HOMOMER",
+  "stoichiometry": {
+    "formula": "A4",
+    "chains": {
+      "A": 4
+    },
+    "total_subunits": 4,
+    "assembly_type": "HOMOMER",
+    "symmetry": "D2"
+  },
+  "target_self_assembly": {
+    "formula": "A4",
+    "assembly_type": "HOMOMER",
+    "subunit_count": 4,
+    "symmetry": "D2",
+    "confidence_status": "CONFIRMED"
+  },
+  "functional_complexes": [
+    {
+      "name": "TP53-MDM2-MDM4 transcription regulation complex",
+      "stoichiometry": "MDM2:MDM4:TP53",
+      "partner_uniprot_accessions": [
+        "Q00987",
+        "O15151"
+      ],
+      "partner_names": [
+        "MDM2",
+        "MDM4"
+      ],
+      "complex_portal_id": "CPX-6093",
+      "evidence": "Complex Portal curated biological assembly"
+    }
+  ],
+  "observed_assemblies": [
+    {
+      "pdb_id": "1AIE",
+      "assembly_id": "1",
+      "stoichiometry": "A4",
+      "biological_assembly_type": "HOMOMER",
+      "conditions": "X-RAY DIFFRACTION",
+      "is_target_self": true,
+      "delta_g_diss_kcal_mol": 12.24,
+      "primary_physiological_state": "Primary Crystallographic Biological Assembly"
+    },
+    {
+      "pdb_id": "1C26",
+      "assembly_id": "1",
+      "stoichiometry": "A4",
+      "biological_assembly_type": "HOMOMER",
+      "conditions": "X-RAY DIFFRACTION",
+      "is_target_self": true,
+      "delta_g_diss_kcal_mol": null,
+      "primary_physiological_state": "Primary Crystallographic Biological Assembly"
+    },
+    {
+      "pdb_id": "1H26",
+      "assembly_id": "1",
+      "stoichiometry": "A4",
+      "biological_assembly_type": "HOMOMER",
+      "conditions": "X-RAY DIFFRACTION",
+      "is_target_self": true,
+      "delta_g_diss_kcal_mol": null,
+      "primary_physiological_state": "Primary Crystallographic Biological Assembly"
+    },
+    {
+      "pdb_id": "1GZH",
+      "assembly_id": "1",
+      "stoichiometry": "A4",
+      "biological_assembly_type": "HOMOMER",
+      "conditions": "X-RAY DIFFRACTION",
+      "is_target_self": true,
+      "delta_g_diss_kcal_mol": null,
+      "primary_physiological_state": "Primary Crystallographic Biological Assembly"
+    },
+    {
+      "pdb_id": "1A1U",
+      "assembly_id": "1",
+      "stoichiometry": "A4",
+      "biological_assembly_type": "HOMOMER",
+      "conditions": "SOLUTION NMR",
+      "is_target_self": true,
+      "delta_g_diss_kcal_mol": null,
+      "primary_physiological_state": "Primary Crystallographic Biological Assembly"
+    },
+    {
+      "pdb_id": "1DT7",
+      "assembly_id": "1",
+      "stoichiometry": "A4",
+      "biological_assembly_type": "HOMOMER",
+      "conditions": "SOLUTION NMR",
+      "is_target_self": true,
+      "delta_g_diss_kcal_mol": null,
+      "primary_physiological_state": "Primary Crystallographic Biological Assembly"
+    }
+  ],
+  "interfaces": [
+    {
+      "chain_1": "A-4",
+      "chain_2": "A",
+      "buried_surface_area_angstrom2": 1107.76,
+      "solvation_free_energy_kcal_mol": -9.66,
+      "hydrogen_bonds_count": 13,
+      "salt_bridges_count": 6,
+      "interface_residues_chain_1": [
+        326,
+        327,
+        328,
+        329,
+        330,
+        331,
+        332,
+        333,
+        334,
+        335,
+        337,
+        338,
+        340,
+        341,
+        342,
+        344,
+        345,
+        348,
+        349,
+        352
+      ],
+      "interface_residues_chain_2": [
+        326,
+        327,
+        328,
+        329,
+        330,
+        331,
+        332,
+        333,
+        334,
+        335,
+        337,
+        338,
+        340,
+        341,
+        342,
+        344,
+        345,
+        348,
+        349,
+        352
+      ]
+    },
+    {
+      "chain_1": "A-2",
+      "chain_2": "A-3",
+      "buried_surface_area_angstrom2": 1105.59,
+      "solvation_free_energy_kcal_mol": -9.32,
+      "hydrogen_bonds_count": 13,
+      "salt_bridges_count": 6,
+      "interface_residues_chain_1": [
+        326,
+        327,
+        328,
+        329,
+        330,
+        331,
+        332,
+        333,
+        334,
+        335,
+        337,
+        338,
+        340,
+        341,
+        342,
+        344,
+        345,
+        348,
+        349,
+        352
+      ],
+      "interface_residues_chain_2": [
+        326,
+        327,
+        328,
+        329,
+        330,
+        331,
+        332,
+        333,
+        334,
+        335,
+        337,
+        338,
+        340,
+        341,
+        342,
+        344,
+        345,
+        348,
+        349,
+        352
+      ]
+    },
+    {
+      "chain_1": "A-3",
+      "chain_2": "A",
+      "buried_surface_area_angstrom2": 442.01,
+      "solvation_free_energy_kcal_mol": -5.5,
+      "hydrogen_bonds_count": 2,
+      "salt_bridges_count": 2,
+      "interface_residues_chain_1": [
+        343,
+        344,
+        346,
+        347,
+        348,
+        350,
+        351,
+        352,
+        354,
+        356
+      ],
+      "interface_residues_chain_2": [
+        343,
+        344,
+        346,
+        347,
+        348,
+        350,
+        351,
+        352,
+        354,
+        356
+      ]
+    },
+    {
+      "chain_1": "A-2",
+      "chain_2": "A-4",
+      "buried_surface_area_angstrom2": 442.01,
+      "solvation_free_energy_kcal_mol": -5.5,
+      "hydrogen_bonds_count": 2,
+      "salt_bridges_count": 2,
+      "interface_residues_chain_1": [
+        343,
+        344,
+        346,
+        347,
+        348,
+        350,
+        351,
+        352,
+        354,
+        356
+      ],
+      "interface_residues_chain_2": [
+        343,
+        344,
+        346,
+        347,
+        348,
+        350,
+        351,
+        352,
+        354,
+        356
+      ]
+    },
+    {
+      "chain_1": "A-2",
+      "chain_2": "A",
+      "buried_surface_area_angstrom2": 107.64,
+      "solvation_free_energy_kcal_mol": -4.08,
+      "hydrogen_bonds_count": 0,
+      "salt_bridges_count": 0,
+      "interface_residues_chain_1": [
+        337,
+        340,
+        341,
+        343,
+        344
+      ],
+      "interface_residues_chain_2": [
+        337,
+        340,
+        341,
+        343,
+        344
+      ]
+    },
+    {
+      "chain_1": "A-3",
+      "chain_2": "A-4",
+      "buried_surface_area_angstrom2": 107.64,
+      "solvation_free_energy_kcal_mol": -4.08,
+      "hydrogen_bonds_count": 0,
+      "salt_bridges_count": 0,
+      "interface_residues_chain_1": [
+        337,
+        340,
+        341,
+        343,
+        344
+      ],
+      "interface_residues_chain_2": [
+        337,
+        340,
+        341,
+        343,
+        344
+      ]
+    }
+  ],
+  "conflicts": [],
+  "experimental_conflict": {
+    "rcsb_author_assembly": "A-2A-3A-4A",
+    "rcsb_annotated_assembly": "A-2A-3A-4A",
+    "pisa_predicted_assembly": "4",
+    "pisa_thermodynamic_state": "STABLE",
+    "dissociation_energy_kcal_mol": 12.24,
+    "conflict_detected": false,
+    "conflict_rationale": null,
+    "discrepancy_type": null
+  },
+  "confidence_provenance": {
+    "pdbe_pisa": {
+      "dissociation_energy_kcal_mol": 12.24,
+      "buried_surface_area_angstrom2": 6625.32
+    },
+    "swissmodel": {
+      "qmqe": 0.454,
+      "gmqe": 0.475,
+      "coverage": 0.669
+    },
+    "alphafold_db": {
+      "global_plddt": 75.06
+    },
+    "alphafold_multimer": null
+  },
+  "inferred_function": {
+    "molecular_function": "Oligomeric enzyme or structural complex",
+    "biological_process": "Multimeric cellular machinery",
+    "oligomeric_mechanism_hypothesis": "Self-associating A4 assembly providing multivalent interaction interfaces",
+    "archetype_name": null,
+    "go_terms": [
+      {
+        "id": "GO:0005813",
+        "name": "C:centrosome"
+      },
+      {
+        "id": "GO:0000785",
+        "name": "C:chromatin"
+      },
+      {
+        "id": "GO:0005737",
+        "name": "C:cytoplasm"
+      },
+      {
+        "id": "GO:0005829",
+        "name": "C:cytosol"
+      },
+      {
+        "id": "GO:0005783",
+        "name": "C:endoplasmic reticulum"
+      },
+      {
+        "id": "GO:0005759",
+        "name": "C:mitochondrial matrix"
+      },
+      {
+        "id": "GO:0005739",
+        "name": "C:mitochondrion"
+      },
+      {
+        "id": "GO:0016363",
+        "name": "C:nuclear matrix"
+      },
+      {
+        "id": "GO:0005730",
+        "name": "C:nucleolus"
+      },
+      {
+        "id": "GO:0005654",
+        "name": "C:nucleoplasm"
+      },
+      {
+        "id": "GO:0005634",
+        "name": "C:nucleus"
+      },
+      {
+        "id": "GO:0016605",
+        "name": "C:PML body"
+      },
+      {
+        "id": "GO:0032991",
+        "name": "C:protein-containing complex"
+      },
+      {
+        "id": "GO:0005657",
+        "name": "C:replication fork"
+      },
+      {
+        "id": "GO:0035861",
+        "name": "C:site of double-strand break"
+      },
+      {
+        "id": "GO:0005667",
+        "name": "C:transcription regulator complex"
+      },
+      {
+        "id": "GO:0017053",
+        "name": "C:transcription repressor complex"
+      },
+      {
+        "id": "GO:0071889",
+        "name": "F:14-3-3 protein binding"
+      },
+      {
+        "id": "GO:0036310",
+        "name": "F:ATP-dependent DNA/DNA annealing activity"
+      },
+      {
+        "id": "GO:0003682",
+        "name": "F:chromatin binding"
+      },
+      {
+        "id": "GO:0000987",
+        "name": "F:cis-regulatory region sequence-specific DNA binding"
+      },
+      {
+        "id": "GO:0005507",
+        "name": "F:copper ion binding"
+      },
+      {
+        "id": "GO:0001046",
+        "name": "F:core promoter sequence-specific DNA binding"
+      },
+      {
+        "id": "GO:0097718",
+        "name": "F:disordered domain specific binding"
+      },
+      {
+        "id": "GO:0003677",
+        "name": "F:DNA binding"
+      },
+      {
+        "id": "GO:0001228",
+        "name": "F:DNA-binding transcription activator activity, RNA polymerase II-specific"
+      },
+      {
+        "id": "GO:0003700",
+        "name": "F:DNA-binding transcription factor activity"
+      },
+      {
+        "id": "GO:0000981",
+        "name": "F:DNA-binding transcription factor activity, RNA polymerase II-specific"
+      },
+      {
+        "id": "GO:0001227",
+        "name": "F:DNA-binding transcription repressor activity, RNA polymerase II-specific"
+      },
+      {
+        "id": "GO:0019899",
+        "name": "F:enzyme binding"
+      },
+      {
+        "id": "GO:0140296",
+        "name": "F:general transcription initiation factor binding"
+      },
+      {
+        "id": "GO:0042826",
+        "name": "F:histone deacetylase binding"
+      },
+      {
+        "id": "GO:0035033",
+        "name": "F:histone deacetylase regulator activity"
+      },
+      {
+        "id": "GO:0042802",
+        "name": "F:identical protein binding"
+      },
+      {
+        "id": "GO:0097371",
+        "name": "F:MDM2/MDM4 family protein binding"
+      },
+      {
+        "id": "GO:0140693",
+        "name": "F:molecular condensate scaffold activity"
+      },
+      {
+        "id": "GO:0140677",
+        "name": "F:molecular function activator activity"
+      },
+      {
+        "id": "GO:0003730",
+        "name": "F:mRNA 3'-UTR binding"
+      },
+      {
+        "id": "GO:0002039",
+        "name": "F:p53 binding"
+      },
+      {
+        "id": "GO:1990841",
+        "name": "F:promoter-specific chromatin binding"
+      },
+      {
+        "id": "GO:0002020",
+        "name": "F:protease binding"
+      },
+      {
+        "id": "GO:0046982",
+        "name": "F:protein heterodimerization activity"
+      },
+      {
+        "id": "GO:0051721",
+        "name": "F:protein phosphatase 2A binding"
+      },
+      {
+        "id": "GO:0051087",
+        "name": "F:protein-folding chaperone binding"
+      },
+      {
+        "id": "GO:0030971",
+        "name": "F:receptor tyrosine kinase binding"
+      },
+      {
+        "id": "GO:0000978",
+        "name": "F:RNA polymerase II cis-regulatory region sequence-specific DNA binding"
+      },
+      {
+        "id": "GO:0061629",
+        "name": "F:RNA polymerase II-specific DNA-binding transcription factor binding"
+      },
+      {
+        "id": "GO:0001094",
+        "name": "F:TFIID-class transcription factor complex binding"
+      },
+      {
+        "id": "GO:0000976",
+        "name": "F:transcription cis-regulatory region binding"
+      },
+      {
+        "id": "GO:0001223",
+        "name": "F:transcription coactivator binding"
+      },
+      {
+        "id": "GO:0031625",
+        "name": "F:ubiquitin protein ligase binding"
+      },
+      {
+        "id": "GO:0008270",
+        "name": "F:zinc ion binding"
+      },
+      {
+        "id": "GO:0006914",
+        "name": "P:autophagy"
+      },
+      {
+        "id": "GO:0048539",
+        "name": "P:bone marrow development"
+      },
+      {
+        "id": "GO:0072717",
+        "name": "P:cellular response to actinomycin D"
+      },
+      {
+        "id": "GO:0071480",
+        "name": "P:cellular response to gamma radiation"
+      },
+      {
+        "id": "GO:0042149",
+        "name": "P:cellular response to glucose starvation"
+      },
+      {
+        "id": "GO:0071456",
+        "name": "P:cellular response to hypoxia"
+      },
+      {
+        "id": "GO:0071479",
+        "name": "P:cellular response to ionizing radiation"
+      },
+      {
+        "id": "GO:0034644",
+        "name": "P:cellular response to UV"
+      },
+      {
+        "id": "GO:0071466",
+        "name": "P:cellular response to xenobiotic stimulus"
+      },
+      {
+        "id": "GO:0090398",
+        "name": "P:cellular senescence"
+      },
+      {
+        "id": "GO:0048512",
+        "name": "P:circadian behavior"
+      },
+      {
+        "id": "GO:0008340",
+        "name": "P:determination of adult lifespan"
+      },
+      {
+        "id": "GO:0006974",
+        "name": "P:DNA damage response"
+      },
+      {
+        "id": "GO:0030330",
+        "name": "P:DNA damage response, signal transduction by p53 class mediator"
+      },
+      {
+        "id": "GO:0043153",
+        "name": "P:entrainment of circadian clock by photoperiod"
+      },
+      {
+        "id": "GO:0006983",
+        "name": "P:ER overload response"
+      },
+      {
+        "id": "GO:0002244",
+        "name": "P:hematopoietic progenitor cell differentiation"
+      },
+      {
+        "id": "GO:0060218",
+        "name": "P:hematopoietic stem cell differentiation"
+      },
+      {
+        "id": "GO:0008104",
+        "name": "P:intracellular protein localization"
+      },
+      {
+        "id": "GO:0097193",
+        "name": "P:intrinsic apoptotic signaling pathway"
+      },
+      {
+        "id": "GO:0072332",
+        "name": "P:intrinsic apoptotic signaling pathway by p53 class mediator"
+      },
+      {
+        "id": "GO:0042771",
+        "name": "P:intrinsic apoptotic signaling pathway in response to DNA damage by p53 class mediator"
+      },
+      {
+        "id": "GO:0070059",
+        "name": "P:intrinsic apoptotic signaling pathway in response to endoplasmic reticulum stress"
+      },
+      {
+        "id": "GO:0031571",
+        "name": "P:mitotic G1 DNA damage checkpoint signaling"
+      },
+      {
+        "id": "GO:0009299",
+        "name": "P:mRNA transcription"
+      },
+      {
+        "id": "GO:0043066",
+        "name": "P:negative regulation of apoptotic process"
+      },
+      {
+        "id": "GO:0030308",
+        "name": "P:negative regulation of cell growth"
+      },
+      {
+        "id": "GO:0008285",
+        "name": "P:negative regulation of cell population proliferation"
+      },
+      {
+        "id": "GO:0045892",
+        "name": "P:negative regulation of DNA-templated transcription"
+      },
+      {
+        "id": "GO:0048147",
+        "name": "P:negative regulation of fibroblast proliferation"
+      },
+      {
+        "id": "GO:1903451",
+        "name": "P:negative regulation of G1 to G0 transition"
+      },
+      {
+        "id": "GO:0051097",
+        "name": "P:negative regulation of helicase activity"
+      },
+      {
+        "id": "GO:1905856",
+        "name": "P:negative regulation of pentose-phosphate shunt"
+      },
+      {
+        "id": "GO:0032211",
+        "name": "P:negative regulation of telomere maintenance via telomerase"
+      },
+      {
+        "id": "GO:0000122",
+        "name": "P:negative regulation of transcription by RNA polymerase II"
+      },
+      {
+        "id": "GO:0006289",
+        "name": "P:nucleotide-excision repair"
+      },
+      {
+        "id": "GO:0097252",
+        "name": "P:oligodendrocyte apoptotic process"
+      },
+      {
+        "id": "GO:0090403",
+        "name": "P:oxidative stress-induced premature senescence"
+      },
+      {
+        "id": "GO:0043065",
+        "name": "P:positive regulation of apoptotic process"
+      },
+      {
+        "id": "GO:2000774",
+        "name": "P:positive regulation of cellular senescence"
+      },
+      {
+        "id": "GO:0045893",
+        "name": "P:positive regulation of DNA-templated transcription"
+      },
+      {
+        "id": "GO:1900119",
+        "name": "P:positive regulation of execution phase of apoptosis"
+      },
+      {
+        "id": "GO:0010628",
+        "name": "P:positive regulation of gene expression"
+      },
+      {
+        "id": "GO:2001244",
+        "name": "P:positive regulation of intrinsic apoptotic signaling pathway"
+      },
+      {
+        "id": "GO:1902895",
+        "name": "P:positive regulation of miRNA transcription"
+      },
+      {
+        "id": "GO:0062100",
+        "name": "P:positive regulation of programmed necrotic cell death"
+      },
+      {
+        "id": "GO:2000379",
+        "name": "P:positive regulation of reactive oxygen species metabolic process"
+      },
+      {
+        "id": "GO:0090200",
+        "name": "P:positive regulation of release of cytochrome c from mitochondria"
+      },
+      {
+        "id": "GO:0045899",
+        "name": "P:positive regulation of RNA polymerase II transcription preinitiation complex assembly"
+      },
+      {
+        "id": "GO:0070245",
+        "name": "P:positive regulation of thymocyte apoptotic process"
+      },
+      {
+        "id": "GO:0045944",
+        "name": "P:positive regulation of transcription by RNA polymerase II"
+      },
+      {
+        "id": "GO:0051262",
+        "name": "P:protein tetramerization"
+      },
+      {
+        "id": "GO:0065003",
+        "name": "P:protein-containing complex assembly"
+      },
+      {
+        "id": "GO:0007265",
+        "name": "P:Ras protein signal transduction"
+      },
+      {
+        "id": "GO:0042981",
+        "name": "P:regulation of apoptotic process"
+      },
+      {
+        "id": "GO:0051726",
+        "name": "P:regulation of cell cycle"
+      },
+      {
+        "id": "GO:1902749",
+        "name": "P:regulation of cell cycle G2/M phase transition"
+      },
+      {
+        "id": "GO:0006355",
+        "name": "P:regulation of DNA-templated transcription"
+      },
+      {
+        "id": "GO:0006357",
+        "name": "P:regulation of transcription by RNA polymerase II"
+      },
+      {
+        "id": "GO:0090399",
+        "name": "P:replicative senescence"
+      },
+      {
+        "id": "GO:0046677",
+        "name": "P:response to antibiotic"
+      },
+      {
+        "id": "GO:0010332",
+        "name": "P:response to gamma radiation"
+      },
+      {
+        "id": "GO:0072331",
+        "name": "P:signal transduction by p53 class mediator"
+      },
+      {
+        "id": "GO:0045815",
+        "name": "P:transcription initiation-coupled chromatin remodeling"
+      },
+      {
+        "id": "GO:0033209",
+        "name": "P:tumor necrosis factor-mediated signaling pathway"
+      },
+      {
+        "id": "GO:0060333",
+        "name": "P:type II interferon-mediated signaling pathway"
+      },
+      {
+        "id": "GO:0016032",
+        "name": "P:viral process"
+      }
+    ],
+    "functional_homologs": [
+      {
+        "template_pdb_id": "6XRE",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.865,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5XZC",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.674,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9U4D",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.519,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8R1F",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.514,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8R1G",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.514,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6RZ3",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.511,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9R04",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.509,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9R2M",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.509,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9R2P",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.509,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9R2Q",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.509,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "4QO1",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.506,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "4XR8",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.506,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "7DVD",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.506,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9CHT",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.506,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8J8N",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.506,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9SPN",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.504,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "7YGI",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.504,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "1GZH",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.504,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5ECG",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.504,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2H1L",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.504,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "7XZX",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.504,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "7XZZ",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.504,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9FZB",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.501,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9SPR",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.501,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9SPQ",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.501,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9SPP",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.499,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9SPO",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.499,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8RCI",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.499,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9SPM",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.499,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9SPS",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.496,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "1KZY",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.496,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2MEJ",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.496,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8HLN",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.494,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8HLM",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.494,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8HLL",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.494,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8GCR",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.491,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "1YCS",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.486,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2L14",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.125,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2LY4",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.12,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2K8F",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.099,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "7NMI",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.094,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "7BWN",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.089,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2MZD",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.064,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2B3G",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.061,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2RUK",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.056,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "1DT7",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.056,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "1JSP",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.051,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2MWO",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.038,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2MWY",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.038,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6V4F",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.036,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6V4H",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.036,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2GS0",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.036,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "1YC5",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.033,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2H2D",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.033,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "3PDH",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.033,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "1YCR",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.033,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5MHC",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.031,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6RL3",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.031,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6RWU",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.031,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6RWS",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.031,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6RJZ",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.031,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6RL6",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.031,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6RM7",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.031,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6RL4",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.031,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6SIP",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.031,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6SIO",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.031,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6SIN",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.031,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6RWI",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.031,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6RWH",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.031,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6S9Q",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.031,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "3DAC",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.031,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5MOC",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.031,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6RKI",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.031,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6RKM",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.031,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6S39",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.031,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6SLV",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.031,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6S40",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.031,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "3DAB",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.031,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2MWP",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.031,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2H4J",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.028,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "1YCQ",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.028,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2Z5S",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.028,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2Z5T",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.028,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "4HFZ",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.028,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9OBF",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.028,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9YZH",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.028,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6SIQ",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.025,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "4X34",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.025,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6RKK",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.025,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6R5L",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.025,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6S3C",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.025,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "1MA3",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.023,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "21EX",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.023,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9EK4",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.023,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5UN8",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.023,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9EIQ",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.023,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "1H26",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.023,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6VR1",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.023,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6VR5",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.023,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6VRN",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.023,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6VRM",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.023,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6VQO",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.023,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "7RM4",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.023,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6W51",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.023,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6RK8",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.02,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6RM5",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.02,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2H4H",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.02,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5OL0",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.02,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2H4F",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.02,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9EJD",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.02,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "3TG5",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.02,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2YDR",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.02,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "3LW1",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.018,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2FOJ",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.018,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6RX2",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.018,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "4BUZ",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.018,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2H2F",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.018,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "4ZZJ",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.018,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8OXM",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.018,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8OXO",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.018,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "1XQH",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.015,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2H59",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.015,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2FOO",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.015,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "4BV2",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.013,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2V5W",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.01,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "4FZ3",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.01,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "3OQ5",
+        "template_oligomeric_state": "heteromer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.003,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "4RP6",
+        "template_oligomeric_state": "homo-6-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.018,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "4RP7",
+        "template_oligomeric_state": "homo-6-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.015,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "3Q05",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.669,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "3TS8",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.669,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "4MZR",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.669,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "3Q06",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.659,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "7B49",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.509,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5MCT",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.509,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5MG7",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.509,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5MF7",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.509,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5MCV",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.509,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2AC0",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.509,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2AHI",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.509,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "7B4A",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.509,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "4HJE",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.509,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "3KMD",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.509,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "4IBU",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.506,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5MCW",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.506,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6FJ5",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.506,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2ATA",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.506,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2ADY",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.506,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "3KZ8",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.504,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "7EEU",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.504,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5LGY",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.504,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5MCU",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.501,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "7B46",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.499,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "7B4C",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.496,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8XCE",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.496,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "7B48",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.494,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "7B4B",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.491,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "7B47",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.491,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "1SAE",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.107,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "1SAF",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.107,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "1OLG",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.107,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "1OLH",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.107,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "1SAK",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.107,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "3SAK",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.107,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "1SAL",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.107,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "1C26",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.081,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8UQR",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.079,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "1AIE",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.079,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "1PES",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.079,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "1PET",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.079,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2J0Z",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.079,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2J11",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.079,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2J10",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.079,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9C5S",
+        "template_oligomeric_state": "homo-4-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.036,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "1TUP",
+        "template_oligomeric_state": "homo-3-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.499,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "1TSR",
+        "template_oligomeric_state": "homo-3-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.499,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "3Q01",
+        "template_oligomeric_state": "homo-2-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.669,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "7B4N",
+        "template_oligomeric_state": "homo-2-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.509,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "7B4H",
+        "template_oligomeric_state": "homo-2-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.509,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "7B4E",
+        "template_oligomeric_state": "homo-2-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.509,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6ZNC",
+        "template_oligomeric_state": "homo-2-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.509,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "3IGK",
+        "template_oligomeric_state": "homo-2-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.509,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "7B4F",
+        "template_oligomeric_state": "homo-2-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.509,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "4IBW",
+        "template_oligomeric_state": "homo-2-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.509,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "3IGL",
+        "template_oligomeric_state": "homo-2-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.509,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5BUA",
+        "template_oligomeric_state": "homo-2-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.509,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "7B4D",
+        "template_oligomeric_state": "homo-2-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.509,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "7B4G",
+        "template_oligomeric_state": "homo-2-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.509,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "4IBV",
+        "template_oligomeric_state": "homo-2-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.509,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9G6T",
+        "template_oligomeric_state": "homo-2-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.506,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "3D0A",
+        "template_oligomeric_state": "homo-2-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.501,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8XCB",
+        "template_oligomeric_state": "homo-2-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.494,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "1HS5",
+        "template_oligomeric_state": "homo-2-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.087,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "1A1U",
+        "template_oligomeric_state": "homo-2-mer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.074,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6SL6",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.519,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2FEJ",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.519,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "37ZA",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.511,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "7EDS",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.509,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "37ZR",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.509,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9S9L",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.506,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9S9P",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.506,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2PCX",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.506,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2XWR",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.506,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8WD2",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.506,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6GGB",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.504,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8A92",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.504,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9S9O",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.504,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8RBA",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.504,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9SZZ",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.504,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "4IJT",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.504,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9S9Q",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.504,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "4LOF",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.504,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6SHZ",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.501,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6GGC",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.501,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6GGE",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.501,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5O1E",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.501,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8E7A",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.501,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5O1C",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.501,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5G4N",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.501,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5O1D",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.501,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8QWO",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.501,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6SI3",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.501,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5O1B",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.501,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6SI1",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.501,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "4IBY",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.501,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8A31",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.501,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8A32",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.501,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5AOL",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.501,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "4AGM",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.501,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8CG7",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.501,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6SI0",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.501,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "4AGN",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.501,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9G6U",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.501,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8QWL",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.501,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9G5H",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.501,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9S9M",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.501,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9BR3",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.501,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8RBC",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.501,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5O1H",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.499,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6GGF",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.499,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5O1G",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.499,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5O1F",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.499,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5O1I",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.499,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5A7B",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.499,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6GGD",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.499,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5O1A",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.499,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "4AGO",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.499,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5G4O",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.499,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "4AGP",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.499,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6SI2",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.499,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8QWM",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.499,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6GGA",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.499,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8DC6",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.499,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8QWK",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.499,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8RBB",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.499,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "4IBT",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.499,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9BR4",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.499,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9S9N",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.499,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8DC8",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.499,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2WGX",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.499,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6SI4",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.499,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8DC7",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.499,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8QWP",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.499,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8DC4",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.499,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8XP5",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.499,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "3ZME",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.496,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5AOK",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.496,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5AB9",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.496,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5G4M",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.496,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5LAP",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.496,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "4AGQ",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.496,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8QWN",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.496,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5AOJ",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.496,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2VUK",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.496,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9SUK",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.496,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2X0U",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.496,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5ABA",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.496,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2J1X",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.496,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2J1Y",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.496,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "4AGL",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.496,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "9S9R",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.496,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5AOM",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.496,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5AOI",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.496,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2BIP",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.496,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2BIQ",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.496,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2X0V",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.496,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2J1W",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.496,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2J1Z",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.496,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2J20",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.496,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "1UOL",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.496,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2BIN",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.496,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "3D09",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.496,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2BIM",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.496,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2X0W",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.496,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "3D07",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.496,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "4KVP",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.494,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "4LOE",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.494,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2BIO",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.494,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "7V97",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.494,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2OCJ",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.494,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6LHD",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.494,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "4LO9",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.494,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "7EAX",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.494,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "4MZI",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.491,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2J21",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.491,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "3D05",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.491,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "7DHZ",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.491,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "4IBS",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.491,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "2YBG",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.491,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "4IBZ",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.491,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6FF9",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.491,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "7DHY",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.491,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "8E7B",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.491,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "3D06",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.489,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "4IBQ",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.489,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "3D08",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.486,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5HOU",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.155,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5HPD",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.153,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6T58",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.102,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "5HP0",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.064,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "7EL4",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.0,
+        "seq_identity": 0.0,
+        "coverage": 0.018,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "4MZR",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.454,
+        "gmqe": 0.475,
+        "seq_identity": 90.717,
+        "coverage": 0.669,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "3Q05",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.416,
+        "gmqe": 0.476,
+        "seq_identity": 92.704,
+        "coverage": 0.667,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "3Q01",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.367,
+        "gmqe": 0.472,
+        "seq_identity": 92.704,
+        "coverage": 0.669,
+        "qualifying_homology": false
+      },
+      {
+        "template_pdb_id": "6XRE",
+        "template_oligomeric_state": "monomer",
+        "qmqe": 0.0,
+        "gmqe": 0.699,
+        "seq_identity": 100.0,
+        "coverage": 0.865,
+        "qualifying_homology": false
+      }
+    ],
+    "confidence": 0.9,
+    "status": "CONFIRMED",
+    "observed_function": "forms homodimers and homotetramers (pubmed:19011621). binds dna as a homotetramer (pubmed:36108750). interacts with axin1. probably part of a complex consisting of tp53, hipk2 and axin1 (by similarity). interacts with histone acetyltransferases ep300 and methyltransferases hrmt1l2 and carm1, and recruits them to promoters. interacts (via c-terminus) with taf1; when taf1 is part of the tfiid complex. interacts with ing4; this interaction may be indirect. found in a complex with cables1 and tp73. interacts with hipk1, hipk2, and tp53inp1. interacts with wwox. may interact with hcv core protein. interacts with usp7 and syvn1. interacts with hsp90ab1. interacts with chd8; leading to recruit histone h1 and prevent transactivation activity (by similarity). interacts with armc10, cdkn2aip, nuak1, stk11/lkb1, uhrf2 and e4f1. interacts with ywhaz; the interaction enhances tp53 transcriptional activity. phosphorylation of ywhaz on 'ser-58' inhibits this interaction. interacts (via dna-binding domain) with maml1 (via n-terminus). interacts with mkrn1. interacts with pml (via c-terminus). interacts with mdm2; leading to ubiquitination and proteasomal degradation of tp53 (pubmed:10570149, pubmed:19880522, pubmed:22914926, pubmed:8875929). interacts with pdcd5; the interaction is direct and prevents the interaction between tp53 and mdm2, thereby stabilizing tp53 (pubmed:22914926). directly interacts with fbxo42; leading to ubiquitination and degradation of tp53. interacts (phosphorylated at ser-15 by atm) with the phosphatase pp2a-ppp2r5c holoenzyme; regulates stress-induced tp53-dependent inhibition of cell proliferation. interacts with ppp2r2a. interacts with aurka, daxx, brd7 and trim24. interacts (when monomethylated at lys-382) with l3mbtl1. isoform 1 interacts with isoform 2 and with isoform 4. interacts with grk5. binds to the cak complex (cdk7, cyclin h and mat1) in response to dna damage. interacts with cdk5 in neurons. interacts with aurkb, setd2, uhrf2 and noc2l. interacts (via n-terminus) with ptk2/fak1; this promotes ubiquitination by mdm2. interacts with ptk2b/pyk2; this promotes ubiquitination by mdm2. interacts with prkcg. interacts with ppif; the association implicates preferentially tetrameric tp53, is induced by oxidative stress and is impaired by cyclosporin a (csa). interacts with snai1; the interaction induces snai1 degradation via mdm2-mediated ubiquitination and inhibits snai1-induced cell invasion. interacts with ubc9. interacts with znf385b; the interaction is direct. interacts (via dna-binding domain) with znf385a; the interaction is direct and enhances p53/tp53 transactivation functions on cell-cycle arrest target genes, resulting in growth arrest. interacts with ankrd2. interacts with rffl and rnf34; involved in p53/tp53 ubiquitination. interacts with mta1 and cop1. interacts with ccar2 (via n-terminus). interacts with morc3 (pubmed:17332504). interacts (via c-terminus) with pou4f2 isoform 1 (via c-terminus) (pubmed:17145718). interacts (via oligomerization region) with nop53; the interaction is direct and may prevent the mdm2-mediated proteasomal degradation of tp53 (pubmed:22522597). interacts with afg1l; mediates mitochondrial translocation of tp53 (pubmed:27323408). interacts with ubd (pubmed:25422469). interacts with taf6 isoform 1 and isoform 4 (pubmed:20096117). interacts with c10orf90/fats; the interaction inhibits binding of tp53 and mdm2 (by similarity). interacts with nupr1; interaction is stress-dependent (pubmed:18690848). forms a complex with ep300 and nupr1; this complex binds cdkn1a promoter leading to transcriptional induction of cdkn1a (pubmed:18690848). interacts with prmt5 in response to dna damage; the interaction is ttc5/strap dependent (pubmed:19011621). interacts with ppp1r13l (via sh3 domain and ank repeats); the interaction inhibits pro-apoptotic activity of p53/tp53 (pubmed:12524540). interacts with ppp1r13b/aspp1 and tp53bp2/aspp2; the interactions promotes pro-apoptotic activity (pubmed:12524540). when phosphorylated at ser-15, interacts with ddx3x and gamma-tubulin (pubmed:28842590). interacts with kat7/hbo1; leading to inhibit histone acetyltransferase activity of kat7/hbo1 (pubmed:17954561). interacts (via n-terminus) with e3 ubiquitin-protein ligase mul1; the interaction results in ubiquitination of cytoplasmic tp53 at lys-24 and subsequent proteasomal degradation (pubmed:21597459). interacts with s100a4; this interaction promotes tp53 degradation (pubmed:23752197, pubmed:32442400). interacts with banp (by similarity). interacts with ttc5/strap; the interaction may result in increased mitochondrial-dependent apoptosis (pubmed:25168243). interacts with nqo1; this interaction is nadh-dependent, stabilizes tp53 in response to oxidative stress and protects it from ubiquitin-independent degradation by the 20s proteasome (pubmed:15687255). interacts with dazap2 at tp53 target gene promoters; the interaction is triggered by dna damage and leads to modulation of the expression of a subset of tp53 target genes, reducing dna damage-induced cell death by limiting the expression of cell death-mediating tp53 target genes (pubmed:33591310). interacts (via n-terminus) with znf768 (via zinc-finger domains); interaction might be facilitated by tp53 oligomerization state (pubmed:34404770). forms a ternary complex with aldob and g6pd; this interaction is direct. aldob stabilizes the complex inhibiting g6pd activity and keeping oxidative pentose phosphate metabolism in check. interacts with morn3; the interactions mediate post-transcriptional modifications of tp53 by mdm2 and sirt1 (pubmed:29681526). interacts with hspa9/mot-2; the interaction promotes the degradation of tp53 (pubmed:24625977). interacts with fbxo22; this interaction promotes tp53 proteasomal degradation (pubmed:26868148) (microbial infection) interacts with cancer-associated/hpv e6 viral proteins leading to ubiquitination and degradation of tp53 giving a possible model for cell growth regulation. this complex formation requires an additional factor, e6-ap, which stably associates with tp53 in the presence of e6 (microbial infection) interacts with human cytomegalovirus/hhv-5 protein ul123 (microbial infection) interacts (via n-terminus) with human adenovirus 5 e1b-55k protein; this interaction leads to the inhibition of tp53 function and/or its degradation (microbial infection) interacts with kaposi's sarcoma-associated herpesvirus/hhv-8 protein orf45; this interaction results in the cytoplasmic localization of tp53 thereby decreasing its transcriptional activity",
+    "predicted_function": "Oligomeric enzyme or structural complex",
+    "quaternary_mechanism_hypothesis": "Self-associating A4 assembly providing multivalent interaction interfaces",
+    "supporting_evidence": [
+      "Experimental PDBe PISA quaternary interface corroboration",
+      "Validated Gene Ontology: C:centrosome"
+    ]
+  },
+  "evidence_coverage": {
+    "databases_queried": [
+      {
+        "database": "UniProtKB",
+        "queried": true,
+        "hit": true,
+        "query_status": "QUERY_SUCCESS_WITH_HIT"
+      },
+      {
+        "database": "Complex Portal",
+        "queried": true,
+        "hit": true,
+        "query_status": "QUERY_SUCCESS_WITH_HIT"
+      },
+      {
+        "database": "RCSB PDB",
+        "queried": true,
+        "hit": true,
+        "query_status": "QUERY_SUCCESS_WITH_HIT"
+      },
+      {
+        "database": "PDBe PISA",
+        "queried": true,
+        "hit": true,
+        "query_status": "QUERY_SUCCESS_WITH_HIT"
+      },
+      {
+        "database": "SWISS-MODEL",
+        "queried": true,
+        "hit": true,
+        "query_status": "QUERY_SUCCESS_WITH_HIT"
+      },
+      {
+        "database": "IntAct",
+        "queried": true,
+        "hit": false,
+        "query_status": "QUERY_SUCCESS_NO_HIT"
+      },
+      {
+        "database": "AlphaFold DB",
+        "queried": true,
+        "hit": true,
+        "query_status": "QUERY_SUCCESS_WITH_HIT"
+      },
+      {
+        "database": "AlphaFold-Multimer",
+        "queried": true,
+        "hit": false,
+        "query_status": "PREDICTION_NOT_EXECUTED"
+      }
+    ],
+    "evidence_gaps": [
+      "External multimer live compute absent"
+    ],
+    "records": [
+      {
+        "database": "UniProtKB",
+        "query_status": "QUERY_SUCCESS_WITH_HIT",
+        "hit_count": 1,
+        "rationale": "Curated subunit annotation and sequence entry",
+        "details": null
+      },
+      {
+        "database": "Complex Portal",
+        "query_status": "QUERY_SUCCESS_WITH_HIT",
+        "hit_count": 1,
+        "rationale": "Curated heteromeric complex assembly",
+        "details": null
+      },
+      {
+        "database": "RCSB PDB",
+        "query_status": "QUERY_SUCCESS_WITH_HIT",
+        "hit_count": 6,
+        "rationale": "Experimental crystallographic/cryo-EM biological assemblies",
+        "details": null
+      },
+      {
+        "database": "PDBe PISA",
+        "query_status": "QUERY_SUCCESS_WITH_HIT",
+        "hit_count": 6,
+        "rationale": "Thermodynamic assembly stability and interface chemistry",
+        "details": null
+      },
+      {
+        "database": "SWISS-MODEL",
+        "query_status": "QUERY_SUCCESS_WITH_HIT",
+        "hit_count": 325,
+        "rationale": "Homology multimer templates",
+        "details": null
+      },
+      {
+        "database": "IntAct",
+        "query_status": "QUERY_SUCCESS_NO_HIT",
+        "hit_count": 0,
+        "rationale": "Physical protein-protein interaction network",
+        "details": null
+      },
+      {
+        "database": "AlphaFold DB",
+        "query_status": "QUERY_SUCCESS_WITH_HIT",
+        "hit_count": 1,
+        "rationale": "Monomer fold confidence (pLDDT); tertiary coordinate prediction",
+        "details": null
+      },
+      {
+        "database": "AlphaFold-Multimer",
+        "query_status": "PREDICTION_NOT_EXECUTED",
+        "hit_count": 0,
+        "rationale": "External prediction runner not configured",
+        "details": null
+      }
+    ]
+  },
+  "status": "CONFIRMED",
+  "experimental_oligomeric_state": "A4",
+  "predicted_oligomeric_state": "A4",
+  "fallback_representation": null,
+  "stages_completed": [
+    1,
+    2,
+    3,
+    4,
+    6
+  ],
+  "metadata": {
+    "session_id": "quat-session-1791161046153-d7f07820",
+    "offline_mode": false,
+    "pisa_thermodynamic_state": "STABLE"
+  }
+}
