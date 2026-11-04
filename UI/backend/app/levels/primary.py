@@ -61,7 +61,7 @@ from ..schemas import (
 logger = logging.getLogger(__name__)
 
 # Change this whenever the logic below changes, so cached results are not reused.
-CACHE_VERSION = "primary-1"
+CACHE_VERSION = "primary-2"
 
 ESM_MODEL_NAME = "facebook/esm2_t6_8M_UR50D"
 DIAMOND_DB = PRIMARY_DATA_DIR / "swissprot.dmnd"
@@ -632,7 +632,6 @@ def _to_level_result(sequence: str, results: dict[str, Any], pipeline: EndToEndB
 
     # --- Key figures and grouped properties
     metrics = [
-        Metric(label="Best-hit identity", value=f"{identity:.2f}%" if has_hit else "—"),
         Metric(label="Query coverage", value=f"{coverage:.2f}%" if has_hit else "—"),
         Metric(label="Best Pfam domain", value=str(hmmer.get("domain")) if hmmer_passed else "None"),
         Metric(label="Domain E-value", value=f"{hmmer_evalue:.2e}" if hmmer_passed else "—"),
@@ -650,7 +649,6 @@ def _to_level_result(sequence: str, results: dict[str, Any], pipeline: EndToEndB
         Metric(label="DIAMOND identity", value=f"> {pipeline.DIAMOND_IDENTITY_THRESHOLD:g}%", group=thresholds),
         Metric(label="DIAMOND query coverage", value=f"≥ {pipeline.DIAMOND_QUERY_COVERAGE_THRESHOLD:g}%", group=thresholds),
         Metric(label="HMMER independent E-value", value=f"< {pipeline.HMMER_EVAL_THRESHOLD:.0e}", group=thresholds),
-        Metric(label="Points", value="DIAMOND 50 + HMMER 40", group=thresholds),
     ]
 
     # --- Evidence: the notebook's own summary lines
@@ -784,13 +782,17 @@ def _to_level_result(sequence: str, results: dict[str, Any], pipeline: EndToEndB
             "embedding": [round(float(value), 6) for value in embedding.tolist()] if embedding is not None else None,
         },
         "physicochemical": physio,
-        "consensus": consensus,
+        "consensus": {"summary": consensus["summary"]},
         "interpretation": [{"title": title, "text": text} for title, text in results["interpretation"]],
     }
 
     return LevelResult(
         source="live",
-        headline=Headline(value=f"{consensus['evidence_score']} / {consensus['maximum_score']}", label="evidence score"),
+        headline=(
+            Headline(value=f"{identity:.2f}%", label="best Swiss-Prot hit identity")
+            if has_hit
+            else Headline(value="No hit", label="Swiss-Prot homology search")
+        ),
         summary=summary,
         metrics=metrics,
         evidence=evidence,
