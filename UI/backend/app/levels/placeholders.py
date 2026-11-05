@@ -188,7 +188,7 @@ def primary(sequence: str, ctx: StageContext) -> LevelResult:
 
     return LevelResult(
         source="placeholder",
-        headline=Headline(value="90 / 90", label="evidence score"),
+        headline=Headline(value=f"{best_identity:.0f}%", label="best Swiss-Prot hit identity"),
         summary=(
             f"A close Swiss-Prot homologue ({best_identity:.0f}% identity) and {len(domains)} "
             f"Pfam {domain_word} point to a well-characterised protein family."

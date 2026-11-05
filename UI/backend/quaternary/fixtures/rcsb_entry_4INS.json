@@ -1,0 +1,15 @@
+{
+  "pdb_id": "4INS",
+  "resolution": 1.50,
+  "method": "X-RAY DIFFRACTION",
+  "symmetry": "C3",
+  "assemblies": [
+    {
+      "assembly_id": "1",
+      "details": "Zinc-stabilized storage hexamer in pancreatic beta cells",
+      "oligomeric_details": "Hexamer",
+      "stoichiometry": "A6",
+      "total_subunits": 6
+    }
+  ]
+}

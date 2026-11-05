@@ -122,3 +122,10 @@ DIAMOND_BIN = os.getenv("PFP_DIAMOND_BIN", "").strip() or "diamond"
 HMMSCAN_BIN = os.getenv("PFP_HMMSCAN_BIN", "").strip() or "hmmscan"
 # Longest a single DIAMOND or hmmscan run may take.
 PRIMARY_TOOL_TIMEOUT_SECONDS = _read_float("PFP_PRIMARY_TOOL_TIMEOUT", 1800.0)
+
+# --- Quaternary-structure module (the team's quaternary_pipeline package) -----
+# Longest the pipeline's six stages (about a dozen database queries) may take.
+QUATERNARY_TIMEOUT_SECONDS = _read_float("PFP_QUATERNARY_TIMEOUT", 600.0)
+# The pipeline's own cache of database answers. Delete the folder to clear it;
+# PFP_CACHE=off turns it off together with the result cache above.
+QUATERNARY_CACHE_DIR = BACKEND_DIR / "data" / "quaternary_cache"

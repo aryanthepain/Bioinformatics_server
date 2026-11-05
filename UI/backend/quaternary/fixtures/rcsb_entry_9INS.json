@@ -1,0 +1,15 @@
+{
+  "pdb_id": "9INS",
+  "resolution": 2.10,
+  "method": "X-RAY DIFFRACTION",
+  "symmetry": null,
+  "assemblies": [
+    {
+      "assembly_id": "1",
+      "details": "Active circulating monomeric hormone binding insulin receptor",
+      "oligomeric_details": "Monomer",
+      "stoichiometry": "A",
+      "total_subunits": 1
+    }
+  ]
+}

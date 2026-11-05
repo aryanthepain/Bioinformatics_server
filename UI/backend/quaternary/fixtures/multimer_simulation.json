@@ -1,0 +1,9 @@
+{
+  "predicted_stoichiometry": "A2",
+  "iptm": 0.84,
+  "ptm": 0.81,
+  "model_confidence": 0.834,
+  "plddt": 88.5,
+  "simulation_mode": true,
+  "notes": "Simulated AlphaFold-Multimer prediction for local dry-run testing."
+}

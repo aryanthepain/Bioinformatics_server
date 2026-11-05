@@ -1,0 +1,11 @@
+{
+  "pdb_id": "1DK7",
+  "assembly_id": "1",
+  "macromolecular_size": 1,
+  "composition": "A",
+  "dissociation_energy_kcal_mol": 0.0,
+  "accessible_surface_area_angstrom2": 9500.0,
+  "buried_surface_area_angstrom2": 0.0,
+  "status": "dissociated/lattice",
+  "interfaces": []
+}
