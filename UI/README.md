@@ -52,9 +52,17 @@ UI/
 │   ├── .python-version          pins Python 3.12 for uv
 │   ├── pyproject.toml           backend dependencies
 │   ├── .env.example             template for .env (secrets; .env itself is never committed)
+│   ├── quaternary_pipeline.py   the team's quaternary package (copied unchanged from main)
+│   ├── quaternary/              ″
+│   ├── seed_cache/              saved example results, copied into the hosted app
 │   ├── scripts/
 │   │   ├── smoke_test.py        end-to-end check of the running backend
-│   │   └── check_tertiary.py    runs the real tertiary module once (5–15 min)
+│   │   ├── setup_primary.sh     one-time download of Swiss-Prot and Pfam
+│   │   ├── check_primary.py     runs each real module once…
+│   │   ├── check_secondary.py   ″
+│   │   ├── check_tertiary.py    ″ (5–15 min)
+│   │   ├── check_quaternary.py  ″ (about a minute; --offline needs no internet)
+│   │   └── update_seed_cache.sh copies saved results into seed_cache
 │   └── app/
 │       ├── main.py              FastAPI app: startup, shutdown, routes
 │       ├── api.py               the HTTP endpoints
@@ -65,11 +73,16 @@ UI/
 │       ├── jobs.py              in-memory job store, progress and cancellation
 │       ├── runner.py            runs the levels in the background
 │       ├── cache.py             saves results of slow real modules (backend/data/cache)
-│       ├── verdict.py           combines level results into the final answer
+│       ├── verdict.py           combines the four levels into the predicted function
+│       ├── warmup.py            optional model loading at start-up (hosting)
 │       └── levels/
 │           ├── __init__.py      level registry — where real modules plug in
-│           ├── placeholders.py  stand-in results until modules are connected
-│           └── tertiary.py      REAL: Swiss-Model, Foldseek, ProtParam, wet-lab advice
+│           ├── placeholders.py  stand-in results (used when a module is switched off)
+│           ├── primary.py       REAL: DIAMOND, HMMER/Pfam, ESM-2, ProtParam
+│           ├── secondary.py     REAL: JPred, ProtBert, RCSB/PDBe comparison
+│           ├── tertiary.py      REAL: Swiss-Model, Foldseek, ProtParam, wet-lab advice
+│           └── quaternary.py    REAL: the team's quaternary pipeline (six stages)
+├── deploy/                      hosting: Dockerfile, docker-compose, Caddy, DEPLOY.md
 └── frontend/
     ├── index.html
     ├── package.json
@@ -128,8 +141,9 @@ See [docs/LEVEL_CONTRACT.md](docs/LEVEL_CONTRACT.md).
 
 ## Placeholder mode
 
-Until the analysis modules are connected, every level returns clearly marked
-placeholder results. Two optional settings help while building the interface:
+Levels switched to placeholders (`PFP_PLACEHOLDER_LEVELS=primary,tertiary`, or
+all four for interface work) return clearly marked stand-in results. Two optional
+settings help while building the interface:
 
 ```bash
 # Instant results instead of the realistic ~15-second run
@@ -141,10 +155,17 @@ PFP_MOCK_FAIL_LEVEL=secondary uv run uvicorn app.main:app --reload --port 8000
 
 ## Real analysis modules
 
-Connected so far: **primary structure** (`backend/app/levels/primary.py`) and
-**tertiary structure** (`backend/app/levels/tertiary.py`), ported from the team
-notebooks with their logic unchanged (one documented bug fix in primary). The
-other levels still use placeholders.
+All four levels are connected, each ported from the team notebook with its
+logic unchanged: **primary** (`levels/primary.py`; one documented bug fix),
+**secondary** (`levels/secondary.py`), **tertiary** (`levels/tertiary.py`) and
+**quaternary** (`levels/quaternary.py`, which runs the team's `quaternary_pipeline`
+package on the closest Swiss-Prot homologue found by the primary level).
+
+**The final prediction** (`backend/app/verdict.py`) follows the notebook
+`Function_Prediction_Integration_Final.ipynb`: the function is transferred from the
+best-supported template (Swiss-Prot homologue → Pfam domain → Foldseek fold), its
+confidence is P(homology) × P(function conserved), and the secondary, tertiary and
+quaternary results act as consistency checks on the log-odds scale.
 
 **Primary structure needs a one-time setup** (about 5 GB of disk):
 
@@ -162,8 +183,10 @@ SWISSMODEL_TOKEN=your-swiss-model-token
 
 Without a token, the tertiary level is skipped with an explanation.
 
-- **Check the module on its own** (5–15 minutes, needs internet):
-  `uv run python scripts/check_tertiary.py`
+- **Check a module on its own** (needs internet):
+  `uv run python scripts/check_tertiary.py` (5–15 minutes) or
+  `uv run python scripts/check_quaternary.py` (about a minute; add `--offline`
+  to test without internet)
 - **Cache:** real results are saved in `backend/data/cache`, so the same
   sequence is instant the second time. Delete that folder to clear it, or set
   `PFP_CACHE=off`.
@@ -190,10 +213,21 @@ backend with `PFP_PLACEHOLDER_LEVELS=tertiary` to run them too.
 3. Input screen: sequence entry, validation, examples, job progress ✅
 4. Results screen: verdict, residue map, level cards, detailed analyses, print ✅
 5. Integrate primary-structure analysis (DIAMOND, HMMER, ESM-2, ProtParam) ✅
-6. Integrate secondary-structure analysis (JPred, ProtBert, RCSB/PDBe)
+6. Integrate secondary-structure analysis (JPred, ProtBert, RCSB/PDBe) ✅
 7. Integrate tertiary-structure analysis (Swiss-Model, Foldseek, ProtParam) ✅
-8. Integrate quaternary-structure analysis, then evidence aggregation
-9. Polish
+8. Integrate quaternary-structure analysis, then evidence aggregation ✅
+9. Hosting (free, Oracle Cloud; see `deploy/DEPLOY.md`) ✅
+
+## Hosting
+
+The whole app runs as one Docker container behind HTTPS on a free Oracle Cloud
+machine. Step-by-step guide: **[deploy/DEPLOY.md](deploy/DEPLOY.md)**.
+After changing Python dependencies, refresh the file the Docker build installs:
+
+```bash
+cd backend
+uv export --frozen --no-hashes --no-emit-project --no-group primary --format requirements-txt -o requirements.txt
+```
 
 ## Troubleshooting
 

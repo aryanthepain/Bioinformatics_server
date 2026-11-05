@@ -1,0 +1,6 @@
+# SITE_ADDRESS comes from deploy/.env, e.g. protfunc.duckdns.org.
+# For a real domain name, Caddy obtains and renews the HTTPS certificate itself.
+{$SITE_ADDRESS} {
+	encode gzip
+	reverse_proxy app:8000
+}

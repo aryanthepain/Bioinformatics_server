@@ -22,7 +22,7 @@ from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
-from . import runner
+from . import runner, warmup
 from .api import router
 from .config import API_VERSION
 
@@ -38,6 +38,7 @@ logging.basicConfig(
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     runner.startup()
+    warmup.start()
     yield
     await runner.shutdown()
 

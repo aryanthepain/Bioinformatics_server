@@ -129,3 +129,8 @@ QUATERNARY_TIMEOUT_SECONDS = _read_float("PFP_QUATERNARY_TIMEOUT", 600.0)
 # The pipeline's own cache of database answers. Delete the folder to clear it;
 # PFP_CACHE=off turns it off together with the result cache above.
 QUATERNARY_CACHE_DIR = BACKEND_DIR / "data" / "quaternary_cache"
+
+# --- Hosting ------------------------------------------------------------------
+# Load the ESM-2 and ProtBert models when the server starts instead of during
+# the first analysis (on by default in the hosted Docker image; see app/warmup.py).
+PRELOAD_MODELS = os.getenv("PFP_PRELOAD_MODELS", "off").strip().lower() in {"on", "1", "true", "yes"}

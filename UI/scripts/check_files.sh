@@ -6,13 +6,16 @@
 
 cd "$(dirname "$0")/.." || exit 1
 missing=0
+total=0
 while IFS= read -r file; do
   [ -z "$file" ] && continue
+  total=$((total + 1))
   if [ ! -f "$file" ]; then
     echo "MISSING  UI/$file"
     missing=$((missing + 1))
   fi
 done <<'FILES'
+.dockerignore
 .gitignore
 .vscode/settings.json
 README.md
@@ -27,6 +30,7 @@ backend/app/jobs.py
 backend/app/levels/__init__.py
 backend/app/levels/placeholders.py
 backend/app/levels/primary.py
+backend/app/levels/quaternary.py
 backend/app/levels/secondary.py
 backend/app/levels/tertiary.py
 backend/app/main.py
@@ -34,12 +38,28 @@ backend/app/runner.py
 backend/app/schemas.py
 backend/app/sequence.py
 backend/app/verdict.py
+backend/app/warmup.py
 backend/pyproject.toml
+backend/quaternary_pipeline.py
+backend/quaternary/__init__.py
+backend/quaternary/engine.py
+backend/quaternary/session.py
+backend/requirements.txt
 backend/scripts/check_primary.py
+backend/scripts/check_quaternary.py
 backend/scripts/check_secondary.py
 backend/scripts/check_tertiary.py
 backend/scripts/setup_primary.sh
 backend/scripts/smoke_test.py
+backend/scripts/update_seed_cache.sh
+backend/uv.lock
+deploy/.env.example
+deploy/Caddyfile
+deploy/DEPLOY.md
+deploy/Dockerfile
+deploy/docker-compose.yml
+deploy/ml_versions.py
+deploy/setup_server.sh
 docs/LEVEL_CONTRACT.md
 frontend/index.html
 frontend/package.json
@@ -84,7 +104,7 @@ scripts/check_files.sh
 FILES
 
 if [ "$missing" -eq 0 ]; then
-  echo "OK: all 66 project files are present."
+  echo "OK: all $total project files are present."
 else
   echo "$missing file(s) missing. The project is incomplete; do not run it yet."
   exit 1

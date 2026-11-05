@@ -1,0 +1,41 @@
+# Runs the Protein Function Predictor behind Caddy, which serves it over HTTPS
+# with a free Let's Encrypt certificate. From the deploy folder:
+#
+#     sudo docker compose up -d --build      build (first time 30-40 min) and start
+#     sudo docker compose logs -f app        follow the app's log (Ctrl+C to stop following)
+#
+# Settings come from deploy/.env (created by setup_server.sh; see .env.example).
+
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: protein-function-predictor
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      # Results survive restarts and rebuilds.
+      - results-cache:/home/user/app/backend/data/cache
+      - quaternary-cache:/home/user/app/backend/data/quaternary_cache
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:?Set SITE_ADDRESS in deploy/.env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  results-cache:
+  quaternary-cache:
+  caddy-data:
+  caddy-config:
