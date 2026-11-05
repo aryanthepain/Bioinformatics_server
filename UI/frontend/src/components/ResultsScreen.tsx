@@ -187,7 +187,7 @@ export default function ResultsScreen({ job, onNewAnalysis }: ResultsScreenProps
                 </li>
               ))}
             </ul>
-            <p className="confidence__note">Solid: supports · striped: placeholder · grey: no result</p>
+            <p className="confidence__note">Blue: supports · grey: neutral · red: contradicts · striped: placeholder · pale: no result</p>
           </div>
         </section>
       ) : (

@@ -259,6 +259,23 @@ class StageContext:
         if self._cancel_event.wait(timeout=max(0.0, seconds)):
             raise AnalysisCancelled()
 
+    def level_result(self, key: LevelKey) -> LevelResult | None:
+        """The result of another level of this analysis, if that level completed.
+
+        Levels run in registry order, so a level can read the results of the
+        levels before it (the quaternary level reads the primary level's
+        Swiss-Prot homologue). Returns None if that level did not complete,
+        or if the job is unknown (as in the check scripts).
+        """
+        try:
+            job = self._store.get(self._job_id)
+        except JobNotFound:
+            return None
+        for level in job.levels:
+            if level.key == key:
+                return level.result if level.status == "completed" else None
+        return None
+
 
 # The single store used by the whole application.
 store = JobStore()

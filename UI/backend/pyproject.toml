@@ -11,6 +11,8 @@ dependencies = [
     "requests>=2.31,<3",
     "biopython>=1.84,<2",
     "jpredapi>=1,<2",
+    # Used by the quaternary_pipeline package (quaternary/session.py).
+    "pandas>=2.0,<4",
 ]
 
 [dependency-groups]

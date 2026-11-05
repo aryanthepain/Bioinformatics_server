@@ -1,0 +1,15 @@
+{
+  "pdb_id": "2INS",
+  "resolution": 1.90,
+  "method": "X-RAY DIFFRACTION",
+  "symmetry": "C2",
+  "assemblies": [
+    {
+      "assembly_id": "1",
+      "details": "Intermediate dimer during blood dilution",
+      "oligomeric_details": "Dimer",
+      "stoichiometry": "A2",
+      "total_subunits": 2
+    }
+  ]
+}

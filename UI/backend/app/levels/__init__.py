@@ -10,6 +10,9 @@ See docs/LEVEL_CONTRACT.md for details.
 Setting PFP_PLACEHOLDER_LEVELS (e.g. "tertiary") forces placeholder data for
 those levels even when a real module exists, which is handy for fast
 interface work.
+
+The levels run one after another in the order below. Keep quaternary after
+primary: it analyses the Swiss-Prot homologue that the primary level found.
 """
 
 import logging
@@ -19,7 +22,7 @@ from dataclasses import dataclass
 from ..config import LEVEL_NAMES, MOCK_FAIL_LEVEL, PLACEHOLDER_LEVELS
 from ..jobs import StageContext
 from ..schemas import LevelKey, LevelResult
-from . import placeholders, primary, secondary, tertiary
+from . import placeholders, primary, quaternary, secondary, tertiary
 
 logger = logging.getLogger(__name__)
 
@@ -78,8 +81,10 @@ LEVELS: tuple[LevelSpec, ...] = (
     _spec(
         "quaternary",
         "Quaternary structure",
-        (),  # filled in when the quaternary module is connected
+        ("UniProt", "Complex Portal", "RCSB PDB", "PDBe PISA", "SWISS-MODEL", "IntAct", "AlphaFold DB"),
         placeholders.quaternary,
+        live=quaternary.analyze,
+        # No cache_version: the pipeline caches its own database answers (see quaternary.py).
     ),
 )
 
