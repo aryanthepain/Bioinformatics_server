@@ -63,19 +63,40 @@ WORKDIR /home/user/app
 
 # The primary level's databases, built as in scripts/setup_primary.sh (about 400 MB of
 # downloads, about 5 GB on disk). Kept before the code so code changes do not rebuild them.
+# fetch() tries each address in turn (official mirrors; plain HTTP as the last resort for
+# Pfam), so one download server being unreachable does not stop a deploy. gunzip -t then
+# checks that the archive arrived complete.
 RUN mkdir -p backend/data/primary && cd backend/data/primary \
- && curl -fL --retry 5 --retry-delay 10 -o uniprot_sprot.fasta.gz \
+ && fetch() { \
+      out="$1"; shift; \
+      for url in "$@"; do \
+        echo "Downloading $url"; \
+        if curl -fL --retry 4 --retry-delay 15 --retry-connrefused --connect-timeout 30 -o "$out" "$url"; then return 0; fi; \
+      done; \
+      echo "Could not download $out from any address" >&2; return 1; \
+    } \
+ && fetch uniprot_sprot.fasta.gz \
       https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz \
+      https://ftp.ebi.ac.uk/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz \
+      https://ftp.expasy.org/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz \
+ && gunzip -t uniprot_sprot.fasta.gz \
  && gunzip -f uniprot_sprot.fasta.gz \
  && /opt/tools/bin/diamond makedb --in uniprot_sprot.fasta -d swissprot --quiet \
  && rm -f uniprot_sprot.fasta \
- && curl -fL --retry 5 --retry-delay 10 -o Pfam-A.hmm.gz \
+ && fetch Pfam-A.hmm.gz \
       https://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam-A.hmm.gz \
+      http://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam-A.hmm.gz \
+ && gunzip -t Pfam-A.hmm.gz \
  && gunzip -f Pfam-A.hmm.gz \
  && /opt/tools/bin/hmmpress -f Pfam-A.hmm > /dev/null \
- && (curl -fsL https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/reldate.txt \
-       -o swissprot_release.txt || true) \
- && (curl -fsL https://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam.version.gz | gunzip -c > pfam_release.txt || true)
+ && (fetch swissprot_release.txt \
+       https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/reldate.txt \
+       https://ftp.ebi.ac.uk/pub/databases/uniprot/current_release/knowledgebase/complete/reldate.txt \
+     || true) \
+ && (fetch Pfam.version.gz \
+       https://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam.version.gz \
+       http://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam.version.gz \
+     && gunzip -c Pfam.version.gz > pfam_release.txt; rm -f Pfam.version.gz; true)
 
 # The application code and the built website.
 COPY backend/ backend/
