@@ -22,7 +22,8 @@ export type Tone =
   | "confidence-low"
   | "confidence-very-low";
 export type Polarity = "positive" | "negative" | "neutral";
-export type SupportState = "supports" | "neutral" | "contradicts" | "placeholder" | "unavailable";
+/** "pending" = the level is still running; the verdict is provisional until it finishes. */
+export type SupportState = "supports" | "neutral" | "contradicts" | "placeholder" | "unavailable" | "pending";
 export type ConfidenceTier = "high" | "moderate" | "low" | "undetermined";
 export type GoAspect = "molecular_function" | "biological_process" | "cellular_component";
 export type NoteKind = "recommendation" | "observation" | "caution";
@@ -130,12 +131,34 @@ export interface LevelSupport {
   state: SupportState;
 }
 
+/** One key fact behind the prediction, e.g. the closest characterised protein. */
+export interface VerdictFact {
+  label: string;
+  value: string;
+}
+
+/**
+ * How far the levels that have not finished could still move the confidence.
+ * The predicted function itself can no longer change.
+ */
+export interface ConfidenceRange {
+  low: number;
+  high: number;
+  low_tier: ConfidenceTier;
+  high_tier: ConfidenceTier;
+  levels: LevelKey[];
+  /** True when these levels were stopped: the range is what they could have changed. */
+  stopped: boolean;
+}
+
 export interface Verdict {
   source: DataSource;
   function: string;
   description: string;
   confidence_tier: ConfidenceTier;
   confidence_score: number | null;
+  confidence_range: ConfidenceRange | null;
+  facts: VerdictFact[];
   go_terms: GoTerm[];
   level_support: LevelSupport[];
   rationale: string[];

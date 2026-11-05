@@ -227,7 +227,8 @@ export default function RunScreen({
           </section>
           {active && (
             <p className="run-note">
-              Some levels use public web servers (Swiss-Model, JPred) and can take 5–15 minutes. You can
+              The results open as soon as the first level has finished; the others keep running in their own
+              tabs. Some levels use public web servers (Swiss-Model, JPred) and can take 5–15 minutes. You can
               safely refresh this page — the analysis keeps running on the server.
             </p>
           )}

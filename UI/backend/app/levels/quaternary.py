@@ -445,21 +445,21 @@ def _to_level_result(
 
     if characterized:
         article = "an" if name[0] in "AEIOU" else "a"
-        assembly_phrase = f"{article} {name.lower()} ({formula}), evidence status {status}"
+        finding = f"forms {article} {name.lower()} ({formula}); evidence status: {status.lower()}"
     else:
-        assembly_phrase = f"quaternary structure uncharacterized ({status.lower()})"
+        finding = f"has no characterised quaternary structure (evidence status: {status.lower()})"
     if homologue is not None and target.mode == "homologue":
         described = homologue.protein or homologue.entry
         summary = (
-            f"Quaternary evidence for the closest Swiss-Prot homologue, {accession} ({described}; "
-            f"{homologue.identity:.2f}% identity over {homologue.coverage:.2f}% of the sequence): {assembly_phrase}."
+            f"{described} ({accession}), the closest Swiss-Prot homologue ({homologue.identity:.2f}% identity "
+            f"over {homologue.coverage:.2f}% of the sequence), {finding}."
         )
     else:
-        summary = f"{target.reason} Result: {assembly_phrase}."
+        summary = f"{target.reason} The sequence {finding}."
     if complexes:
         first = complexes[0]
-        cpx = f" ({first.complex_portal_id})" if first.complex_portal_id else ""
-        summary += f" Complex Portal: part of the {first.name}{cpx}."
+        portal = f"Complex Portal {first.complex_portal_id}" if first.complex_portal_id else "Complex Portal"
+        summary += f" It is part of the {first.name} ({portal})."
 
     # --- Key figures (up to four)
     metrics: list[Metric] = [

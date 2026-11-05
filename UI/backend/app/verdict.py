@@ -31,6 +31,11 @@ Rost 2002 (J Mol Biol 318:595), Aloy et al. 2003 (J Mol Biol 332:989), van Kempe
 et al. 2024 (Nat Biotechnol 42:243). The score is a literature-anchored estimate,
 not a calibrated probability.
 
+While levels are still running (or after they were stopped), the verdict also gives
+the confidence range they could still produce: once the primary level is done the
+predicted function is fixed, and each unfinished level can only add its agreement
+bonus, its contradiction penalty or nothing.
+
 When every level returned placeholder data (mock mode), the built-in examples
 still show their known function, clearly marked as a placeholder.
 """
@@ -40,7 +45,17 @@ import math
 import re
 
 from .examples import find_example
-from .schemas import AnalysisJob, GoTerm, LevelReport, LevelSupport, SupportState, Verdict
+from .levels.quaternary import assembly_name
+from .schemas import (
+    AnalysisJob,
+    ConfidenceRange,
+    GoTerm,
+    LevelReport,
+    LevelSupport,
+    SupportState,
+    Verdict,
+    VerdictFact,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -373,6 +388,8 @@ def predict(ev, P=PARAMS):
 
 MAX_GO_TERMS = 6
 _GO_ID = re.compile(r"^GO:\d{7}$")
+# Level states meaning "not finished yet": the verdict is provisional.
+_RUNNING = frozenset({"pending", "running"})
 _ROUTE_TEXT = {
     "sequence": "Route 1 of 3, sequence homology",
     "domain": "Route 2 of 3, Pfam domain",
@@ -406,54 +423,52 @@ def _template_context(ev, prediction):
     return quat
 
 
-def _description(ev, prediction, context, missing):
+def _join(names):
+    """['a'] -> 'a'; ['a', 'b'] -> 'a and b'; ['a', 'b', 'c'] -> 'a, b and c'."""
+    return names[0] if len(names) == 1 else f"{', '.join(names[:-1])} and {names[-1]}"
+
+
+def _percent(value):
+    return f"{value:.1f}%" if value is not None else "?"
+
+
+def _scientific(value):
+    return f"{value:.1e}" if value is not None else "?"
+
+
+def _description(ev, prediction, missing, running):
+    """One sentence on how the function was reached; the facts (_facts) give the details."""
     route = prediction["route"]
-    prim, ter = ev["primary"], ev["tertiary"]
+    prim = ev["primary"]
     hit = prim.get("hit") if prim.get("ran") else None
     domain = prim.get("domain") if prim.get("ran") else None
     if route == "sequence":
-        where = f", {hit['organism']}" if hit["organism"] else ""
-        text = (
-            f"Closest characterised Swiss-Prot protein: {hit['protein']} ({hit['accession']}{where}), "
-            f"{hit['identity']:.1f}% identity over {hit['coverage']:.1f}% of the query, so its function is "
-            "transferred at the level of the specific protein."
-        )
-        if domain is not None:
-            text += f" Pfam domain: {domain['description']} ({domain['accession']})."
-        if context is not None:
-            if context.get("formula") and context["status"] in ("CONFIRMED", "SUPPORTED"):
-                text += f" Oligomeric state of {hit['accession']}: {context['formula']} ({context['status']})."
-            for name, identifier, stoichiometry in context["complexes"][:2]:
-                if name:
-                    details = ", ".join(str(part) for part in (identifier, stoichiometry) if part)
-                    text += f" Member of the {name}" + (f" ({details})." if details else ".")
-        return text
-    if route == "domain":
-        if hit is not None and hit["passed"]:
-            opening = f"The closest Swiss-Prot protein ({hit['entry']}) is itself uncharacterised"
-        elif hit is not None:
-            opening = (
-                f"No Swiss-Prot protein passed the homology test (best hit {hit['entry']}: "
-                f"{hit['identity']:.1f}% identity, {hit['coverage']:.1f}% coverage)"
-            )
-        else:
-            opening = "No Swiss-Prot protein passed the homology test"
         return (
-            f"{opening}, but the sequence contains the {domain['description']} domain ({domain['accession']}, "
-            f"E-value {domain['evalue']:.1e}), so a family-level function is predicted; members of a family "
-            "can differ in their exact function."
+            f"Transferred from the closest characterised Swiss-Prot protein ({_percent(hit['identity'])} identity), "
+            "so the function is predicted at the level of the specific protein."
+        )
+    if route == "domain":
+        opening = (
+            "The closest Swiss-Prot protein is itself uncharacterised"
+            if hit is not None and hit["passed"]
+            else "No Swiss-Prot protein passed the homology test"
+        )
+        return (
+            f"{opening}, so a family-level function is predicted from the {domain['description']} domain; "
+            "members of a family can differ in their exact function."
         )
     if route == "fold":
-        best = ter["best"]
-        probability = f", homology probability {best['prob']:.2f}" if best["prob"] is not None else ""
         return (
-            "Neither a characterised Swiss-Prot homologue nor a Pfam domain supported a function, but the "
-            f"reliable 3D model matches {best['target']} in {best['database']} (E-value {best['evalue']:.1e}"
-            f"{probability}). Similar folds can carry different functions, so treat this as a hint."
+            "Neither a characterised Swiss-Prot homologue nor a Pfam domain supported a function, so it is inferred "
+            "from the structural similarity of a reliable 3D model; similar folds can carry different functions, "
+            "so treat it as a hint."
         )
     text = "No Swiss-Prot homologue, Pfam domain or significant structural match from a reliable model supported a function."
     if missing:
-        text += f" The {' and '.join(missing)} level{'s' if len(missing) > 1 else ''} gave no result, so part of that evidence was missing."
+        levels = f"{' and '.join(missing)} level{'s' if len(missing) > 1 else ''}"
+        text += f" The {levels} gave no result, so part of that evidence was missing."
+    if running:
+        text += f" The {' and '.join(running)} level{'s are' if len(running) > 1 else ' is'} still running."
     return text
 
 
@@ -468,7 +483,132 @@ def _go_terms(context):
     return terms[:MAX_GO_TERMS]
 
 
-def _rationale(ev, prediction, context, P):
+def _assembly(context):
+    """The template's oligomeric state, e.g. 'Homotetramer (A4), confirmed'."""
+    formula = str(context.get("formula") or "")
+    subunits = _num(context.get("subunits"))
+    name = assembly_name(str(context.get("assembly_type") or ""), int(subunits)) if subunits else "Uncharacterized"
+    shown = f"{name} ({formula})" if name != "Uncharacterized" and formula else formula or name
+    return f"{shown}, {str(context['status']).lower()}"
+
+
+def _facts(ev, prediction, context):
+    """The key facts behind the prediction, shown as a grid under the predicted function."""
+    route = prediction["route"]
+    prim, ter = ev["primary"], ev["tertiary"]
+    hit = prim.get("hit") if prim.get("ran") else None
+    domain = prim.get("domain") if prim.get("ran") else None
+    facts = []
+    if route == "sequence":
+        source = f"{hit['protein'] or hit['entry']} ({hit['accession']})"
+        facts += [
+            ("Basis", "Sequence homology (route 1 of 3)"),
+            ("Closest Swiss-Prot protein", source + (f", {hit['organism']}" if hit["organism"] else "")),
+            ("Similarity", f"{_percent(hit['identity'])} identity over {_percent(hit['coverage'])} of the query"),
+        ]
+        if domain is not None:
+            facts.append(("Pfam domain", f"{domain['description']} ({domain['accession']})"))
+        if context is not None:
+            if context.get("formula") and context["status"] in ("CONFIRMED", "SUPPORTED"):
+                facts.append((f"Oligomeric state of {hit['accession']}", _assembly(context)))
+            complexes = []
+            for name, identifier, stoichiometry in context["complexes"][:2]:
+                if name:
+                    details = ", ".join(str(part) for part in (identifier, stoichiometry) if part)
+                    complexes.append(f"{name} ({details})" if details else str(name))
+            if complexes:
+                facts.append(("Complex" if len(complexes) == 1 else "Complexes", "; ".join(complexes)))
+        facts.append(("Specificity", "Specific protein"))
+    elif route == "domain":
+        facts += [
+            ("Basis", "Pfam domain (route 2 of 3)"),
+            ("Pfam domain", f"{domain['description']} ({domain['accession']})"),
+            ("Domain E-value", _scientific(domain["evalue"])),
+        ]
+        if hit is not None and hit["passed"]:
+            source = f"{hit['protein'] or hit['entry']} ({hit['accession']})"
+            facts.append(("Closest Swiss-Prot protein", f"{source}, uncharacterised"))
+        elif hit is not None:
+            similarity = f"{_percent(hit['identity'])} identity over {_percent(hit['coverage'])} of the query"
+            facts.append(("Best Swiss-Prot hit", f"{hit['entry']}: {similarity} (below the homology thresholds)"))
+        else:
+            facts.append(("Best Swiss-Prot hit", "none found"))
+        facts.append(("Specificity", "Protein family"))
+    elif route == "fold":
+        best = ter["best"]
+        probability = f", homology probability {best['prob']:.2f}" if best["prob"] is not None else ""
+        facts += [
+            ("Basis", "Structural similarity (route 3 of 3)"),
+            ("Structural match", f"{best['target']} ({best['database']})"),
+            ("Match statistics", f"E-value {_scientific(best['evalue'])}{probability}"),
+            ("3D model quality", f"mean local QMEAN {ter['qmean']:.2f}"),
+            ("Specificity", "Fold only"),
+        ]
+    return [VerdictFact(label=label, value=value) for label, value in facts]
+
+
+def _band(score, P):
+    return "high" if score >= P["high"] else "moderate" if score >= P["moderate"] else "low"
+
+
+def _confidence_range(ev, prediction, statuses, P):
+    """The confidence the levels that have not finished could still produce (None if none apply).
+
+    Once the primary level has finished the route, and so the predicted function, is fixed
+    (the fold route also needs the tertiary level, so it has finished too). An unfinished
+    level can then only add the adjustment `predict` gives it: the agreement bonus, the
+    contradiction penalty or nothing. The extremes of the range are all-agree and
+    all-contradict.
+    """
+    route = prediction["route"]
+    if route is None or statuses.get("primary") not in ("completed", "failed", "skipped"):
+        return None
+    unfinished = {key for key, status in statuses.items() if status in _RUNNING or status == "cancelled"}
+    possible = {}
+    if "secondary" in unfinished:
+        possible["secondary"] = (P["d_ss_contra"], P["d_ss_agree"])
+    if "tertiary" in unfinished and route != "fold":
+        possible["tertiary"] = (P["d_ter_contra"], P["d_ter_agree"])
+    if "quaternary" in unfinished and route == "sequence":
+        factor = 1.0 if ev["primary"]["hit"]["identity"] >= P["q_full_identity"] else 0.5
+        possible["quaternary"] = (P["d_q_conflict"] * factor, P["d_q_good"] * factor)
+    if not possible:
+        return None
+    total = sum(delta for _, _, delta in prediction["steps"])
+    low = sigmoid(total + sum(min(0.0, worst) for worst, _ in possible.values()))
+    high = sigmoid(total + sum(max(0.0, best) for _, best in possible.values()))
+    levels = [key for key in ("primary", "secondary", "tertiary", "quaternary") if key in possible]
+    return ConfidenceRange(
+        low=round(low, 2),
+        high=round(high, 2),
+        low_tier=_band(low, P),
+        high_tier=_band(high, P),
+        levels=levels,
+        stopped=all(statuses.get(key) == "cancelled" for key in levels),
+    )
+
+
+def _range_line(confidence_range):
+    names = _join(confidence_range.levels)
+    plural = "s" if len(confidence_range.levels) > 1 else ""
+    low, high = confidence_range.low, confidence_range.high
+    tiers = (
+        f"{confidence_range.high_tier} either way"
+        if confidence_range.low_tier == confidence_range.high_tier
+        else f"{confidence_range.low_tier} to {confidence_range.high_tier}"
+    )
+    if confidence_range.stopped:
+        return (
+            f"Had the {names} level{plural} finished, the confidence would have been between {low:.2f} and "
+            f"{high:.2f} ({tiers}); the predicted function would have been the same."
+        )
+    return (
+        f"Still to come: the {names} check{plural} can move the confidence to between {low:.2f} and {high:.2f} "
+        f"({tiers}); the predicted function itself will not change."
+    )
+
+
+def _rationale(ev, prediction, context, P, statuses, confidence_range):
     route = prediction["route"]
     if route is None:
         lines = [
@@ -489,7 +629,13 @@ def _rationale(ev, prediction, context, P):
                 lines.append(f"{_LEVEL_NAME[level]} check: {text} → {delta:+.2f} log-odds.")
     for key in ("primary", "secondary", "tertiary", "quaternary"):
         if not ev[key].get("ran"):
-            lines.append(f"{key.capitalize()} level: no real (live) result, so it was not used.")
+            status = statuses.get(key)
+            if status in _RUNNING:
+                lines.append(f"{key.capitalize()} level: still running; the prediction is updated when it finishes.")
+            elif status == "cancelled":
+                lines.append(f"{key.capitalize()} level: stopped before it finished, so it was not used.")
+            else:
+                lines.append(f"{key.capitalize()} level: no real (live) result, so it was not used.")
     if prediction["score"] is not None:
         total = sum(delta for _, _, delta in prediction["steps"])
         lines.append(
@@ -497,15 +643,14 @@ def _rationale(ev, prediction, context, P):
             f"(high ≥ {P['high']:.2f}, moderate ≥ {P['moderate']:.2f}). Agreement between levels is rewarded less "
             "than contradiction is penalised; the score is a literature-anchored estimate, not a calibrated probability."
         )
-    if context is not None and context["go_mf"]:
-        lines.append(
-            f"GO terms: molecular-function annotations of {context['analysed']} in UniProtKB, read by the "
-            "quaternary level (activity terms first)."
-        )
+    if confidence_range is not None:
+        lines.append(_range_line(confidence_range))
     return lines
 
 
 def _support(level, state):
+    if level.status in _RUNNING:
+        return "pending"
     if level.status != "completed" or level.result is None:
         return "unavailable"
     if level.result.source == "placeholder":
@@ -517,27 +662,34 @@ def _integrate(job):
     ev = evidence_from_levels(_level_results(job))
     prediction = predict(ev, PARAMS)
     context = _template_context(ev, prediction)
-    missing = [key for key in ("primary", "tertiary") if not ev[key].get("ran")]
+    statuses = {level.key: level.status for level in job.levels}
+    running = [key for key in ("primary", "tertiary") if not ev[key].get("ran") and statuses.get(key) in _RUNNING]
+    missing = [key for key in ("primary", "tertiary") if not ev[key].get("ran") and key not in running]
     function = prediction["function"]
     if prediction["route"] == "fold":
         function = _brief(function, 110)
     score = prediction["score"]
+    confidence_range = _confidence_range(ev, prediction, statuses, PARAMS)
     return Verdict(
         source="live",
         function=function,
-        description=_description(ev, prediction, context, missing),
+        description=_description(ev, prediction, missing, running),
         confidence_tier=prediction["band"],
         confidence_score=None if score is None else round(min(max(score, 0.0), 1.0), 2),
+        confidence_range=confidence_range,
+        facts=_facts(ev, prediction, context),
         go_terms=_go_terms(context),
         level_support=[
             LevelSupport(key=level.key, state=_support(level, prediction["support"].get(level.key, "neutral")))
             for level in job.levels
         ],
-        rationale=_rationale(ev, prediction, context, PARAMS),
+        rationale=_rationale(ev, prediction, context, PARAMS, statuses, confidence_range),
     )
 
 
 def _simple_support(level: LevelReport) -> SupportState:
+    if level.status in _RUNNING:
+        return "pending"
     if level.status != "completed" or level.result is None:
         return "unavailable"
     return "placeholder" if level.result.source == "placeholder" else "neutral"
@@ -545,7 +697,7 @@ def _simple_support(level: LevelReport) -> SupportState:
 
 def _placeholder_verdict(job: AnalysisJob, support: list[LevelSupport]) -> Verdict:
     """Mock mode: the known function of the built-in examples, clearly marked."""
-    reported = sum(1 for item in support if item.state != "unavailable")
+    reported = sum(1 for item in support if item.state not in ("unavailable", "pending"))
     coverage_note = f"{reported} of {len(support)} structural levels returned results."
     example = find_example(job.query.sequence)
     if example is not None:

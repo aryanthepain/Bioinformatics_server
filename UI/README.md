@@ -167,6 +167,22 @@ best-supported template (Swiss-Prot homologue → Pfam domain → Foldseek fold)
 confidence is P(homology) × P(function conserved), and the secondary, tertiary and
 quaternary results act as consistency checks on the log-odds scale.
 
+**Quick results** (`backend/app/runner.py`): the four levels run at the same time
+(quaternary starts when primary has found its homologue). The results page opens
+as soon as the first level has finished, on that level's tab; levels that are
+still running show their progress in their own tab. A *provisional* prediction
+appears on the Summary tab once the primary level is done and updates as the
+slower secondary (JPred) and tertiary (Swiss-Model) levels finish. Meanwhile it
+shows the confidence range those levels could still produce: the predicted
+function itself can no longer change, only their consistency checks are
+outstanding. **Stop & finish now** finalises the report with the levels that are
+done. Up to three analyses run at once; the CPU-heavy primary level runs for one
+analysis at a time.
+
+**Results page:** a Summary tab (prediction, confidence, key facts, residue map,
+how it was reached) and one tab per level with the essentials; everything else is
+under "More details". The Print menu prints the full report or a single level.
+
 **Primary structure needs a one-time setup** (about 5 GB of disk):
 
 ```bash
@@ -190,6 +206,9 @@ Without a token, the tertiary level is skipped with an explanation.
 - **Cache:** real results are saved in `backend/data/cache`, so the same
   sequence is instant the second time. Delete that folder to clear it, or set
   `PFP_CACHE=off`.
+- **Pre-compute** (e.g. before a demo): `python3 scripts/precompute.py <app address>`
+  analyses the built-in examples (or a FASTA file) through the running app, so they
+  open instantly afterwards.
 - **Fast interface work:** `PFP_PLACEHOLDER_LEVELS=primary,tertiary` uses
   placeholder data even though the real modules exist.
 
@@ -216,12 +235,14 @@ backend with `PFP_PLACEHOLDER_LEVELS=tertiary` to run them too.
 6. Integrate secondary-structure analysis (JPred, ProtBert, RCSB/PDBe) ✅
 7. Integrate tertiary-structure analysis (Swiss-Model, Foldseek, ProtParam) ✅
 8. Integrate quaternary-structure analysis, then evidence aggregation ✅
-9. Hosting (free, Oracle Cloud; see `deploy/DEPLOY.md`) ✅
+9. Hosting (Docker on a cloud server; see `deploy/DEPLOY.md`) ✅
+10. Quick results (parallel levels, provisional prediction) and a tabbed results page ✅
 
 ## Hosting
 
-The whole app runs as one Docker container behind HTTPS on a free Oracle Cloud
-machine. Step-by-step guide: **[deploy/DEPLOY.md](deploy/DEPLOY.md)**.
+The whole app runs as one Docker container behind HTTPS (Caddy) on a cloud
+server, e.g. a Google Cloud free-trial VM. Step-by-step guide:
+**[deploy/DEPLOY.md](deploy/DEPLOY.md)**.
 After changing Python dependencies, refresh the file the Docker build installs:
 
 ```bash

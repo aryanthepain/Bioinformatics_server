@@ -49,6 +49,7 @@ backend/scripts/check_primary.py
 backend/scripts/check_quaternary.py
 backend/scripts/check_secondary.py
 backend/scripts/check_tertiary.py
+backend/scripts/precompute.py
 backend/scripts/setup_primary.sh
 backend/scripts/smoke_test.py
 backend/scripts/update_seed_cache.sh

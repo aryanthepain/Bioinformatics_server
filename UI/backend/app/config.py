@@ -53,8 +53,10 @@ JPRED_MAX_LENGTH = 800
 # --- Job handling ------------------------------------------------------------
 # Results live in memory and disappear when the server restarts.
 MAX_STORED_JOBS = 100
-# The real models are heavy, so analyses run one at a time; others queue.
-MAX_CONCURRENT_JOBS = 1
+# Analyses that may run at the same time; others queue. Most of an analysis is
+# spent waiting for web services (JPred, Swiss-Model), so several can overlap;
+# the CPU-heavy primary level still runs for one analysis at a time.
+MAX_CONCURRENT_JOBS = 3
 
 
 def _read_float(name: str, default: float) -> float:
@@ -104,6 +106,13 @@ FOLDSEEK_TIMEOUT_SECONDS = _read_float("PFP_FOLDSEEK_TIMEOUT", 900.0)
 JPRED_TIMEOUT_SECONDS = _read_float("PFP_JPRED_TIMEOUT", 900.0)
 # Longest a single web request may take before it counts as a failure.
 HTTP_TIMEOUT_SECONDS = 60.0
+
+# --- Quick results ------------------------------------------------------------
+# The results page opens as soon as any level has finished. A provisional
+# prediction is shown once the primary level is done (after waiting up to this
+# many seconds for the quaternary level; 0 = show it straight away). It updates
+# each time another level finishes.
+QUICK_RESULT_SECONDS = _read_float("PFP_QUICK_RESULT_SECONDS", 0.0)
 
 # --- Placeholder (mock) mode -------------------------------------------------
 # Multiplies every simulated delay. 1 = realistic pacing (~15 s per analysis),

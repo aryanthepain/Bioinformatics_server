@@ -1,14 +1,18 @@
 /*
- * The detailed analysis of one structural level.
+ * The analysis of one structural level (one tab of the results page).
  *
- * Every level uses this same template, filled from its LevelResult:
- *   key figures · residue tracks (+ sequence view) · tables
- *   recommendations / observations · evidence · grouped properties · links
- * Sections that have no data are simply left out.
+ * Every level uses this same concise template, filled from its LevelResult:
+ *   summary · key figures · residue tracks · evidence and cautions · main tables
+ * Everything else (further tables, observations, recommendations, grouped
+ * properties, references, raw output) is kept in one collapsed "More details"
+ * section, so the page stays short without losing any information.
+ * A level that is still running shows its own waiting screen (live progress)
+ * instead, until its result arrives.
  */
 import { useState } from "react";
 import type {
   EvidenceItem,
+  LevelKey,
   LevelReport,
   LevelResult,
   Link,
@@ -19,6 +23,7 @@ import type {
   Table,
 } from "../api/types";
 import { analysisId } from "../lib/anchors";
+import { useNow } from "../hooks/useNow";
 import { formatDuration, parseTimestamp } from "../lib/format";
 import LevelStatusTag from "./LevelStatusTag";
 import ResidueMap from "./ResidueMap";
@@ -30,7 +35,24 @@ interface LevelAnalysisProps {
   level: LevelReport;
   index: number;
   sequence: string;
+  /** The analysis is still running (live timers). */
+  active: boolean;
+  /** Print layout: every table row, no buttons, no "More details". */
+  printMode?: boolean;
 }
+
+/** Tables shown in full view; the rest are under "More details". */
+const MAIN_TABLES = 2;
+/** Rows shown before "Show all rows". */
+const TABLE_PREVIEW_ROWS = 5;
+
+/** How long each level usually takes, shown while it runs. */
+const TYPICAL_DURATION: Record<LevelKey, string> = {
+  primary: "This level usually takes about a minute.",
+  secondary: "JPred usually answers within a few minutes.",
+  tertiary: "Swiss-Model and Foldseek usually take 5–15 minutes.",
+  quaternary: "This level usually takes a minute or two.",
+};
 
 const NOTE_ORDER: NoteKind[] = ["recommendation", "observation", "caution"];
 
@@ -119,7 +141,10 @@ function NoteIcon({ kind }: { kind: NoteKind }) {
   );
 }
 
-function DataTable({ table }: { table: Table }) {
+function DataTable({ table, printMode }: { table: Table; printMode: boolean }) {
+  const [expanded, setExpanded] = useState(false);
+  const hidden = printMode ? 0 : Math.max(0, table.rows.length - TABLE_PREVIEW_ROWS);
+
   return (
     <div className="analysis__block">
       <div className="analysis__block-head">
@@ -129,42 +154,59 @@ function DataTable({ table }: { table: Table }) {
       {table.rows.length === 0 ? (
         <p className="analysis__empty">No entries.</p>
       ) : (
-        <div className="table-scroll">
-          <table className="data-table">
-            <thead>
-              <tr>
-                {table.columns.map((column) => (
-                  <th
-                    key={column.key}
-                    scope="col"
-                    className={column.align === "right" ? "data-table__cell--right" : undefined}
-                  >
-                    {column.label}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {table.rows.map((row, rowIndex) => (
-                <tr key={rowIndex}>
+        <>
+          <div className="table-scroll">
+            <table className="data-table">
+              <thead>
+                <tr>
                   {table.columns.map((column) => (
-                    <td
+                    <th
                       key={column.key}
-                      className={[
-                        column.align === "right" ? "data-table__cell--right" : "",
-                        column.mono ? "data-table__cell--mono" : "",
-                      ]
-                        .filter((name) => name !== "")
-                        .join(" ") || undefined}
+                      scope="col"
+                      className={column.align === "right" ? "data-table__cell--right" : undefined}
                     >
-                      {row[column.key] ?? "—"}
-                    </td>
+                      {column.label}
+                    </th>
                   ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {table.rows.map((row, rowIndex) => (
+                  <tr
+                    key={rowIndex}
+                    className={!expanded && hidden > 0 && rowIndex >= TABLE_PREVIEW_ROWS ? "data-table__row--extra" : undefined}
+                  >
+                    {table.columns.map((column) => (
+                      <td
+                        key={column.key}
+                        className={
+                          [
+                            column.align === "right" ? "data-table__cell--right" : "",
+                            column.mono ? "data-table__cell--mono" : "",
+                          ]
+                            .filter((name) => name !== "")
+                            .join(" ") || undefined
+                        }
+                      >
+                        {row[column.key] ?? "—"}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {hidden > 0 && (
+            <button
+              type="button"
+              className="analysis__more-rows"
+              aria-expanded={expanded}
+              onClick={() => setExpanded((current) => !current)}
+            >
+              {expanded ? "Show fewer rows" : `Show all ${table.rows.length} rows`}
+            </button>
+          )}
+        </>
       )}
     </div>
   );
@@ -246,23 +288,37 @@ function LinksBlock({ links }: { links: Link[] }) {
   );
 }
 
-function AnalysisBody({ result, sequence, title }: { result: LevelResult; sequence: string; title: string }) {
+function AnalysisBody({
+  result,
+  sequence,
+  title,
+  printMode,
+}: {
+  result: LevelResult;
+  sequence: string;
+  title: string;
+  printMode: boolean;
+}) {
   const [showSequence, setShowSequence] = useState(false);
   const figures = result.metrics.filter((metric) => metric.group === null);
   const groups = groupMetrics(result.metrics);
-  const noteGroups = NOTE_ORDER.map((kind) => ({
-    kind,
-    notes: result.notes.filter((note) => note.kind === kind),
-  })).filter((group) => group.notes.length > 0);
+  const cautions = result.notes.filter((note) => note.kind === "caution");
+  const otherNotes = NOTE_ORDER.filter((kind) => kind !== "caution")
+    .map((kind) => ({ kind, notes: result.notes.filter((note) => note.kind === kind) }))
+    .filter((group) => group.notes.length > 0);
+  const mainTables = result.tables.slice(0, MAIN_TABLES);
+  const extraTables = result.tables.slice(MAIN_TABLES);
   const mapRows: MapRow[] = result.tracks.map((track) => ({
     key: track.key,
     label: track.label,
     caption: track.caption,
     track,
   }));
-  const hasSide =
-    noteGroups.length > 0 || result.evidence.length > 0 || groups.length > 0 || result.links.length > 0;
-  const hasMain = mapRows.length > 0 || result.tables.length > 0;
+  const detailCount =
+    extraTables.length + otherNotes.length + groups.length + (result.links.length > 0 ? 1 : 0);
+  const hasDetails = detailCount > 0 || result.raw !== null;
+  const hasEvidence = result.evidence.length > 0;
+  const hasCautions = cautions.length > 0;
 
   return (
     <>
@@ -281,73 +337,119 @@ function AnalysisBody({ result, sequence, title }: { result: LevelResult; sequen
         ))}
       </div>
 
-      {(hasMain || hasSide) && (
-        <div className={`analysis__body${hasMain && hasSide ? "" : " analysis__body--single"}`}>
-          {hasMain && (
-            <div className="analysis__main">
-              {mapRows.length > 0 && (
-                <div className="analysis__block">
-                  <div className="analysis__block-head analysis__block-head--row">
-                    <h4 className="analysis__block-title">Along the sequence</h4>
-                    <button
-                      type="button"
-                      className="btn btn--secondary btn--small analysis__toggle"
-                      aria-expanded={showSequence}
-                      onClick={() => setShowSequence((current) => !current)}
-                    >
-                      {showSequence ? "Hide residues" : "Show residues"}
-                    </button>
-                  </div>
-                  <ResidueMap rows={mapRows} sequence={sequence} label={`${title}: residue map`} />
-                  {showSequence && <SequenceView sequence={sequence} tracks={result.tracks} />}
-                </div>
-              )}
-              {result.tables.map((table) => (
-                <DataTable key={table.key} table={table} />
-              ))}
-            </div>
-          )}
-
-          {hasSide && (
-            <div className="analysis__side">
-              {noteGroups.map((group) => (
-                <NotesBlock key={group.kind} kind={group.kind} notes={group.notes} />
-              ))}
-              {result.evidence.length > 0 && <EvidenceBlock items={result.evidence} />}
-              {groups.map((group) => (
-                <PropertiesBlock key={group.title} group={group} />
-              ))}
-              {result.links.length > 0 && <LinksBlock links={result.links} />}
-            </div>
-          )}
+      {mapRows.length > 0 && (
+        <div className="analysis__block">
+          <div className="analysis__block-head analysis__block-head--row">
+            <h4 className="analysis__block-title">Along the sequence</h4>
+            {!printMode && (
+              <button
+                type="button"
+                className="btn btn--secondary btn--small analysis__toggle"
+                aria-expanded={showSequence}
+                onClick={() => setShowSequence((current) => !current)}
+              >
+                {showSequence ? "Hide residues" : "Show residues"}
+              </button>
+            )}
+          </div>
+          <ResidueMap rows={mapRows} sequence={sequence} label={`${title}: residue map`} />
+          {showSequence && !printMode && <SequenceView sequence={sequence} tracks={result.tracks} />}
         </div>
       )}
 
-      {result.raw && (
-        <details className="raw-output">
-          <summary>Raw module output</summary>
-          <pre>{JSON.stringify(result.raw, null, 2)}</pre>
+      {(hasEvidence || hasCautions) && (
+        <div className={`analysis__pair${hasEvidence && hasCautions ? "" : " analysis__pair--single"}`}>
+          {hasEvidence && <EvidenceBlock items={result.evidence} />}
+          {hasCautions && <NotesBlock kind="caution" notes={cautions} />}
+        </div>
+      )}
+
+      {mainTables.map((table) => (
+        <DataTable key={table.key} table={table} printMode={printMode} />
+      ))}
+
+      {!printMode && hasDetails && (
+        <details className="analysis__details">
+          <summary className="analysis__details-summary">
+            More details
+            {detailCount > 0 && (
+              <span className="analysis__details-count">
+                {detailCount} {detailCount === 1 ? "section" : "sections"}
+              </span>
+            )}
+          </summary>
+          <div className="analysis__details-body">
+            {extraTables.map((table) => (
+              <DataTable key={table.key} table={table} printMode={false} />
+            ))}
+            {otherNotes.map((group) => (
+              <NotesBlock key={group.kind} kind={group.kind} notes={group.notes} />
+            ))}
+            {groups.length > 0 && (
+              <div className="props-grid">
+                {groups.map((group) => (
+                  <PropertiesBlock key={group.title} group={group} />
+                ))}
+              </div>
+            )}
+            {result.links.length > 0 && <LinksBlock links={result.links} />}
+            {result.raw && (
+              <details className="raw-output">
+                <summary>Raw module output</summary>
+                <pre>{JSON.stringify(result.raw, null, 2)}</pre>
+              </details>
+            )}
+          </div>
         </details>
       )}
     </>
   );
 }
 
-export default function LevelAnalysis({ level, index, sequence }: LevelAnalysisProps) {
+/** The tab of a level that is still running: its live progress, until the result arrives. */
+function Progress({ level, active }: { level: LevelReport; active: boolean }) {
+  const startedAt = parseTimestamp(level.started_at);
+  const now = useNow(active && level.status === "running");
+  const waiting = level.status === "pending";
+  const elapsed = !waiting && startedAt !== null ? formatDuration(now - startedAt) : null;
+  const message = level.message ?? (waiting ? "Waiting to start…" : "Working…");
+
+  return (
+    <div className="analysis__progress" role="status">
+      <span className="spinner analysis__progress-spinner" aria-hidden="true" />
+      <p className="analysis__progress-title">
+        {waiting ? "Waiting to start" : "Still running"}
+        {elapsed && <span className="analysis__progress-time"> · {elapsed}</span>}
+      </p>
+      <p className="analysis__progress-message">{message}</p>
+      <p className="analysis__progress-note">
+        {TYPICAL_DURATION[level.key]} The result appears here by itself, and the prediction on the Summary tab
+        is updated; the other tabs can be opened meanwhile.
+      </p>
+    </div>
+  );
+}
+
+export default function LevelAnalysis({ level, index, sequence, active, printMode = false }: LevelAnalysisProps) {
   const startedAt = parseTimestamp(level.started_at);
   const finishedAt = parseTimestamp(level.finished_at);
   const duration = startedAt !== null && finishedAt !== null ? formatDuration(finishedAt - startedAt) : null;
   const tools = level.tools.length > 0 ? level.tools.join(" · ") : "Module in progress";
-  const sectionId = analysisId(level.key);
+  const titleId = printMode ? undefined : `${analysisId(level.key)}-title`;
+  const running = level.status === "running" || level.status === "pending";
 
   return (
-    <section id={sectionId} className="analysis" aria-labelledby={`${sectionId}-title`}>
+    <section
+      id={printMode ? undefined : analysisId(level.key)}
+      className={`analysis${printMode ? " analysis--print" : ""}`}
+      aria-labelledby={titleId}
+    >
       <header className="analysis__head">
         <span className="analysis__number" aria-hidden="true">
           {String(index + 1).padStart(2, "0")}
         </span>
         <div className="analysis__titles">
-          <h3 id={`${sectionId}-title`} className="analysis__title" tabIndex={-1}>
+          <h3 id={titleId} className="analysis__title">
             {level.title}
           </h3>
           <p className="analysis__tools">{tools}</p>
@@ -359,7 +461,9 @@ export default function LevelAnalysis({ level, index, sequence }: LevelAnalysisP
       </header>
 
       {level.result ? (
-        <AnalysisBody result={level.result} sequence={sequence} title={level.title} />
+        <AnalysisBody result={level.result} sequence={sequence} title={level.title} printMode={printMode} />
+      ) : running ? (
+        <Progress level={level} active={active} />
       ) : level.status === "failed" ? (
         <div className="alert alert--error">
           <div className="alert__body">
@@ -370,7 +474,11 @@ export default function LevelAnalysis({ level, index, sequence }: LevelAnalysisP
       ) : (
         <div className="alert alert--info">
           <div className="alert__body">
-            {level.status === "skipped" ? `Skipped: ${level.message ?? "no reason given."}` : "No result."}
+            {level.status === "skipped"
+              ? `Skipped: ${level.message ?? "no reason given."}`
+              : level.status === "cancelled"
+                ? (level.message ?? "Stopped before it finished.")
+                : "No result."}
           </div>
         </div>
       )}

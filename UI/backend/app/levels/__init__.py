@@ -11,8 +11,9 @@ Setting PFP_PLACEHOLDER_LEVELS (e.g. "tertiary") forces placeholder data for
 those levels even when a real module exists, which is handy for fast
 interface work.
 
-The levels run one after another in the order below. Keep quaternary after
-primary: it analyses the Swiss-Prot homologue that the primary level found.
+The levels run at the same time (see app/runner.py), except that a level
+waits for the levels listed in its `after` (quaternary analyses the Swiss-Prot
+homologue that the primary level found). The order below is the display order.
 """
 
 import logging
@@ -38,6 +39,14 @@ class LevelSpec:
     live: bool = False
     # Set for real modules whose results may be cached on disk (see app/cache.py).
     cache_version: str | None = None
+    # Levels that must finish before this one starts.
+    after: tuple[LevelKey, ...] = ()
+    # CPU- and memory-heavy: only one analysis at a time runs this level.
+    exclusive: bool = False
+    # The results page waits for this level (it carries the predicted function).
+    essential: bool = False
+    # Usually slow (remote queues): the results page opens without waiting for it.
+    background: bool = False
 
 
 def _spec(
@@ -47,10 +56,15 @@ def _spec(
     placeholder: LevelRunner,
     live: LevelRunner | None = None,
     cache_version: str | None = None,
+    after: tuple[LevelKey, ...] = (),
+    exclusive: bool = False,
+    essential: bool = False,
+    background: bool = False,
 ) -> LevelSpec:
+    flags = {"after": after, "essential": essential, "background": background}
     if live is not None and key not in PLACEHOLDER_LEVELS:
-        return LevelSpec(key, title, tools, live, live=True, cache_version=cache_version)
-    return LevelSpec(key, title, tools, placeholder)
+        return LevelSpec(key, title, tools, live, live=True, cache_version=cache_version, exclusive=exclusive, **flags)
+    return LevelSpec(key, title, tools, placeholder, **flags)
 
 
 LEVELS: tuple[LevelSpec, ...] = (
@@ -61,6 +75,8 @@ LEVELS: tuple[LevelSpec, ...] = (
         placeholders.primary,
         live=primary.analyze,
         cache_version=primary.CACHE_VERSION,
+        exclusive=True,  # DIAMOND, HMMER and ESM-2 on the local CPU
+        essential=True,
     ),
     _spec(
         "secondary",
@@ -69,6 +85,7 @@ LEVELS: tuple[LevelSpec, ...] = (
         placeholders.secondary,
         live=secondary.analyze,
         cache_version=secondary.CACHE_VERSION,
+        background=True,  # JPred can take up to 15 minutes
     ),
     _spec(
         "tertiary",
@@ -77,6 +94,7 @@ LEVELS: tuple[LevelSpec, ...] = (
         placeholders.tertiary,
         live=tertiary.analyze,
         cache_version=tertiary.CACHE_VERSION,
+        background=True,  # Swiss-Model usually needs 5-20 minutes
     ),
     _spec(
         "quaternary",
@@ -85,6 +103,7 @@ LEVELS: tuple[LevelSpec, ...] = (
         placeholders.quaternary,
         live=quaternary.analyze,
         # No cache_version: the pipeline caches its own database answers (see quaternary.py).
+        after=("primary",),
     ),
 )
 

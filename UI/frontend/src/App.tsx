@@ -116,19 +116,29 @@ export default function App() {
     }
     case "tracking": {
       const job = state.job;
-      screen =
-        job.status === "completed" ? (
-          <ResultsScreen job={job} onNewAnalysis={startNewAnalysis} />
-        ) : (
-          <RunScreen
-            job={job}
-            cancelling={state.cancelling}
-            connectionError={state.connectionError}
-            onCancel={cancel}
-            onNewAnalysis={startNewAnalysis}
-            onEditAndRerun={() => editAndRerun(job.query.sequence, job.query.name)}
-          />
-        );
+      // The results page opens as soon as any level has a result; levels that
+      // are still running show their own progress in their tab.
+      const hasResult = job.levels.some((level) => level.status === "completed" && level.result !== null);
+      const showResults =
+        job.status === "completed" || (job.status === "running" && (hasResult || job.verdict !== null));
+      screen = showResults ? (
+        <ResultsScreen
+          key={job.id}
+          job={job}
+          stopping={state.cancelling}
+          onStop={cancel}
+          onNewAnalysis={startNewAnalysis}
+        />
+      ) : (
+        <RunScreen
+          job={job}
+          cancelling={state.cancelling}
+          connectionError={state.connectionError}
+          onCancel={cancel}
+          onNewAnalysis={startNewAnalysis}
+          onEditAndRerun={() => editAndRerun(job.query.sequence, job.query.name)}
+        />
+      );
       break;
     }
   }

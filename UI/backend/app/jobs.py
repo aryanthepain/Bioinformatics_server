@@ -155,6 +155,29 @@ class JobStore:
 
         self._update(job_id, apply)
 
+    def publish_verdict(self, job_id: str, verdict: Verdict) -> None:
+        """A provisional verdict, shown while slower levels are still running."""
+
+        def apply(job: AnalysisJob) -> None:
+            job.verdict = verdict
+            job.verdict_status = "running"
+
+        self._update(job_id, apply)
+
+    def stop_unfinished(self, job_id: str, message: str) -> None:
+        """Mark the levels that are still waiting or running as stopped."""
+
+        def apply(job: AnalysisJob) -> None:
+            now = utc_now()
+            for level in job.levels:
+                if level.status in UNFINISHED_STEP_STATUSES:
+                    if level.status == "running":
+                        level.finished_at = now
+                    level.status = "cancelled"
+                    level.message = message
+
+        self._update(job_id, apply)
+
     def complete(self, job_id: str, verdict: Verdict) -> None:
         def apply(job: AnalysisJob) -> None:
             job.verdict = verdict
@@ -206,6 +229,8 @@ class JobStore:
             job = self._jobs.get(job_id)
             if job is None:
                 return  # the job was removed; nothing to update
+            if job.status in TERMINAL_JOB_STATUSES:
+                return  # finished jobs never change (e.g. a level answering after Cancel)
             apply(job)
             job.updated_at = utc_now()
 

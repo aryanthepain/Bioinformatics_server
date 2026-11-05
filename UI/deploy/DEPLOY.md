@@ -1,148 +1,89 @@
-# Deploying the Protein Function Predictor (free, Oracle Cloud)
+# Deploying the Protein Function Predictor
 
 The whole app (website, API and all four structural levels) runs as one Docker
-container on a free Oracle Cloud virtual machine, behind Caddy, which provides
-HTTPS automatically. Total cost: nothing.
+container on a cloud server, behind Caddy, which provides HTTPS automatically.
 
-| What | Why it fits |
+| What | Why |
 | --- | --- |
-| Oracle Cloud **Always Free** VM: 2 Arm CPUs, 12 GB memory, up to 200 GB disk | The app needs about 4 GB of memory (ProtBert, ESM-2, DIAMOND) and about 10 GB of disk (Swiss-Prot and Pfam databases, models) and must stay on while an analysis runs (15–30 minutes for a new sequence). Free "platform" hosts offer 512 MB. |
-| **DuckDNS** subdomain, e.g. `protfunc.duckdns.org` | A free web address; Caddy gets a free HTTPS certificate for it. |
-| `deploy/` folder | `Dockerfile` (builds everything), `docker-compose.yml` + `Caddyfile` (app + HTTPS), `setup_server.sh` (one-time server setup). |
+| A Linux server with about **8 GB of memory** and **50 GB of disk** (e.g. Google Cloud `e2-standard-2`, free with the $300 trial) | ProtBert, ESM-2 and DIAMOND need about 4–5 GB of memory; Swiss-Prot, Pfam and the models need about 10 GB of disk. The server must stay on while analyses run. Free "platform" hosts (512 MB) are too small. |
+| A web address, e.g. a free **DuckDNS** subdomain or your own domain | Caddy gets a free HTTPS certificate for it. |
+| This `deploy/` folder | `Dockerfile` (builds everything), `docker-compose.yml` + `Caddyfile` (app + HTTPS), `setup_server.sh` (one-time server setup). |
 
-Time needed: about 1 hour, most of it waiting for the first build.
+The first build takes 30–40 minutes; updates take a few minutes.
 
 ---
 
-## Part A. Prepare the repository (on your Mac)
+## 1. Create the server (Google Cloud)
 
-1. **Optional, recommended:** analyse every example protein once in your local
-   app, so they open instantly on the website. Then copy the saved results:
+1. <https://cloud.google.com/free> → start the free trial (individual account).
+2. **Compute Engine → VM instances → Create instance**:
+   * name `protfunc`, region **asia-south1 (Mumbai)**;
+   * machine type **e2-standard-2** (2 vCPU, 8 GB);
+   * boot disk **Ubuntu 24.04 LTS (x86/64)**, **Balanced**, **50 GB**;
+   * tick **Allow HTTP traffic** and **Allow HTTPS traffic** → **Create**.
+3. **VPC network → IP addresses** → promote the VM's external IP to **static**.
 
-   ```bash
-   cd ~/Projects/Bioinformatics_server/UI/backend
-   bash scripts/update_seed_cache.sh
-   ```
+(Any Ubuntu server with similar resources works the same way, e.g. Oracle
+Cloud or Azure; open ports 80 and 443 in that provider's firewall.)
 
-2. **Commit and push** (from the repository root):
+## 2. Web address
 
-   ```bash
-   cd ~/Projects/Bioinformatics_server
-   git add UI
-   git status            # UI/backend/.env must NOT be listed
-   git commit -m "Add deployment files"
-   git push origin main
-   ```
+<https://www.duckdns.org> → add a subdomain → enter the server's IP → **update ip**.
+With your own domain, add **A records** for `@` and `www` pointing to the IP.
 
-3. **Only if the GitHub repository is private:** create a token the server can
-   use to download it. GitHub → your picture → **Settings** → **Developer settings**
-   → **Personal access tokens** → **Fine-grained tokens** → **Generate new token**:
-   repository access *Only select repositories* → this repository; permissions
-   *Contents: Read-only*. Copy the token (it is shown once).
+## 3. Install and start the app (on the server)
 
-## Part B. Create the Oracle Cloud account
+Open a terminal on the server (Google Cloud: the **SSH** button), then:
 
-1. Go to <https://www.oracle.com/cloud/free/> → **Start for free**.
-2. **Home region:** choose one close to you (e.g. *India South (Hyderabad)* or
-   *India West (Mumbai)*). It cannot be changed later, and free machines can only
-   be created there.
-3. Verify with a credit or debit card (a small temporary charge is reversed; Indian
-   cards need international/online transactions enabled). You stay on the free
-   plan; nothing is charged as long as you only use "Always Free" resources.
-4. Wait for the e-mail saying the account is ready, then sign in to the console.
+```bash
+tmux new -s deploy                      # keeps running if the connection drops
+sudo apt-get update && sudo apt-get install -y git gh
+gh auth login                           # GitHub.com → HTTPS → Yes → web browser
+gh repo clone OWNER/REPO
+cd REPO/UI/deploy
+bash setup_server.sh
+```
 
-## Part C. Create the server
+The script opens the web ports, installs Docker, asks for the web address and the
+Swiss-Model token (saved in `deploy/.env`, never committed), then builds and starts
+everything. Reconnect later with `tmux attach -t deploy`.
 
-Console → menu **☰** → **Compute** → **Instances** → **Create instance**.
+## 4. Before a demo: pre-compute the examples
 
-1. **Name:** `protfunc`.
-2. **Image and shape** → **Edit**:
-   * **Change image** → **Canonical Ubuntu** → version **24.04** → **Select image**.
-   * **Change shape** → **Ampere** → **VM.Standard.A1.Flex** → **OCPUs: 2**,
-     **Memory: 12 GB** → **Select shape**. It should be marked *Always Free-eligible*.
-3. **Networking:** keep *Create new virtual cloud network* and *Create new public
-   subnet*; make sure **Assign a public IPv4 address** is on.
-4. **Add SSH keys:** **Generate a key pair for me** → **Save private key**
-   (a file like `ssh-key-2026-11-05.key`).
-5. **Boot volume:** tick **Specify a custom boot volume size** → **100 GB**
-   (free up to 200 GB in total).
-6. **Create.** When the state is **Running**, copy the **Public IP address**.
+New sequences take 15–30 minutes in total (mostly JPred and Swiss-Model), although
+the results page opens as soon as the first level has finished (usually the primary
+level, after about a minute), with a provisional prediction.
+To make the examples open instantly, analyse them once (run from `REPO/UI/deploy`):
 
-> **"Out of capacity for shape VM.Standard.A1.Flex"** is common: try another
-> *Availability domain* in step 2 (if your region has several), try again a few
-> hours later, or use 1 OCPU / 6 GB (the app still works, more slowly).
+```bash
+sudo docker compose exec app python scripts/precompute.py http://127.0.0.1:8000
+```
 
-## Part D. Open the web ports in Oracle's firewall
+It prints progress and takes roughly 30–60 minutes for the five examples. The
+results are saved on the server and survive restarts and updates.
 
-Instance page → **Primary VNIC** → click the **Subnet** name → **Security**
-(or **Security Lists**) → **Default Security List** → **Add Ingress Rules**:
+## 5. Updating after a change
 
-| Source CIDR | IP protocol | Destination port range |
-| --- | --- | --- |
-| `0.0.0.0/0` | TCP | `80` |
-| `0.0.0.0/0` | TCP | `443` |
+Commit and push from your computer, then on the server:
 
-(Add them as two rules.) The server's own firewall is opened by `setup_server.sh`.
+```bash
+cd ~/REPO && git pull
+cd UI/deploy && sudo docker compose up -d --build
+sudo docker image prune -f        # removes the old image to free disk space
+```
 
-## Part E. Get the web address (DuckDNS)
+## 6. Settings (`deploy/.env`)
 
-1. <https://www.duckdns.org> → sign in (e.g. with GitHub).
-2. Type a subdomain, e.g. `protfunc` → **add domain**.
-3. In the **current ip** box, enter the server's public IP → **update ip**.
+| Setting | Effect |
+| --- | --- |
+| `SITE_ADDRESS` | The web address(es), comma-separated, e.g. `protfunc.duckdns.org, www.example.com` |
+| `SWISSMODEL_TOKEN` | Swiss-Model API token for the tertiary level |
+| `PFP_QUICK_RESULT_SECONDS` | Seconds to wait for the quaternary level before the provisional prediction is shown (default 0: as soon as the primary level is done) |
+| `PFP_PLACEHOLDER_LEVELS` | Use placeholder data for a level whose web service is down, e.g. `tertiary` |
 
-Your address is now `protfunc.duckdns.org`. (With your own domain instead, add an
-**A record** pointing to the server's IP at your domain provider.)
+After editing: `sudo docker compose up -d`.
 
-## Part F. Install and start the app (on the server)
-
-1. **Connect** from your Mac's Terminal (use your key file's real name):
-
-   ```bash
-   mv ~/Downloads/ssh-key-2026-11-05.key ~/.ssh/protfunc.key
-   chmod 600 ~/.ssh/protfunc.key
-   ssh -i ~/.ssh/protfunc.key ubuntu@YOUR_SERVER_IP
-   ```
-
-   Type `yes` when asked about the fingerprint. The prompt changes to `ubuntu@protfunc`.
-
-2. **Start a tmux session**, so the build keeps running if the connection drops
-   (reconnect later with `tmux attach -t deploy`):
-
-   ```bash
-   tmux new -s deploy
-   ```
-
-3. **Download the repository** (replace OWNER/REPO with yours; for a private
-   repository, enter your GitHub username and paste the token from Part A as the
-   password):
-
-   ```bash
-   sudo apt-get update && sudo apt-get install -y git
-   git clone https://github.com/OWNER/REPO.git
-   cd REPO/UI/deploy
-   ```
-
-4. **Run the setup script:**
-
-   ```bash
-   bash setup_server.sh
-   ```
-
-   It asks for the web address (`protfunc.duckdns.org`) and your Swiss-Model token
-   (hidden while typing), then builds and starts everything. The first build takes
-   about 30–40 minutes: it downloads Swiss-Prot and Pfam, builds the DIAMOND and
-   HMMER databases and downloads the ESM-2 and ProtBert models.
-
-5. When it prints **Done**, open `https://protfunc.duckdns.org`.
-
-## Part G. Check it
-
-* The header shows **Server online**.
-* Run **Hemoglobin α**: with the saved results it finishes within seconds and
-  shows *Hemoglobin subunit alpha*, confidence *High*.
-* Paste a new sequence to test the live run (15–30 minutes).
-
-Useful commands (on the server, in `REPO/UI/deploy`):
+## Useful commands (in `REPO/UI/deploy`)
 
 | Task | Command |
 | --- | --- |
@@ -151,37 +92,12 @@ Useful commands (on the server, in `REPO/UI/deploy`):
 | Restart the app | `sudo docker compose restart app` |
 | Stop / start everything | `sudo docker compose down` / `sudo docker compose up -d` |
 
-## Part H. Updating the website after a change
-
-On your Mac: commit and push. Then on the server:
-
-```bash
-cd ~/REPO && git pull
-cd UI/deploy && sudo docker compose up -d --build
-sudo docker image prune -f        # removes the old image to free disk space
-```
-
-Code-only changes rebuild in a few minutes; the databases and models are reused.
-
-## Part I. Demo day and good to know
-
-* **A web service is down** (Swiss-Model, JPred, …): add
-  `PFP_PLACEHOLDER_LEVELS=tertiary` (or the affected level) to `deploy/.env`, then
-  `sudo docker compose up -d`. The final prediction uses the remaining levels.
-* **Analyses run one at a time;** others wait in a queue. Results are kept until the
-  app restarts; saved results of finished levels survive restarts.
-* **Oracle reclaims idle free machines** (CPU, network and memory all below 20% for
-  7 days). Loading the models at start-up (`PFP_PRELOAD_MODELS=on`) keeps memory use
-  above that.
-* **The Swiss-Model token** is stored only in `deploy/.env` on the server.
-
 ## Troubleshooting
 
 | Symptom | Fix |
 | --- | --- |
-| The address does not load at all | Check Part D (both ports, TCP, `0.0.0.0/0`) and that DuckDNS shows the server's current IP. `curl -I http://localhost` on the server should answer. |
-| Browser warns about the certificate | DNS was not ready when Caddy started: wait 1–2 minutes and reload, or run `sudo docker compose restart caddy`. |
-| The build fails | Copy the last 40 lines of the output and fix or report them; run `sudo docker compose up -d --build` again (finished steps are reused). |
-| "Out of capacity" when creating the server | See Part C. |
-| Tertiary level says it was skipped | The Swiss-Model token is missing: edit `deploy/.env`, then `sudo docker compose up -d`. |
-| `Permission denied (publickey)` when connecting | Use `-i` with the key file, user `ubuntu`, and `chmod 600` on the key. |
+| The address does not load | Check that ports 80 and 443 are open in the provider's firewall and that the DNS record shows the server's current IP (`getent hosts <address>` on the server). |
+| Browser warns about the certificate | DNS was not ready when Caddy started: wait a minute and reload, or `sudo docker compose restart caddy`. |
+| The build fails | Copy the last 40 lines of the output; run `sudo docker compose up -d --build` again after fixing (finished steps are reused). |
+| Browser terminal says "Connection failed" during the build | The server is busy; wait a few minutes and retry, then `tmux attach -t deploy`. |
+| Tertiary level says it was skipped | Add the Swiss-Model token to `deploy/.env`, then `sudo docker compose up -d`. |

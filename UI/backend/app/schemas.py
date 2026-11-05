@@ -51,7 +51,8 @@ Tone = Literal[
 ]
 
 Polarity = Literal["positive", "negative", "neutral"]
-SupportState = Literal["supports", "neutral", "contradicts", "placeholder", "unavailable"]
+# "pending" = the level is still running (the verdict is provisional until it finishes).
+SupportState = Literal["supports", "neutral", "contradicts", "placeholder", "unavailable", "pending"]
 ConfidenceTier = Literal["high", "moderate", "low", "undetermined"]
 NoteKind = Literal["recommendation", "observation", "caution"]
 ColumnAlign = Literal["left", "right"]
@@ -194,6 +195,29 @@ class LevelSupport(BaseModel):
     state: SupportState
 
 
+class VerdictFact(BaseModel):
+    """One key fact behind the prediction, e.g. the closest characterised protein."""
+
+    label: str
+    value: str
+
+
+class ConfidenceRange(BaseModel):
+    """How far the levels that have not finished could still move the confidence.
+
+    Only their consistency checks are outstanding: the predicted function itself can
+    no longer change, so each of these levels can only add its agreement bonus, its
+    contradiction penalty, or nothing.
+    """
+
+    low: float = Field(ge=0, le=1)
+    high: float = Field(ge=0, le=1)
+    low_tier: ConfidenceTier
+    high_tier: ConfidenceTier
+    levels: list[LevelKey] = Field(description="The levels that have not finished.")
+    stopped: bool = Field(description="True when they were stopped: the range is what they could have changed.")
+
+
 class Verdict(BaseModel):
     """The final predicted function, combining all levels."""
 
@@ -202,6 +226,8 @@ class Verdict(BaseModel):
     description: str
     confidence_tier: ConfidenceTier
     confidence_score: float | None = Field(default=None, ge=0, le=1)
+    confidence_range: ConfidenceRange | None = None
+    facts: list[VerdictFact] = Field(default_factory=list, description="Key facts behind the prediction.")
     go_terms: list[GoTerm] = Field(default_factory=list)
     level_support: list[LevelSupport] = Field(default_factory=list)
     rationale: list[str] = Field(default_factory=list)
