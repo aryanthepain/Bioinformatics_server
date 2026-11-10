@@ -13,11 +13,15 @@ How a job runs:
      (the frontend shows each level as it finishes). Once the essential level
      (primary) is done and either every non-background level has finished or
      QUICK_RESULT_SECONDS have passed (default 0: straight away), a provisional
-     verdict is published. It is recomputed each time another level finishes,
-     and becomes final when all are done.
+     verdict is published. It is recomputed each time a level changes (finishes,
+     or a background step starts or ends), and becomes final when all are done.
   5. Cancel while no level has a result stops the job. Once a level has a result
      ("Stop & finish now"), it stops the remaining levels and finalises the
      verdict with the levels that finished.
+  6. A level with a background `refine` step (the primary level's EBI BLASTp and
+     InterProScan) shows its result first, then runs that step and replaces the
+     result; the verdict is recomputed when it finishes. Levels waiting for it
+     (quaternary) start as soon as the first result is there.
 
 Results of slow real modules are cached on disk (app/cache.py), so analysing
 the same sequence again skips the wait.
@@ -31,7 +35,7 @@ from . import cache
 from .config import MAX_CONCURRENT_JOBS, MOCK_DELAY_SCALE, QUICK_RESULT_SECONDS
 from .jobs import AnalysisCancelled, LevelSkipped, StageContext, store
 from .levels import LEVELS, LevelSpec
-from .schemas import LevelKey
+from .schemas import AnalysisJob, LevelKey, LevelResult
 from .verdict import build_verdict
 
 logger = logging.getLogger(__name__)
@@ -118,23 +122,28 @@ async def _run_level(
             return
 
         store.start_level(job_id, spec.key)
+        result: LevelResult | None = None
         if spec.cache_version is not None:
-            cached = await asyncio.to_thread(cache.load, spec.key, spec.cache_version, sequence)
-            if cached is not None:
+            result = await asyncio.to_thread(cache.load, spec.key, spec.cache_version, sequence)
+            if result is not None:
                 logger.info("Using the cached %s result for job %s", spec.key, job_id)
-                store.finish_level(job_id, spec.key, "completed", result=cached)
-                return
+                store.finish_level(job_id, spec.key, "completed", result=result)
 
-        if spec.exclusive:
-            lock = _exclusive_lock(spec.key)
-            if lock.locked():
-                store.report_level(job_id, spec.key, "Waiting for another analysis to finish this step…")
-            async with lock:
-                if event.is_set():
-                    return
-                await _execute(job_id, spec, sequence, event)
-        else:
-            await _execute(job_id, spec, sequence, event)
+        if result is None:
+            if spec.exclusive:
+                lock = _exclusive_lock(spec.key)
+                if lock.locked():
+                    store.report_level(job_id, spec.key, "Waiting for another analysis to finish this step…")
+                async with lock:
+                    if event.is_set():
+                        return
+                    result = await _execute(job_id, spec, sequence, event)
+            else:
+                result = await _execute(job_id, spec, sequence, event)
+
+        if result is not None:
+            finished[spec.key].set()  # levels waiting for this one can start now
+            await _refine(job_id, spec, sequence, event, result)
     except asyncio.CancelledError:
         raise
     except Exception as error:  # a level must never take the job down with it
@@ -145,31 +154,71 @@ async def _run_level(
         finished[spec.key].set()
 
 
-async def _execute(job_id: str, spec: LevelSpec, sequence: str, event: threading.Event) -> None:
+async def _execute(job_id: str, spec: LevelSpec, sequence: str, event: threading.Event) -> LevelResult | None:
+    """Run the level; return its result if it completed."""
     context = StageContext(store, job_id, spec.key, event)
     try:
         result = await asyncio.to_thread(spec.run, sequence, context)
     except AnalysisCancelled:
-        return  # the job is being cancelled or stopped; the supervisor records it
+        return None  # the job is being cancelled or stopped; the supervisor records it
     except LevelSkipped as skip:
         if not event.is_set():
             store.finish_level(job_id, spec.key, "skipped", message=_describe(skip))
-        return
+        return None
     except Exception as error:  # one level failing must not stop the others
         logger.exception("The %s level failed for job %s", spec.key, job_id)
         if not event.is_set():
             store.finish_level(job_id, spec.key, "failed", message=_describe(error))
-        return
+        return None
     if event.is_set():
-        return  # finished after Cancel: the job no longer accepts results
+        return None  # finished after Cancel: the job no longer accepts results
     store.finish_level(job_id, spec.key, "completed", result=result)
     if spec.cache_version is not None:
         await asyncio.to_thread(cache.store, spec.key, spec.cache_version, sequence, result)
+    return result
+
+
+async def _refine(job_id: str, spec: LevelSpec, sequence: str, event: threading.Event, result: LevelResult) -> None:
+    """The level's optional background step; its result stays visible meanwhile. Never raises.
+
+    Runs outside the exclusive lock (it waits for remote services, not the local CPU).
+    If it fails, the result shown so far is kept.
+    """
+    if spec.refine is None or spec.needs_refinement is None or event.is_set():
+        return
+    try:
+        if not spec.needs_refinement(result):
+            return
+        store.start_refining(job_id, spec.key, "Starting the remote analyses…")
+        context = StageContext(store, job_id, spec.key, event)
+        refined = await asyncio.to_thread(spec.refine, sequence, result, context)
+    except asyncio.CancelledError:
+        raise
+    except AnalysisCancelled:
+        return  # stopped: the supervisor records it and keeps the result shown so far
+    except Exception as error:
+        logger.exception("The background step of the %s level failed for job %s", spec.key, job_id)
+        if not event.is_set():
+            store.finish_refining(job_id, spec.key, None, message=f"Background step failed: {_describe(error)}")
+        return
+    if event.is_set():
+        return
+    store.finish_refining(job_id, spec.key, refined)
+    if spec.cache_version is not None:
+        try:
+            await asyncio.to_thread(cache.store, spec.key, spec.cache_version, sequence, refined)
+        except Exception:
+            logger.exception("Could not cache the refined %s result", spec.key)
 
 
 def _has_results(job_id: str) -> bool:
     """At least one level finished with a result, so stopping still leaves something to show."""
     return any(level.status == "completed" and level.result is not None for level in store.get(job_id).levels)
+
+
+def _level_state(job: AnalysisJob) -> tuple[object, ...]:
+    """What the verdict depends on: each level's status, background step and result time."""
+    return tuple((level.key, level.status, level.refining, level.finished_at) for level in job.levels)
 
 
 def _ready_for_quick_result(job_id: str, now: float, deadline: float) -> bool:
@@ -205,12 +254,13 @@ async def _run(job_id: str) -> None:
                 pending.add(task)
 
             published = False
+            published_state: tuple[object, ...] = ()
             while pending:
                 now = loop.time()
                 timeout = _STOP_CHECK_SECONDS
                 if not published and now < deadline:
                     timeout = min(timeout, deadline - now)
-                done, pending = await asyncio.wait(pending, timeout=timeout, return_when=asyncio.FIRST_COMPLETED)
+                _, pending = await asyncio.wait(pending, timeout=timeout, return_when=asyncio.FIRST_COMPLETED)
 
                 if cancel_event.is_set():
                     if _has_results(job_id):
@@ -223,12 +273,18 @@ async def _run(job_id: str) -> None:
 
                 if not pending:
                     break
-                if not published and _ready_for_quick_result(job_id, loop.time(), deadline):
-                    store.publish_verdict(job_id, build_verdict(store.get(job_id)))
-                    published = True
-                    logger.info("Published the provisional verdict for job %s", job_id)
-                elif published and done:
-                    store.publish_verdict(job_id, build_verdict(store.get(job_id)))
+                if not published and not _ready_for_quick_result(job_id, loop.time(), deadline):
+                    continue
+                # Recompute the provisional verdict whenever a level changes: it finishes, or a
+                # background step starts, ends or replaces a result.
+                job = store.get(job_id)
+                state = _level_state(job)
+                if state != published_state:
+                    store.publish_verdict(job_id, build_verdict(job))
+                    published_state = state
+                    if not published:
+                        published = True
+                        logger.info("Published the provisional verdict for job %s", job_id)
 
             store.set_verdict_status(job_id, "running")
             await asyncio.sleep(_INTEGRATION_PAUSE_SECONDS * MOCK_DELAY_SCALE)

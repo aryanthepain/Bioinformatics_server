@@ -1,6 +1,6 @@
 """A small on-disk cache for slow analysis modules.
 
-Real modules can take many minutes (Swiss-Model, JPred). Their results are
+Real modules can take many minutes (EBI, Foldseek). Their results are
 saved as backend/data/cache/<level>/<version>/<sha256 of sequence>.json, so
 analysing the same sequence again is instant, which is ideal for demos.
 

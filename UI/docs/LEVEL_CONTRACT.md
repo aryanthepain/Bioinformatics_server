@@ -18,9 +18,10 @@ def analyze(sequence: str, ctx: StageContext) -> LevelResult:
 ```
 
 - `sequence` is already cleaned and validated: uppercase, only the 20
-  standard amino acids, 25 to 1,000 residues.
+  standard amino acids, 25 to 1,000 residues. (A few non-standard letters
+  such as X or U are replaced before this; see `app/sequence.py`.)
 - `ctx` lets you talk to the interface while you work:
-  - `ctx.report("Waiting for Swiss-Model… 2 min")` shows a live progress message.
+  - `ctx.report("Foldseek is searching · 0:40 elapsed")` shows a live progress message.
   - `ctx.sleep(20)` waits, but stops immediately if the user cancels.
     Use it instead of `time.sleep` in polling loops.
   - `ctx.check_cancelled()` can be called between long steps.
@@ -31,6 +32,17 @@ def analyze(sequence: str, ctx: StageContext) -> LevelResult:
 
 Then register it in `backend/app/levels/__init__.py` by replacing the
 placeholder function for your level.
+
+**Optional: a slower background step.** A level whose module has a fast part and a
+slow part can show the fast result first. Register two more functions with it:
+`refine(sequence, result, ctx) -> LevelResult`, which runs after `result` is shown
+and returns the result that replaces it, and `needs_refinement(result) -> bool`
+(for example after a cached result). While `refine` runs, the level's tab says so
+above the result and the prediction is recomputed when it finishes. If `refine`
+fails or the user stops the analysis, the first result stays. The primary level
+uses this for its optional remote EMBL-EBI BLASTp and InterProScan (only when
+`PFP_EBI_EMAIL` is set), the secondary level for its comparison with experimental
+PDB structures.
 
 ## Where each field appears
 
@@ -81,7 +93,7 @@ design: `accent`, `ink`, `neutral`, `helix`, `strand`, `coil`, `uncertain`,
 Table(
     key="structural-matches",
     title="Structural matches",
-    caption="Foldseek search with the Swiss-Model model",
+    caption="Foldseek search of the AlphaFold DB structure",
     columns=[
         TableColumn(key="database", label="Database", mono=True),
         TableColumn(key="match", label="Match"),
@@ -96,17 +108,21 @@ left-aligned columns (names) take the remaining width.
 
 ## Worked example: the tertiary notebook
 
-`Mapping_protein_function_from_tertiary_structure.ipynb` already computes
-everything the tertiary section displays:
+`Tertiary_protein_identification.ipynb` computes everything the tertiary section
+displays (`backend/app/levels/tertiary.py`):
 
 | Notebook output | Goes into |
 | --- | --- |
-| `identify_structure()` top hit per database | `tables` (Structural matches), `evidence`, `headline` (best E-value) |
-| Foldseek hit query start and end positions | `tracks` (`blocks`, `overview=False`), one per database |
-| Per-residue local quality (QMEAN, 0–1), which Swiss-Model stores in the PDB B-factor column — verify on a real model file | `tracks` (`states`, `overview=True`), banded into the four `confidence-*` tones |
-| `analyze_properties()` pI, GRAVY, instability, weight | `metrics` with `group="Physicochemical profile · ProtParam"` |
-| atom count and spatial dimensions | key-figure `metrics` |
-| `generate_wet_lab_report()` solubility, purification, assay | `notes` with `kind="recommendation"` |
+| mean pLDDT (`analyze_structure`) | `headline`, `metrics` group "Confidence · pLDDT" |
+| per-residue pLDDT (B-factor column of the AlphaFold DB file) | `tracks` (`states`), banded into the four `confidence-*` tones |
+| DSSP states (pydssp) | `tracks` (`states`, `overview=False`) and `metrics` group "Secondary structure" |
+| `identify_structure()` top hit per database | `tables` (Structural matches), `links` |
+| the printed report (CONFIDENCE, DISORDER, COMPACTNESS, SURFACE, HOMOLOGY…) | `evidence`, one line each |
+| `transfer_uniprot_annotation()` sites and function | `tables` (Functional sites), `tracks` (`marks`), `notes` |
+| `analyze_properties()` pI, GRAVY, instability, weight, atoms, size | `metrics` |
+
+Residue tracks are drawn only when the structure's residues line up with the query
+(the structure is that of the primary level's closest match).
 
 The placeholder in `backend/app/levels/placeholders.py` (`tertiary`) produces
 exactly this shape, so it is a useful template.

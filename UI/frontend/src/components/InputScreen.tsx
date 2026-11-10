@@ -4,7 +4,7 @@ import type { ExampleSequence } from "../api/types";
 import type { BackendStatus } from "../hooks/useBackendStatus";
 import { useExamples } from "../hooks/useExamples";
 import { formatCount } from "../lib/format";
-import { MAX_SEQUENCE_LENGTH, MIN_SEQUENCE_LENGTH, checkSequence } from "../lib/sequence";
+import { MAX_SEQUENCE_LENGTH, MIN_SEQUENCE_LENGTH, checkSequence, describeReplacements } from "../lib/sequence";
 import type { SequenceCheck } from "../lib/sequence";
 import "./InputScreen.css";
 
@@ -36,7 +36,7 @@ const LEVEL_GUIDE = [
   },
   {
     title: "Tertiary structure",
-    text: "The three-dimensional fold of the chain. Proteins with similar folds often share a function.",
+    text: "The three-dimensional fold, from the AlphaFold DB structure of the closest known protein. Proteins with similar folds often share a function.",
   },
   {
     title: "Quaternary structure",
@@ -66,16 +66,31 @@ function StatusLine({ check }: { check: SequenceCheck }) {
       );
     case "invalid":
       return <>{check.message}</>;
-    case "valid":
+    case "valid": {
+      const changes = [
+        ...describeReplacements(check.replacements, 8),
+        ...(check.removedGaps > 0
+          ? [`${formatCount(check.removedGaps)} gap ${check.removedGaps === 1 ? "character" : "characters"} removed`]
+          : []),
+      ];
       return (
         <>
           <CheckIcon />
           <span>
             {formatCount(check.sequence.length)} residues
             {check.header ? ` · ${check.header}` : ""} · ready
+            {changes.length > 0 && (
+              <span className="composer__changes">
+                {check.replacements.length > 0
+                  ? ` · ${check.replacements.length === 1 ? "1 non-standard letter" : `${check.replacements.length} non-standard letters`} will be replaced: `
+                  : " · "}
+                {changes.join("; ")}
+              </span>
+            )}
           </span>
         </>
       );
+    }
   }
 }
 

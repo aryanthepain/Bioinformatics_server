@@ -5,9 +5,9 @@ each one mirrors what its notebook actually produces, so the interface
 already has the right shape:
 
   primary     DIAMOND homologues, HMMER/Pfam domains, ESM-2, ProtParam
-  secondary   JPred + ProtBert per-residue predictions, PDB comparison
-  tertiary    Swiss-Model model, Foldseek matches, ProtParam, model
-              geometry and wet-lab recommendations
+  secondary   five per-residue predictors and their consensus, PDB comparison
+  tertiary    AlphaFold DB structure, Foldseek matches, pLDDT, DSSP,
+              shape and surface, ProtParam
   quaternary  generic (the module is still being written)
 
 They are deterministic (same sequence → same placeholder), consistent
@@ -23,9 +23,9 @@ import hashlib
 import random
 from dataclasses import dataclass
 
-from ..config import JPRED_MAX_LENGTH, MOCK_DELAY_SCALE, MOCK_FAIL_LEVEL
+from ..config import MOCK_DELAY_SCALE, MOCK_FAIL_LEVEL
 from ..examples import find_example
-from ..jobs import LevelSkipped, StageContext
+from ..jobs import StageContext
 from ..schemas import (
     EvidenceItem,
     Headline,
@@ -322,7 +322,7 @@ def _secondary_runs(sequence: str) -> list[tuple[Tone, int, int]]:
 def _predictor_runs(
     sequence: str, consensus: list[tuple[Tone, int, int]]
 ) -> tuple[list[tuple[Tone, int, int]], list[tuple[Tone, int, int]]]:
-    """JPred and ProtBert agree wherever the consensus is certain, and differ elsewhere."""
+    """Two of the predictors (S4PRED and ESM-2 SS3) agree wherever the consensus is certain, and differ elsewhere."""
     rng = _rng(sequence, "predictors")
     jpred: list[tuple[Tone, int, int]] = []
     protbert: list[tuple[Tone, int, int]] = []
@@ -350,19 +350,12 @@ def _composition(runs: list[tuple[Tone, int, int]], length: int, states: list[st
 
 def secondary(sequence: str, ctx: StageContext) -> LevelResult:
     length = len(sequence)
-    if length > JPRED_MAX_LENGTH:
-        raise LevelSkipped(
-            f"JPred accepts at most {JPRED_MAX_LENGTH} residues, so secondary structure "
-            f"was not predicted for this {length:,}-residue sequence."
-        )
-
     rng = _rng(sequence, "secondary")
 
-    _pause(ctx, "Submitting the sequence to JPred…", 1.0)
+    _pause(ctx, "Predicting with S4PRED…", 1.0)
     _maybe_fail("secondary")
-    for check in (1, 2, 3):
-        _pause(ctx, f"Waiting for JPred results (check {check} of 3)…", 1.0)
-    _pause(ctx, "Predicting with ProtBert-BFD-SS3…", 1.0)
+    for name in ("ESM-2 SS3", "PSIPRED-single", "GOR IV", "Chou–Fasman"):
+        _pause(ctx, f"Predicting with {name}…", 0.5)
     _pause(ctx, "Comparing with experimental structures from the PDB…", 1.0)
 
     consensus = _secondary_runs(sequence)
@@ -403,7 +396,7 @@ def secondary(sequence: str, ctx: StageContext) -> LevelResult:
     evidence = [
         EvidenceItem(
             polarity="positive" if agreement >= 80 else "neutral",
-            text=f"JPred and ProtBert agree on {agreement}% of residues.",
+            text=f"A majority of the predictors agree on {agreement}% of residues.",
         ),
         EvidenceItem(
             polarity="positive",
@@ -436,12 +429,12 @@ def secondary(sequence: str, ctx: StageContext) -> LevelResult:
             Metric(label="Structures compared", value=str(len(structure_rows)), group=experimental_group),
             Metric(label="Best agreement", value=f"{best_agreement}%", group=experimental_group),
             Metric(
-                label="JPred 4",
+                label="S4PRED",
                 value=f"{jpred_shares['helix']}% helix · {jpred_shares['strand']}% strand",
                 group=predictor_group,
             ),
             Metric(
-                label="ProtBert-BFD-SS3",
+                label="ESM-2 SS3",
                 value=f"{protbert_shares['helix']}% helix · {protbert_shares['strand']}% strand",
                 group=predictor_group,
             ),
@@ -452,14 +445,14 @@ def secondary(sequence: str, ctx: StageContext) -> LevelResult:
             Track(
                 key="secondary-structure",
                 label="Secondary structure",
-                caption="JPred ∩ ProtBert consensus",
+                caption="Consensus · majority of 5 predictors",
                 style="states",
                 segments=[Segment(start=start, end=end, tone=state) for state, start, end in consensus],
                 legend=[*_SS_LEGEND, LegendItem(label="Predictors disagree", tone="uncertain")],
             ),
             Track(
-                key="jpred",
-                label="JPred 4",
+                key="s4pred",
+                label="S4PRED",
                 caption="Secondary · prediction",
                 style="states",
                 segments=[Segment(start=start, end=end, tone=state) for state, start, end in jpred],
@@ -467,8 +460,8 @@ def secondary(sequence: str, ctx: StageContext) -> LevelResult:
                 overview=False,
             ),
             Track(
-                key="protbert",
-                label="ProtBert-BFD-SS3",
+                key="esm2-ss3",
+                label="ESM-2 SS3",
                 caption="Secondary · prediction",
                 style="states",
                 segments=[Segment(start=start, end=end, tone=state) for state, start, end in protbert],
@@ -497,11 +490,11 @@ def secondary(sequence: str, ctx: StageContext) -> LevelResult:
 # --- Tertiary structure ----------------------------------------------------------
 
 # Representative local-QMEAN score (0–1) for each quality band.
-_QUALITY_SCORE: dict[str, float] = {
-    "confidence-very-high": 0.88,
-    "confidence-high": 0.72,
-    "confidence-low": 0.52,
-    "confidence-very-low": 0.32,
+_PLDDT_SCORE: dict[str, float] = {
+    "confidence-very-high": 94.0,
+    "confidence-high": 82.0,
+    "confidence-low": 61.0,
+    "confidence-very-low": 38.0,
 }
 
 
@@ -542,29 +535,24 @@ def tertiary(sequence: str, ctx: StageContext) -> LevelResult:
     length = len(sequence)
     rng = _rng(sequence, "tertiary")
 
-    _pause(ctx, "Submitting the sequence to Swiss-Model…", 1.0)
+    _pause(ctx, "Fetching the AlphaFold DB structure of the primary level's closest match…", 0.5)
     _maybe_fail("tertiary")
-    _pause(ctx, "Waiting for the Swiss-Model homology model…", 1.5)
-    _pause(ctx, "Searching the PDB and AlphaFold DB with Foldseek…", 1.0)
-    _pause(ctx, "Profiling the predicted model…", 0.5)
+    _pause(ctx, "Searching the PDB and AlphaFold DB with Foldseek…", 1.5)
+    _pause(ctx, "Analysing the structure (confidence, secondary structure, surface, annotation)…", 0.5)
 
-    # Model quality along the chain (Swiss-Model writes local QMEAN into the B-factor column).
+    # AlphaFold confidence (pLDDT) along the chain: high in domains, lower in linkers and termini.
     runs = _quality_runs(sequence)
-    counts = {tone: 0 for tone in _QUALITY_SCORE}
+    counts = {tone: 0 for tone in _PLDDT_SCORE}
     for tone, start, end in runs:
         counts[tone] += end - start + 1
-    mean_quality = sum(_QUALITY_SCORE[tone] * count for tone, count in counts.items()) / length
+    mean_plddt = sum(_PLDDT_SCORE[tone] * count for tone, count in counts.items()) / length
     shares = _percentages(counts, length)
-    low_share = shares["confidence-low"] + shares["confidence-very-low"]
+    below_70 = shares["confidence-low"] + shares["confidence-very-low"]
+    confidence = "high" if mean_plddt > 80 else "moderate" if mean_plddt > 70 else "low"
 
-    # Foldseek: the top match in each database, aligned over the domain region.
-    domains = _domain_regions(sequence)
+    # Foldseek: the top match in each database.
     matches: list[dict[str, str | float | int]] = []
     for database, name in (("pdb100", "PDB"), ("afdb50", "AlphaFold DB")):
-        start = min(length, max(1, domains[0][0] + rng.randint(-3, 3)))
-        end = min(length, max(1, domains[-1][1] + rng.randint(-3, 3)))
-        if end < start:
-            start, end = domains[0][0], domains[-1][1]
         matches.append(
             {
                 "database": database,
@@ -573,142 +561,88 @@ def tertiary(sequence: str, ctx: StageContext) -> LevelResult:
                 "exponent": rng.randint(12, 45),
                 "probability": rng.uniform(0.95, 1.0),
                 "identity": rng.uniform(25.0, 95.0),
-                "start": start,
-                "end": end,
+                "coverage": rng.randint(85, 100),
             }
         )
 
     def match_evalue(match: dict[str, str | float | int]) -> str:
         return _evalue(float(match["mantissa"]), int(match["exponent"]))
 
-    best = min(matches, key=lambda match: float(match["mantissa"]) * 10.0 ** -int(match["exponent"]))
-    best_evalue = match_evalue(best)
-
-    # Model geometry, on the scale of the notebook's own output (~7.9 atoms per residue).
+    best = max(matches, key=lambda match: float(match["probability"]))
+    helix = rng.randint(25, 55)
+    strand = rng.randint(5, 30)
+    rg_expected = 2.2 * length**0.38
+    rg = rg_expected * rng.uniform(0.92, 1.1)
     atoms = round(length * rng.uniform(7.6, 8.1))
     size = length ** (1 / 3) * 7.0
     x_span, y_span, z_span = (size * rng.uniform(0.85, 1.15) for _ in range(3))
-    dimensions = f"{x_span:.0f} × {y_span:.0f} × {z_span:.0f} Å"
-
-    # Wet-lab recommendations, using exactly the notebook's rules.
-    physchem = _physicochemical(sequence)
-    if physchem.gravy < 0:
-        solubility = (
-            "Predicted to be hydrophilic (GRAVY below 0). Standard cytosolic extraction buffers "
-            "such as Tris or PBS, without harsh detergents, should work."
-        )
-    else:
-        solubility = (
-            "Predicted to be hydrophobic (GRAVY of 0 or above). Consider mild detergents such as "
-            "Triton X-100 or CHAPS during lysis."
-        )
-    if physchem.isoelectric_point < 7.4:
-        purification = (
-            f"With a pI of {physchem.isoelectric_point:.2f}, the protein is negatively charged at "
-            "physiological pH (7.4). Use an anion-exchange column."
-        )
-    else:
-        purification = (
-            f"With a pI of {physchem.isoelectric_point:.2f}, the protein is positively charged at "
-            "physiological pH (7.4). Use a cation-exchange column."
-        )
-    assay = (
-        f"The predicted fold matches a known structure in the {best['name']} (E-value {best_evalue}). "
-        "Review the literature on this fold for known binding partners or activity assays."
-    )
-
-    evidence = [
-        EvidenceItem(
-            polarity="positive",
-            text=(
-                f"Foldseek ({match['database']}): structural match with E-value {match_evalue(match)} "
-                f"and probability {float(match['probability']):.2f}."
-            ),
-        )
-        for match in matches
-    ]
-    evidence.append(
-        EvidenceItem(polarity="neutral", text=f"Model of {atoms:,} atoms, about {dimensions}.")
-    )
-    if low_share >= 20:
-        evidence.append(
-            EvidenceItem(polarity="negative", text=f"{low_share}% of residues have low local model quality.")
-        )
-
-    physchem_metrics = _physicochemical_metrics(physchem, include_aromaticity=False)
-    quality_group = "Model quality · local QMEAN"
+    physchem_metrics = _physicochemical_metrics(_physicochemical(sequence), include_aromaticity=False)
 
     return LevelResult(
         source="placeholder",
-        headline=Headline(value=best_evalue, label="best structural-match E-value"),
+        headline=Headline(value=f"{mean_plddt:.1f}", label=f"mean pLDDT · {confidence} confidence"),
         summary=(
-            "The predicted model matches known folds in both the PDB and AlphaFold DB; "
-            f"the strongest match has an E-value of {best_evalue}."
+            "AlphaFold DB structure of the primary level's closest Swiss-Prot match. "
+            f"Mean pLDDT {mean_plddt:.1f} ({confidence}). Best structural match in the {best['name']}, "
+            f"probability {float(best['probability']):.2f}."
         ),
         metrics=[
+            Metric(label="Mean pLDDT", value=f"{mean_plddt:.1f}", hint="AlphaFold's per-residue confidence (0–100)."),
             Metric(label="Databases with a match", value=f"{len(matches)} of 2"),
-            Metric(label="Model atoms", value=f"{atoms:,}"),
-            Metric(label="Model size", value=dimensions),
-            Metric(
-                label="Mean model quality",
-                value=f"{mean_quality:.2f}",
-                hint="Average local QMEAN score (0–1) along the chain.",
-            ),
+            Metric(label="Structure residues", value=f"{length:,}"),
+            Metric(label="Atoms", value=f"{atoms:,}", group="Structure · AlphaFold DB"),
+            Metric(label="Size", value=f"{x_span:.1f} × {y_span:.1f} × {z_span:.1f} Å", group="Structure · AlphaFold DB"),
+            Metric(label="Very high (≥ 90)", value=f"{shares['confidence-very-high']}% of residues", group="Confidence · pLDDT"),
+            Metric(label="Below 70", value=f"{below_70}% of residues", group="Confidence · pLDDT"),
+            Metric(label="Helix", value=f"{helix}%", group="Secondary structure · DSSP (pydssp)"),
+            Metric(label="Strand", value=f"{strand}%", group="Secondary structure · DSSP (pydssp)"),
+            Metric(label="Coil", value=f"{100 - helix - strand}%", group="Secondary structure · DSSP (pydssp)"),
+            Metric(label="Radius of gyration", value=f"{rg:.1f} Å (expected ~{rg_expected:.1f} Å)", group="Shape and surface"),
             *physchem_metrics,
-            Metric(label="High quality (≥ 0.8)", value=f"{shares['confidence-very-high']}% of residues", group=quality_group),
-            Metric(label="Low quality (< 0.6)", value=f"{low_share}% of residues", group=quality_group),
         ],
-        evidence=evidence,
+        evidence=[
+            EvidenceItem(polarity="positive" if mean_plddt > 70 else "negative",
+                         text=f"CONFIDENCE: mean pLDDT {mean_plddt:.1f} ({confidence})"),
+            EvidenceItem(polarity="neutral",
+                         text=f"SECONDARY STRUCTURE: {helix}% helix, {strand}% strand, {100 - helix - strand}% coil"),
+            EvidenceItem(polarity="positive",
+                         text=f"HOMOLOGY (best overall): [{best['name']} match] | prob {float(best['probability']):.2f}"),
+        ],
         notes=[
-            Note(kind="recommendation", title="Solubility", text=solubility),
-            Note(kind="recommendation", title="Purification", text=purification),
-            Note(kind="recommendation", title="Assay design", text=assay),
+            Note(
+                kind="recommendation",
+                title="Reading the transferred sites",
+                text="Conserved site residues support a shared function; if they differ, the fold may be shared "
+                "while the function has diverged.",
+            ),
         ],
         tracks=[
             Track(
-                key="model-quality",
-                label="Model quality",
-                caption="Tertiary · local QMEAN",
+                key="plddt",
+                label="AlphaFold confidence",
+                caption="Tertiary · pLDDT",
                 style="states",
                 segments=[Segment(start=start, end=end, tone=tone) for tone, start, end in runs],
                 legend=[
-                    LegendItem(label="QMEAN ≥ 0.8", tone="confidence-very-high"),
-                    LegendItem(label="0.6–0.8", tone="confidence-high"),
-                    LegendItem(label="0.4–0.6", tone="confidence-low"),
-                    LegendItem(label="< 0.4", tone="confidence-very-low"),
+                    LegendItem(label="Very high (pLDDT ≥ 90)", tone="confidence-very-high"),
+                    LegendItem(label="Confident (70–90)", tone="confidence-high"),
+                    LegendItem(label="Low (50–70)", tone="confidence-low"),
+                    LegendItem(label="Very low (< 50)", tone="confidence-very-low"),
                 ],
             ),
-            *[
-                Track(
-                    key=f"match-{match['database']}",
-                    label=f"{match['name']} match",
-                    caption=f"Foldseek · {match['database']}",
-                    style="blocks",
-                    segments=[
-                        Segment(
-                            start=int(match["start"]),
-                            end=int(match["end"]),
-                            tone="accent" if match is best else "ink",
-                            label=f"[{match['name']} match]",
-                        )
-                    ],
-                    overview=False,
-                )
-                for match in matches
-            ],
         ],
         tables=[
             Table(
                 key="structural-matches",
                 title="Structural matches",
-                caption="Foldseek search (3Di + amino acids) with the Swiss-Model model",
+                caption="Foldseek search (3Di + amino acids) of the AlphaFold DB structure; top hit per database",
                 columns=[
                     TableColumn(key="database", label="Database", mono=True),
                     TableColumn(key="match", label="Match"),
                     TableColumn(key="evalue", label="E-value", align="right", mono=True),
                     TableColumn(key="probability", label="Probability", align="right"),
                     TableColumn(key="identity", label="Identity", align="right"),
-                    TableColumn(key="residues", label="Query residues", align="right", mono=True),
+                    TableColumn(key="coverage", label="Coverage", align="right"),
                 ],
                 rows=[
                     {
@@ -717,7 +651,7 @@ def tertiary(sequence: str, ctx: StageContext) -> LevelResult:
                         "evalue": match_evalue(match),
                         "probability": f"{float(match['probability']):.2f}",
                         "identity": f"{float(match['identity']):.1f}%",
-                        "residues": f"{match['start']}–{match['end']}",
+                        "coverage": f"{match['coverage']}%",
                     }
                     for match in matches
                 ],

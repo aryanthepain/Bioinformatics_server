@@ -179,6 +179,10 @@ class LevelReport(BaseModel):
     started_at: datetime | None = None
     finished_at: datetime | None = None
     result: LevelResult | None = None
+    refining: bool = Field(
+        default=False,
+        description="The result is shown, but a slower background step (the primary level's EBI services) is still running.",
+    )
 
 
 # --- The integrated answer ---------------------------------------------------------
@@ -216,6 +220,17 @@ class ConfidenceRange(BaseModel):
     high_tier: ConfidenceTier
     levels: list[LevelKey] = Field(description="The levels that have not finished.")
     stopped: bool = Field(description="True when they were stopped: the range is what they could have changed.")
+    function_fixed: bool = Field(
+        default=True,
+        description="False while the primary level's EBI services still run: they can refine the best match itself.",
+    )
+
+
+class CuratedFunction(BaseModel):
+    """The template's curated function text from UniProt (sequence route only)."""
+
+    accession: str
+    text: str
 
 
 class Verdict(BaseModel):
@@ -227,6 +242,7 @@ class Verdict(BaseModel):
     confidence_tier: ConfidenceTier
     confidence_score: float | None = Field(default=None, ge=0, le=1)
     confidence_range: ConfidenceRange | None = None
+    curated_function: CuratedFunction | None = None
     facts: list[VerdictFact] = Field(default_factory=list, description="Key facts behind the prediction.")
     go_terms: list[GoTerm] = Field(default_factory=list)
     level_support: list[LevelSupport] = Field(default_factory=list)
@@ -236,10 +252,20 @@ class Verdict(BaseModel):
 # --- Jobs ---------------------------------------------------------------------------
 
 
+class ResidueReplacement(BaseModel):
+    """A non-standard letter in the submitted sequence and what it was replaced with."""
+
+    position: int = Field(ge=1, description="1-based position in the analysed sequence.")
+    original: str
+    replacement: str
+
+
 class QueryInfo(BaseModel):
     name: str
-    sequence: str
+    sequence: str = Field(description="The analysed sequence (after cleaning and replacements).")
     length: int
+    replacements: list[ResidueReplacement] = Field(default_factory=list)
+    removed_gaps: int = Field(default=0, ge=0, description="Alignment gap characters removed.")
 
 
 class AnalysisJob(BaseModel):

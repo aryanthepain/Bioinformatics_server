@@ -27,7 +27,25 @@ RUN case "$(uname -m)" in \
  && /opt/tools/bin/diamond version \
  && /opt/tools/bin/hmmscan -h | head -n 2
 
-# ---- 3. The application ----------------------------------------------------------------
+# ---- 3. The secondary level's assets (scripts/setup_secondary.py) and GOR IV ---------------
+# Built in their own stage so the compilers and git stay out of the final image. The same base
+# image as the application, so the PSIPRED programs and the gor4 wheel run there.
+FROM python:3.12-slim-bookworm AS secondary
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends ca-certificates git make gcc libc6-dev \
+ && rm -rf /var/lib/apt/lists/*
+# gor4 (the GOR IV C code, built with cffi), pinned to the notebook's commit as in pyproject.toml.
+RUN pip install --no-cache-dir cffi setuptools wheel \
+ && pip wheel --no-cache-dir --no-deps --wheel-dir /wheels \
+      "gor4 @ git+https://github.com/acorg/gor4.git@38de0ac7def0dde4f6c6efea3cce2fed772137d1"
+# S4PRED and PSIPRED at their pinned commits, PSIPRED built, the S4PRED checkpoint (checksum
+# checked) and the ESM-2 secondary-structure checkpoint: about 250 MB.
+COPY backend/scripts/setup_secondary.py /tmp/build/setup_secondary.py
+RUN pip install --no-cache-dir "huggingface_hub<1" \
+ && python /tmp/build/setup_secondary.py --assets /opt/secondary \
+ && rm -rf /opt/secondary/s4pred/.git /opt/secondary/psipred/.git
+
+# ---- 4. The application ----------------------------------------------------------------
 FROM python:3.12-slim-bookworm
 ENV PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
@@ -35,11 +53,14 @@ ENV PYTHONUNBUFFERED=1 \
     HF_HOME=/opt/hf-cache \
     PFP_DIAMOND_BIN=/opt/tools/bin/diamond \
     PFP_HMMSCAN_BIN=/opt/tools/bin/hmmscan \
+    PFP_SECONDARY_DATA_DIR=/opt/secondary \
     PFP_PRELOAD_MODELS=on
 RUN apt-get update \
  && apt-get install -y --no-install-recommends ca-certificates curl \
  && rm -rf /var/lib/apt/lists/*
 COPY --from=tools /opt/tools /opt/tools
+COPY --from=secondary /opt/secondary /opt/secondary
+COPY --from=secondary /wheels /tmp/wheels
 
 # Python libraries: the versions pinned in uv.lock (requirements.txt is exported from it),
 # plus PyTorch (CPU-only build, much smaller) and Transformers at their uv.lock versions.
@@ -52,10 +73,20 @@ RUN pip install -r /tmp/build/requirements.txt \
  && pip install "transformers==${transformers_version}" \
  && python -c "import torch, transformers; print('torch', torch.__version__, '| transformers', transformers.__version__)"
 
-# The two models, downloaded now so the server never has to (about 1.7 GB).
-RUN python -c "from transformers import AutoModelForTokenClassification, AutoTokenizer, EsmModel; \
-AutoTokenizer.from_pretrained('facebook/esm2_t6_8M_UR50D'); EsmModel.from_pretrained('facebook/esm2_t6_8M_UR50D'); \
-AutoTokenizer.from_pretrained('Rostlab/prot_bert_bfd_ss3'); AutoModelForTokenClassification.from_pretrained('Rostlab/prot_bert_bfd_ss3')"
+# pydssp (secondary structure of the tertiary level's AlphaFold DB structure), after PyTorch so
+# pip keeps the CPU-only build; its uv.lock version if it is there. Then gor4 (GOR IV, the
+# secondary level), from the wheel built above.
+RUN pydssp_version="$(python /tmp/build/ml_versions.py /tmp/build/uv.lock pydssp 2>/dev/null || true)" \
+ && pip install "pydssp${pydssp_version:+==${pydssp_version}}" \
+ && python -c "import pydssp; print('pydssp ok')" \
+ && pip install /tmp/wheels/gor4-*.whl \
+ && rm -rf /tmp/wheels \
+ && python -c "from gor4 import GOR4; print('gor4 ok')"
+
+# The primary level's ESM-2 model, downloaded now so the server never has to. (The secondary
+# level's ESM-2 SS3 checkpoint is in /opt/secondary/hf, from the stage above.)
+RUN python -c "from transformers import AutoTokenizer, EsmModel; \
+AutoTokenizer.from_pretrained('facebook/esm2_t6_8M_UR50D'); EsmModel.from_pretrained('facebook/esm2_t6_8M_UR50D')"
 ENV HF_HUB_OFFLINE=1
 
 RUN useradd --create-home --uid 1000 user

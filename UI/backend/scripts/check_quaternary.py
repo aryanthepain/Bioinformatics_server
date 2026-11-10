@@ -233,7 +233,8 @@ def check_examples() -> None:
         print(f"--- {example.name}")
         primary_result = cache.load("primary", primary.CACHE_VERSION, example.sequence)
         if primary_result is None:
-            result("NOTE", f"{example.name}: no cached primary result; analyse it once in the app first")
+            result("NOTE", f"{example.name}: no cached primary result; run scripts/check_primary.py --examples "
+                           "or analyse it once in the app first")
             continue
         target, homologue = quaternary.choose_target(example.sequence, primary_result)
         try:

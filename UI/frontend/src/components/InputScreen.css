@@ -125,6 +125,11 @@
   color: var(--color-danger);
 }
 
+/* Non-standard letters that will be replaced (still valid, but worth noticing). */
+.composer__changes {
+  color: var(--color-placeholder);
+}
+
 .composer__footer {
   display: flex;
   flex-wrap: wrap;

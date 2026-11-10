@@ -7,6 +7,8 @@
  * Levels that are still running show their progress in their own tab, and the
  * prediction appears on the Summary tab once the primary level is done; it
  * updates as levels finish ("Stop & finish now" finalises it with what is done).
+ * The primary level's result first comes from its local tools; its remote EBI
+ * services (BLASTp, InterProScan) then refine it in the background.
  * A dot marks a tab whose content changed since it was last viewed. The Print
  * menu prints the full report or a single level in a print-friendly layout.
  */
@@ -18,6 +20,7 @@ import type {
   ConfidenceTier,
   LevelKey,
   LevelReport,
+  QueryInfo,
   SupportState,
   Verdict,
 } from "../api/types";
@@ -25,6 +28,7 @@ import { isFinished } from "../hooks/useAnalysis";
 import { useNow } from "../hooks/useNow";
 import { downloadJson } from "../lib/download";
 import { formatCount, formatDuration, parseTimestamp } from "../lib/format";
+import { describeReplacements } from "../lib/sequence";
 import LevelAnalysis from "./LevelAnalysis";
 import LevelStatusTag from "./LevelStatusTag";
 import ResidueMap from "./ResidueMap";
@@ -91,14 +95,25 @@ const LEVEL_SHORT_NAME: Record<LevelKey, string> = {
 
 const PRINT_OPTIONS: { target: PrintTarget; label: string; hint: string }[] = [
   { target: "all", label: "Full report", hint: "Summary and all four analyses" },
-  { target: "primary", label: "Primary structure", hint: "DIAMOND, Pfam, ESM-2, ProtParam" },
-  { target: "secondary", label: "Secondary structure", hint: "JPred, ProtBert, PDB comparison" },
-  { target: "tertiary", label: "Tertiary structure", hint: "Swiss-Model, Foldseek" },
+  { target: "primary", label: "Primary structure", hint: "DIAMOND, BLASTp, Pfam, InterPro, ESM-2" },
+  { target: "secondary", label: "Secondary structure", hint: "Five predictors, consensus, PDB comparison" },
+  { target: "tertiary", label: "Tertiary structure", hint: "AlphaFold DB, Foldseek, pLDDT" },
   { target: "quaternary", label: "Quaternary structure", hint: "Assembly, complexes, interfaces" },
 ];
 
+/** How a level whose background step still runs is named in the "still running" banner. */
+const REFINING_NAME: Partial<Record<LevelKey, string>> = {
+  primary: "Primary (EBI)",
+  secondary: "Secondary (PDB)",
+};
+
 function isRunning(level: LevelReport): boolean {
   return level.status === "running" || level.status === "pending";
+}
+
+/** Still running, or showing a result that a background step will still update. */
+function isBusy(level: LevelReport): boolean {
+  return isRunning(level) || level.refining;
 }
 
 function hasResult(level: LevelReport): boolean {
@@ -175,6 +190,9 @@ function levelMark(level: LevelReport): TabMark | null {
   if (isRunning(level)) {
     return { kind: "running", label: "still running" };
   }
+  if (level.refining) {
+    return { kind: "running", label: "result shown, background step still running" };
+  }
   if (level.status === "failed") {
     return { kind: "failed", label: "failed" };
   }
@@ -194,6 +212,29 @@ function TabMarkView({ mark }: { mark: TabMark }) {
       )}
       <span className="visually-hidden"> ({mark.label})</span>
     </>
+  );
+}
+
+/** Says which letters of the submitted sequence were replaced (or gaps removed) before the analysis. */
+function SequenceAdjustedNote({ query }: { query: QueryInfo }) {
+  if (query.replacements.length === 0 && query.removed_gaps === 0) {
+    return null;
+  }
+  const changes = describeReplacements(query.replacements);
+  if (query.removed_gaps > 0) {
+    changes.push(
+      `${formatCount(query.removed_gaps)} alignment gap ${query.removed_gaps === 1 ? "character was" : "characters were"} removed`,
+    );
+  }
+  return (
+    <div className="alert alert--info sequence-note" role="note">
+      <div className="alert__body">
+        <span className="alert__title">Sequence adjusted before the analysis</span>
+        <span>
+          {changes.join("; ")}. Positions refer to the analysed sequence.
+        </span>
+      </div>
+    </div>
   );
 }
 
@@ -217,13 +258,44 @@ function ConfidenceRangeNote({ range }: { range: ConfidenceRange }) {
         {` · ${tiers}`}
       </span>
       <span className="confidence__range-note">
-        {range.stopped ? "The predicted function would have been the same." : "The predicted function will not change."}
+        {range.stopped
+          ? "The predicted function would have been the same."
+          : range.function_fixed === false
+            ? "EBI BLASTp and InterProScan may still refine the best match."
+            : "The predicted function will not change."}
       </span>
     </div>
   );
 }
 
-function VerdictPanel({ verdict }: { verdict: Verdict }) {
+/** What each level's background step is, in the verdict panel. */
+const REFINING_STEP: Partial<Record<LevelKey, { value: string; note: string }>> = {
+  primary: {
+    value: "EBI BLASTp and InterProScan",
+    note: "They may refine the best match; the prediction is updated when they finish.",
+  },
+  secondary: {
+    value: "PDB comparison",
+    note: "The secondary check is added to the prediction when it finishes.",
+  },
+};
+
+/** While a background step runs and no confidence range is shown. */
+function RefiningNote({ levels }: { levels: LevelKey[] }) {
+  const steps = levels.map((key) => REFINING_STEP[key]).filter((step) => step !== undefined);
+  if (steps.length === 0) {
+    return null;
+  }
+  return (
+    <div className="confidence__range">
+      <span className="confidence__range-label">Still running</span>
+      <span className="confidence__range-value">{steps.map((step) => step.value).join(" · ")}</span>
+      <span className="confidence__range-note">{steps.map((step) => step.note).join(" ")}</span>
+    </div>
+  );
+}
+
+function VerdictPanel({ verdict, refining }: { verdict: Verdict; refining: LevelKey[] }) {
   const legend = SUPPORT_ORDER.filter((state) => verdict.level_support.some((item) => item.state === state));
 
   return (
@@ -233,6 +305,22 @@ function VerdictPanel({ verdict }: { verdict: Verdict }) {
           <p className="eyebrow">Predicted function</p>
           <h1 className="verdict__function">{verdict.function}</h1>
           <p className="verdict__description">{verdict.description}</p>
+          {verdict.curated_function && (
+            <div className="verdict__curated">
+              <p className="verdict__curated-label">
+                Curated function of{" "}
+                <a
+                  href={`https://www.uniprot.org/uniprotkb/${verdict.curated_function.accession}/entry`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {verdict.curated_function.accession}
+                </a>{" "}
+                · UniProt
+              </p>
+              <p className="verdict__curated-text">{verdict.curated_function.text}</p>
+            </div>
+          )}
         </div>
 
         <div className="confidence">
@@ -262,7 +350,11 @@ function VerdictPanel({ verdict }: { verdict: Verdict }) {
               </li>
             ))}
           </ul>
-          {verdict.confidence_range && <ConfidenceRangeNote range={verdict.confidence_range} />}
+          {verdict.confidence_range ? (
+            <ConfidenceRangeNote range={verdict.confidence_range} />
+          ) : (
+            refining.length > 0 && <RefiningNote levels={refining} />
+          )}
         </div>
       </div>
 
@@ -291,8 +383,8 @@ function PendingVerdict({ primary }: { primary: LevelReport | undefined }) {
         <p className="verdict-pending__title">Appears when the primary level has finished</p>
         <p className="verdict-pending__text">
           The function is transferred from what the primary level finds (the closest characterised Swiss-Prot
-          protein or a Pfam domain); the other levels then adjust its confidence. Finished levels can already be
-          opened in their tabs.
+          protein, or a protein domain from Pfam or InterPro); the other levels then adjust its confidence.
+          Finished levels can already be opened in their tabs.
         </p>
         {status && <p className="verdict-pending__status">Primary level: {status}</p>}
       </div>
@@ -356,7 +448,10 @@ function SummaryView({
   return (
     <div className="summary">
       {verdict ? (
-        <VerdictPanel verdict={verdict} />
+        <VerdictPanel
+          verdict={verdict}
+          refining={job.levels.filter((level) => level.refining).map((level) => level.key)}
+        />
       ) : !isFinished(job) ? (
         <PendingVerdict primary={job.levels.find((level) => level.key === "primary")} />
       ) : (
@@ -493,6 +588,7 @@ function ReportView({ job, target, onBack }: { job: AnalysisJob; target: PrintTa
           </p>
         )}
       </header>
+      <SequenceAdjustedNote query={job.query} />
       {target === "all" && <SummaryView job={job} onOpen={() => undefined} showCards={false} />}
       {levels.map((level) => (
         <LevelAnalysis
@@ -541,7 +637,16 @@ export default function ResultsScreen({ job, stopping, onStop, onNewAnalysis }: 
   const verdict = job.verdict;
   const usesPlaceholders =
     verdict?.source === "placeholder" || job.levels.some((level) => level.result?.source === "placeholder");
-  const runningNames = job.levels.filter(isRunning).map((level) => LEVEL_SHORT_NAME[level.key]);
+  const runningNames = job.levels
+    .filter(isBusy)
+    .map((level) =>
+      isRunning(level) ? LEVEL_SHORT_NAME[level.key] : (REFINING_NAME[level.key] ?? LEVEL_SHORT_NAME[level.key]),
+    );
+  const slowSteps = [
+    job.levels.some((level) => level.key === "primary" && level.refining)
+      ? "EBI BLASTp and InterProScan usually take 2–10 minutes."
+      : null,
+  ].filter((text) => text !== null);
   const createdAt = parseTimestamp(job.created_at);
   const finishedAt = parseTimestamp(job.finished_at);
   const runtime =
@@ -653,7 +758,7 @@ export default function ResultsScreen({ job, stopping, onStop, onNewAnalysis }: 
             </span>
             <span>
               {verdict
-                ? "The prediction uses the levels that have finished and updates by itself as the others finish. JPred and Swiss-Model can take 5–20 minutes."
+                ? ["The prediction uses the levels that have finished and updates by itself as the others finish.", ...slowSteps].join(" ")
                 : "Finished levels can be opened in their tabs now; the prediction appears on the Summary tab once the primary level is done."}
             </span>
           </div>
@@ -677,6 +782,8 @@ export default function ResultsScreen({ job, stopping, onStop, onNewAnalysis }: 
           </div>
         </div>
       )}
+
+      <SequenceAdjustedNote query={job.query} />
 
       <nav ref={tabsRef} className="results-tabs" aria-label="Results sections">
         <div className="results-tabs__list" role="tablist">

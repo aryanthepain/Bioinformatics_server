@@ -1,6 +1,6 @@
 """The integration step: combine the four level results into one predicted function.
 
-Same logic as the notebook "Function_Prediction_Integration.ipynb" (sections 4 and 6
+Same logic as the notebook "Function_Prediction_Integration_Final.ipynb" (sections 4 and 6
 are copied here unchanged), so the website and the notebook give identical answers.
 
 Function is predicted by transferring the annotation of a related, characterised
@@ -9,17 +9,29 @@ protein, so the confidence is
     P(function correct) = P(homologous to the template) x P(function conserved at this distance)
 
   Route (first that applies)          predicted function             P(homology)        P(conserved)
-  1. sequence: DIAMOND hit passed     the hit's protein name         0.99 (>= 40% id)   0.95 (>= 60%)
-     the primary thresholds and is                                   0.90 (30-40%)      0.80 (40-60%)
-     characterised                                                                      0.55 (30-40%)
-  2. domain: Pfam E-value < 1e-10     "X family member"              0.95               0.50
-  3. fold: significant Foldseek       "Structural similarity to X"   Foldseek prob      0.25
-     match of a reliable model
-     (mean QMEAN >= 0.6)
+  1. sequence: the primary level's    the hit's protein name         0.99 (>= 40% id)   0.95 (>= 60%)
+     best hit (DIAMOND or EBI                                        0.90 (30-40%)      0.80 (40-60%)
+     BLASTp) shows strong homology                                                      0.55 (30-40%)
+     (>= 30% identity, >= 80%
+     coverage) and is characterised
+  2. domain: domain support, i.e.     "X family member"              0.95               0.50
+     a Pfam domain with E < 1e-10,
+     else an integrated InterPro entry
+  3. fold: the tertiary level's       "Structural similarity to X"   P(homology to the  0.25
+     AlphaFold DB structure of the                                   match) x Foldseek
+     primary level's match, which                                    prob of X
+     shares the query's fold (the
+     match passed the homology test)
+     and is reliable (mean pLDDT >
+     70), matches a characterised
+     protein X (Foldseek prob >= 0.5
+     over >= 50% of the structure)
 
 The other levels are consistency checks, added on the log-odds scale:
-  tertiary   reliable model with a significant match +0.5; without one -1.0
-  secondary  agreement with experimental PDB structures >= 75% +0.4; < 60% -1.0
+  tertiary   none: it analyses the structure of the primary level's own match,
+             so it cannot test a function transferred from that match
+  secondary  agreement of the consensus with experimental PDB structures (helix/strand
+             residues) >= 75% +0.4; < 60% -1.0
   quaternary template assembly CONFIRMED/SUPPORTED +0.4; CONFLICTING -0.5
              (halved below 40% identity)
 Agreement is rewarded less than contradiction is penalised: agreement between
@@ -28,13 +40,17 @@ dependent levels is expected, a contradiction is informative.
 Score = sigmoid(logit(base) + adjustments); bands: high >= 0.80, moderate >= 0.50.
 Literature: Tian & Skolnick 2003 (J Mol Biol 333:863), Rost 1999 (Protein Eng 12:85),
 Rost 2002 (J Mol Biol 318:595), Aloy et al. 2003 (J Mol Biol 332:989), van Kempen
-et al. 2024 (Nat Biotechnol 42:243). The score is a literature-anchored estimate,
+et al. 2024 (Nat Biotechnol 42:243), Jumper et al. 2021 (Nature 596:583). The score is a literature-anchored estimate,
 not a calibrated probability.
 
 While levels are still running (or after they were stopped), the verdict also gives
 the confidence range they could still produce: once the primary level is done the
 predicted function is fixed, and each unfinished level can only add its agreement
-bonus, its contradiction penalty or nothing.
+bonus, its contradiction penalty or nothing. The exception is the primary level's
+background step (EBI BLASTp and InterProScan): until it finishes, it can still
+change the best match or the domain evidence, and the verdict says so. The secondary
+level's background step (its comparison with PDB structures) counts as unfinished
+until it ends.
 
 When every level returned placeholder data (mock mode), the built-in examples
 still show their known function, clearly marked as a placeholder.
@@ -43,12 +59,14 @@ still show their known function, clearly marked as a placeholder.
 import logging
 import math
 import re
+import textwrap
 
 from .examples import find_example
 from .levels.quaternary import assembly_name
 from .schemas import (
     AnalysisJob,
     ConfidenceRange,
+    CuratedFunction,
     GoTerm,
     LevelReport,
     LevelSupport,
@@ -83,66 +101,130 @@ def _live(level):
     return isinstance(level, dict) and level.get("source") == "live"
 
 
-def _passed(level, prefix):
-    """The primary notebook's own verdict: its evidence line is positive when the test passed."""
-    return any(item.get("polarity") == "positive" and str(item.get("text", "")).startswith(prefix)
-               for item in level.get("evidence", []))
+def _swissprot_title(title, hit_id):
+    """A Swiss-Prot title -> (protein, organism, gene).
+
+    DIAMOND titles start with the identifier ('sp|P69905|HBA_HUMAN Hemoglobin subunit alpha OS=...'),
+    EBI BLAST descriptions do not ('Hemoglobin subunit alpha OS=Homo sapiens OX=9606 ...').
+    """
+    text = str(title or "").strip()
+    first, _, rest = text.partition(" ")
+    if (hit_id and first == hit_id) or "|" in first:
+        text = rest
+    organism = re.search(r"OS=(.*?)(?: OX=| GN=| PE=| SV=|$)", text)
+    gene = re.search(r" GN=(\S+)", text)
+    return text.split(" OS=")[0].strip(), organism.group(1).strip() if organism else "", gene.group(1) if gene else ""
 
 
-def _parse_swissprot_title(title):
-    """'sp|P69905|HBA_HUMAN Hemoglobin subunit alpha OS=Homo sapiens OX=9606 ...' -> parts."""
-    token, _, rest = title.partition(" ")
-    parts = token.split("|")
-    accession = parts[1] if len(parts) > 2 else token
-    entry = parts[2] if len(parts) > 2 else token
-    protein = rest.split(" OS=")[0].strip()
-    organism = re.search(r"OS=(.*?)(?: OX=|$)", rest)
-    return accession, entry, protein, organism.group(1).strip() if organism else ""
+def _entry_name(hit_id, accession):
+    """'sp|P69905|HBA_HUMAN' or 'SP:HBA_HUMAN' -> 'HBA_HUMAN'."""
+    text = str(hit_id or "").strip()
+    if "|" in text:
+        parts = text.split("|")
+        return parts[2] if len(parts) > 2 and parts[2] else parts[-1]
+    return text.split(":")[-1] if text else accession
+
+
+def _dict(value):
+    return value if isinstance(value, dict) else {}
+
+
+def _interpro_family(architecture):
+    """The InterPro entry for a family-level prediction: one that integrates a Pfam signature
+    if there is one, otherwise the entry most member databases agree on (then the longest)."""
+    rows = [r for r in architecture or [] if isinstance(r, dict) and r.get("interpro_accession") and r.get("description")]
+    if not rows:
+        return None
+
+    def rank(r):
+        members = [m.strip() for m in str(r.get("members") or "").split(",") if m.strip()]
+        return ("Pfam" in members, len(members), (_num(r.get("end")) or 0) - (_num(r.get("start")) or 0))
+
+    return max(rows, key=rank)
 
 
 def primary_evidence(level):
-    """DIAMOND best Swiss-Prot hit and the best Pfam domain (HMMER) from the primary level."""
+    """The primary notebook's own evidence summary: its best homology hit and its domain support."""
     if not _live(level):
         return {"ran": False}
-    raw = level.get("raw") or {}
-    diamond, hmmer = raw.get("diamond") or {}, raw.get("hmmer") or {}
+    raw = _dict(level.get("raw"))
+    summary = _dict(raw.get("evidence_summary"))
+    assessment = _dict(summary.get("assessment"))
+    threshold = _num(_dict(raw.get("thresholds")).get("hmmer_evalue")) or 1e-10
+    best = _dict(assessment.get("best_hit"))
+    identity, coverage = _num(best.get("identity_percent")), _num(best.get("query_coverage_percent_approx"))
     hit = None
-    if diamond.get("title") and (_num(diamond.get("identity")) or 0) > 0:
-        accession, entry, protein, organism = _parse_swissprot_title(str(diamond["title"]))
+    if best.get("accession") and identity is not None and coverage is not None:
+        accession = str(best["accession"])
+        candidate = next((c for c in summary.get("top_homology_candidates") or []
+                          if isinstance(c, dict) and c.get("accession") == accession), {})
+        protein, organism, gene = _swissprot_title(best.get("title"), best.get("hit_id"))
+        if candidate.get("protein_name") and candidate["protein_name"] != best.get("title"):
+            protein = str(candidate["protein_name"])  # UniProt's recommended name
+        entry = _entry_name(best.get("hit_id"), accession)
         hit = {
-            "accession": accession, "entry": entry, "protein": protein, "organism": organism,
-            "identity": _num(diamond.get("identity")), "coverage": _num(diamond.get("query_coverage")),
-            "evalue": _num(diamond.get("e_value")),
-            "passed": _passed(level, "DIAMOND:"),  # identity > 30% and coverage >= 80%
+            "accession": accession, "entry": entry,
+            "protein": protein or entry, "organism": candidate.get("organism") or organism,
+            "gene": candidate.get("gene_name") or gene, "method": best.get("method") or "",
+            "identity": identity, "coverage": coverage, "evalue": _num(best.get("evalue")),
+            "passed": assessment.get("strong_homology") is True,  # >= 30% identity and >= 80% query coverage
+            "function": candidate.get("function_annotation") or None,  # UniProt's curated FUNCTION text
         }
     domain = None
-    if _passed(level, "HMMER:") and hmmer.get("domain") not in (None, "None"):
-        accession = str(hmmer.get("accession") or "")
-        same = [d for d in hmmer.get("domains", []) or [] if d.get("accession") == accession and _num(d.get("e_value")) is not None]
-        best = min(same, key=lambda d: float(d["e_value"])) if same else {}
-        domain = {
-            "name": str(hmmer["domain"]), "accession": accession.split(".")[0],
-            "description": str(best.get("description") or hmmer["domain"]), "evalue": _num(hmmer.get("e_value")),
-        }
-    return {"ran": True, "hit": hit, "domain": domain}
+    if assessment.get("domain_support") is True:  # Pfam E < 1e-10, or an integrated InterPro entry
+        best_domain = _dict(assessment.get("best_domain"))
+        evalue = _num(best_domain.get("domain_i_evalue"))
+        if evalue is not None and evalue < threshold and best_domain.get("pfam_name"):
+            domain = {
+                "source": "Pfam", "name": str(best_domain["pfam_name"]),
+                "accession": str(best_domain.get("pfam_accession_base") or best_domain.get("pfam_accession") or ""),
+                "description": str(best_domain.get("description") or best_domain["pfam_name"]), "evalue": evalue,
+            }
+        else:
+            entry = _interpro_family(summary.get("domain_architecture"))
+            if entry is not None:
+                domain = {
+                    "source": "InterPro", "name": str(entry["interpro_accession"]),
+                    "accession": str(entry["interpro_accession"]), "description": str(entry["description"]),
+                    "evalue": None,
+                }
+    tier = assessment.get("tier")
+    return {"ran": True, "hit": hit, "domain": domain, "tier": tier if isinstance(tier, str) else None}
 
 
 def secondary_evidence(level):
-    """Best agreement between the predicted secondary structure and experimental PDB structures."""
+    """Best agreement between the predicted secondary structure and experimental PDB structures.
+
+    The final secondary notebook's compare_pdb_references (raw["pdb_references"], filled in by the
+    level's background step; "pending" until then). Results of the earlier JPred/ProtBert notebook
+    (raw["experimental_comparison"]) are still read, so older saved analyses keep their check.
+    """
     if not _live(level):
         return {"ran": False}
     raw = level.get("raw") or {}
-    rows = [
-        r for r in raw.get("experimental_comparison") or []
-        if _num(r.get("SS_Agreement_%")) is not None and _num(r.get("Comparable_Residues")) is not None
-    ]
-    best = max(rows, key=lambda r: (float(r["Comparable_Residues"]) >= 20, float(r["SS_Agreement_%"]))) if rows else None
+    pdb = raw.get("pdb_references")
+    if isinstance(pdb, dict):
+        status = str(pdb.get("status"))
+        rows = [
+            {"entity": r.get("PDB_entity"), "identity": r.get("Aligned_identity_pct"),
+             "residues": r.get("Comparable_residues"), "agreement": r.get("SS_agreement_pct")}
+            for r in pdb.get("rows") or [] if r.get("Status") == "OK"
+        ]
+    else:  # the earlier notebook's format
+        status = "success"
+        rows = [
+            {"entity": r.get("PDB_entity"), "identity": r.get("Sequence_Identity_%"),
+             "residues": r.get("Comparable_Residues"), "agreement": r.get("SS_Agreement_%")}
+            for r in raw.get("experimental_comparison") or []
+        ]
+    rows = [r for r in rows if _num(r["agreement"]) is not None and _num(r["residues"]) is not None]
+    best = max(rows, key=lambda r: (float(r["residues"]) >= 20, float(r["agreement"]))) if rows else None
     return {
         "ran": True,
-        "predictor_agreement": _num(raw.get("predictor_agreement_percent")),
+        "pdb_status": status,  # success, pending (background step not finished), unavailable or off
         "best": None if best is None else {
-            "entity": str(best.get("PDB_entity")), "identity": _num(best.get("Sequence_Identity_%")),
-            "residues": int(float(best["Comparable_Residues"])), "agreement": float(best["SS_Agreement_%"]),
+            "entity": str(best["entity"]), "identity": _num(best["identity"]),
+            "residues": int(float(best["residues"])), "agreement": float(best["agreement"]),
         },
     }
 
@@ -159,24 +241,47 @@ def _pretty_target(database, token):
 
 
 def tertiary_evidence(level):
-    """Model quality (mean local QMEAN) and the best Foldseek match of the SWISS-MODEL model."""
+    """The tertiary notebook's findings on the AlphaFold DB structure of the primary level's match."""
     if not _live(level):
         return {"ran": False}
-    raw = level.get("raw") or {}
-    qmean = next((_num(m.get("value")) for m in level.get("metrics", []) if m.get("label") == "Mean local quality"), None)
+    raw = _dict(level.get("raw"))
+    template = _dict(raw.get("template"))
+    structure = _dict(raw.get("structure"))
+    transfer = _dict(raw.get("annotation_transfer"))
     best = None
-    for database, hit in (raw.get("foldseek_top_hits") or {}).items():
-        evalue = _num((hit or {}).get("eval"))
-        if evalue is None:
-            continue
-        token, _, description = str(hit.get("target", "")).partition(" ")
-        candidate = {
-            "database": database, "target": _pretty_target(database, token), "description": description.strip(),
-            "evalue": evalue, "prob": _num(hit.get("prob")), "seq_id": _num(hit.get("seqId")),
+    hit = _dict(raw.get("best_hit"))
+    if hit.get("target"):
+        token, _, description = str(hit["target"]).partition(" ")
+        database = next((str(db) for db, h in _dict(raw.get("foldseek_top_hits")).items()
+                         if _dict(h).get("target") == hit["target"]), "")
+        best = {"database": database, "target": _pretty_target(database, token), "description": description.strip(),
+                "evalue": _num(hit.get("eval")), "prob": _num(hit.get("prob")), "coverage": _num(hit.get("coverage"))}
+    neighbour = None
+    annotation, afdb = _dict(transfer.get("annotation")), _dict(transfer.get("afdb_hit"))
+    if transfer.get("status") == "transferred" and annotation.get("accession"):
+        sites = [site for site in annotation.get("sites") or [] if isinstance(site, dict)]
+        description = str(afdb.get("target", "")).partition(" ")[2].strip()
+        name = annotation.get("name")
+        neighbour = {
+            "accession": str(annotation["accession"]),
+            "name": str(name) if name and name != "n/a" else description or str(annotation["accession"]),
+            "function": str(annotation["function"]) if annotation.get("function") else None,
+            "prob": _num(afdb.get("prob")), "coverage": _num(afdb.get("coverage")), "evalue": _num(afdb.get("eval")),
+            "sites": len(sites), "conserved": sum(1 for site in sites if site.get("conserved") is True),
         }
-        if best is None or evalue < best["evalue"]:
-            best = candidate
-    return {"ran": True, "qmean": qmean, "best": best}
+    identity = _num(template.get("identity"))
+    return {
+        "ran": True,
+        "template": str(template.get("accession") or raw.get("uniprot_id") or ""),
+        "template_identity": identity,
+        "template_coverage": _num(template.get("coverage")),
+        # The structure shares the query's fold: its protein passed the primary homology test.
+        "template_passed": template.get("passed") is True and identity is not None,
+        "plddt": _num(structure.get("mean_plddt")),
+        "experimental": structure.get("has_plddt") is False,
+        "best": best,
+        "neighbour": neighbour,  # the characterised AlphaFold DB match whose annotation was transferred
+    }
 
 
 def quaternary_evidence(level):
@@ -221,23 +326,21 @@ def evidence_from_levels(levels):
 # =============================================================================
 
 PARAMS = {
-    # Route 1 - sequence homology (DIAMOND hit that passed the primary thresholds)
+    # Route 1 - sequence homology (the primary notebook's best hit, DIAMOND or EBI BLASTp, that passed its thresholds)
     "seq_hom_40": 0.99,       # P(homologous) when identity >= 40%
     "seq_hom_30": 0.90,       # P(homologous) when identity is 30-40% (twilight zone, Rost 1999)
     "cons_60": 0.95,          # P(function conserved) at >= 60% identity (Tian & Skolnick 2003)
     "cons_40": 0.80,          # ... at 40-60% identity (first three EC digits reliable)
     "cons_30": 0.55,          # ... at 30-40% identity (function diverges, Rost 2002)
-    # Route 2 - Pfam domain (HMMER independent E-value < 1e-10)
+    # Route 2 - domain support (Pfam domain with independent E-value < 1e-10, else an integrated InterPro entry)
     "dom_hom": 0.95,          # P(the domain is a true family member)
     "dom_cons": 0.50,         # P(the family's function applies to this protein)
-    # Route 3 - fold only (Foldseek)
+    # Route 3 - fold only (tertiary: Foldseek match of the AlphaFold DB structure of the primary level's match)
     "fold_cons": 0.25,        # P(function conserved | same fold only) (Aloy et al. 2003)
-    "fold_evalue": 1e-3,      # a structural match counts if E <= this ...
-    "fold_prob": 0.5,         # ... and Foldseek's homology probability >= this
-    "qmean_min": 0.6,         # the 3D model is trusted only if mean local QMEAN >= this
+    "fold_prob": 0.5,         # the structural match counts if Foldseek's homology probability >= this ...
+    "fold_cov": 0.5,          # ... over >= this fraction of the structure (both from the tertiary notebook)
+    "plddt_min": 70.0,        # the structure is trusted only if its mean pLDDT is above this (AlphaFold "confident")
     # Consistency checks (log-odds adjustments)
-    "d_ter_agree": 0.5,       # reliable model with a significant structural match
-    "d_ter_contra": -1.0,     # reliable model but no significant structural match
     "ss_agree": 75.0,         # % agreement with experimental structures that counts as agreement
     "ss_contra": 60.0,        # % agreement below which it counts as a contradiction
     "ss_min_res": 20,         # minimum residues compared
@@ -274,12 +377,18 @@ def p_conserved_seq(identity, P):
 
 
 def fold_is_significant(tertiary, P):
-    best = tertiary.get("best") if tertiary.get("ran") else None
-    return bool(best) and best["evalue"] <= P["fold_evalue"] and (best["prob"] is None or best["prob"] >= P["fold_prob"])
+    """The tertiary level transferred the annotation of a characterised structural match."""
+    match = tertiary.get("neighbour") if tertiary.get("ran") else None
+    return (bool(match) and bool(match["function"]) and not UNCHARACTERISED.match(match["name"])
+            and match["prob"] is not None and match["prob"] >= P["fold_prob"]
+            and match["coverage"] is not None and match["coverage"] >= P["fold_cov"])
 
 
 def model_is_reliable(tertiary, P):
-    return tertiary.get("ran") and tertiary.get("qmean") is not None and tertiary["qmean"] >= P["qmean_min"]
+    """The structure is trusted: an experimental structure, or mean pLDDT above plddt_min."""
+    if not tertiary.get("ran"):
+        return False
+    return tertiary.get("experimental") is True or (tertiary.get("plddt") is not None and tertiary["plddt"] > P["plddt_min"])
 
 
 def family_label(description):
@@ -307,15 +416,23 @@ def predict(ev, P=PARAMS):
                  f"{hit['identity']:.1f}% identity over {hit['coverage']:.1f}% of the query")
     elif domain is not None:
         route, specificity = "domain", "protein family"
-        function = f"{family_label(domain['description'])} (Pfam {domain['accession']})"
+        source = domain.get("source", "Pfam")
+        function = f"{family_label(domain['description'])} ({source} {domain['accession']})"
         p_hom, p_cons = P["dom_hom"], P["dom_cons"]
-        basis = f"Pfam domain {domain['description']} ({domain['accession']}, E = {domain['evalue']:.1e})"
-    elif fold_is_significant(ter, P) and model_is_reliable(ter, P):
-        best = ter["best"]
+        if domain.get("evalue") is not None:
+            basis = f"{source} domain {domain['description']} ({domain['accession']}, E = {domain['evalue']:.1e})"
+        else:
+            basis = f"{source} entry {domain['description']} ({domain['accession']}, integrated InterProScan signatures)"
+    elif (prim.get("ran") and ter.get("ran") and ter.get("template_passed")
+          and model_is_reliable(ter, P) and fold_is_significant(ter, P)):
+        match = ter["neighbour"]
         route, specificity = "fold", "fold only"
-        function = f"Structural similarity to {best['target']}" + (f" ({best['description']})" if best["description"] else "")
-        p_hom, p_cons = (best["prob"] if best["prob"] is not None else 0.5), P["fold_cons"]
-        basis = f"Foldseek match {best['target']} in {best['database']} (E = {best['evalue']:.1e}, prob = {p_hom:.2f})"
+        function = f"Structural similarity to {match['name']} ({match['accession']})"
+        # query ~ the structure's protein (sequence homology), then that structure ~ the match (Foldseek)
+        p_hom, p_cons = p_homology_seq(ter["template_identity"], P) * match["prob"], P["fold_cons"]
+        basis = (f"Foldseek match of the AlphaFold DB structure of {ter['template']} "
+                 f"({ter['template_identity']:.1f}% identical to the query) to {match['accession']} "
+                 f"(prob = {match['prob']:.2f}, coverage {match['coverage']:.0%})")
     else:
         route, specificity, function, p_hom, p_cons, basis = None, "none", "Function not determined", None, None, ""
 
@@ -336,19 +453,17 @@ def predict(ev, P=PARAMS):
 
     # ---- Step 2: consistency checks
     if route != "fold" and ter.get("ran"):
-        if not model_is_reliable(ter, P):
-            steps.append(("tertiary", f"model unreliable (mean QMEAN {ter.get('qmean')}); not used", 0.0))
-        elif fold_is_significant(ter, P):
-            b = ter["best"]
-            steps.append(("tertiary", f"reliable model matches {b['target']} (E = {b['evalue']:.1e})", P["d_ter_agree"]))
-            support["tertiary"] = "supports"
-        else:
-            steps.append(("tertiary", "reliable model but no significant structural match", P["d_ter_contra"]))
-            support["tertiary"] = "contradicts"
+        # The structure is that of the primary level's own match, so it cannot test the transfer.
+        steps.append(("tertiary", f"it analysed the AlphaFold DB structure of {ter.get('template') or 'the primary match'}, "
+                                  "the primary level's own match, so it is not an independent test", 0.0))
 
     if sec.get("ran"):
         best = sec.get("best")
-        if best is None or best["residues"] < P["ss_min_res"]:
+        if sec.get("pdb_status") == "pending":
+            steps.append(("secondary", "the comparison with experimental PDB structures has not finished", 0.0))
+        elif sec.get("pdb_status") == "unavailable":
+            steps.append(("secondary", "the PDB reference lookup was unavailable", 0.0))
+        elif best is None or best["residues"] < P["ss_min_res"]:
             steps.append(("secondary", "no experimental structure to compare with", 0.0))
         elif best["agreement"] >= P["ss_agree"]:
             steps.append(("secondary", f"{best['agreement']:.1f}% agreement with {best['entity']} ({best['residues']} residues)", P["d_ss_agree"]))
@@ -392,7 +507,7 @@ _GO_ID = re.compile(r"^GO:\d{7}$")
 _RUNNING = frozenset({"pending", "running"})
 _ROUTE_TEXT = {
     "sequence": "Route 1 of 3, sequence homology",
-    "domain": "Route 2 of 3, Pfam domain",
+    "domain": "Route 2 of 3, protein family (domain)",
     "fold": "Route 3 of 3, structural similarity",
 }
 _LEVEL_NAME = {"tertiary": "Tertiary", "secondary": "Secondary", "quaternary": "Quaternary"}
@@ -453,17 +568,21 @@ def _description(ev, prediction, missing, running):
             if hit is not None and hit["passed"]
             else "No Swiss-Prot protein passed the homology test"
         )
+        kind = "domain" if domain.get("source", "Pfam") == "Pfam" else "entry"
         return (
-            f"{opening}, so a family-level function is predicted from the {domain['description']} domain; "
-            "members of a family can differ in their exact function."
+            f"{opening}, so a family-level function is predicted from the {domain.get('source', 'Pfam')} {kind} "
+            f"{domain['description']}; members of a family can differ in their exact function."
         )
     if route == "fold":
         return (
-            "Neither a characterised Swiss-Prot homologue nor a Pfam domain supported a function, so it is inferred "
-            "from the structural similarity of a reliable 3D model; similar folds can carry different functions, "
-            "so treat it as a hint."
+            "Neither a characterised Swiss-Prot homologue nor a protein domain supported a function, so it is inferred "
+            "from a characterised protein whose structure matches the AlphaFold DB structure of the closest "
+            "Swiss-Prot match; similar folds can carry different functions, so treat it as a hint."
         )
-    text = "No Swiss-Prot homologue, Pfam domain or significant structural match from a reliable model supported a function."
+    text = (
+        "No characterised Swiss-Prot homologue, protein domain or characterised structural match "
+        "supported a function."
+    )
     if missing:
         levels = f"{' and '.join(missing)} level{'s' if len(missing) > 1 else ''}"
         text += f" The {levels} gave no result, so part of that evidence was missing."
@@ -492,22 +611,36 @@ def _assembly(context):
     return f"{shown}, {str(context['status']).lower()}"
 
 
+def _domain_fact(domain):
+    """('Pfam domain', 'Globin (PF00042)') or ('InterPro entry', 'Globin-like (IPR009050)')."""
+    source = domain.get("source", "Pfam")
+    return (f"{source} {'domain' if source == 'Pfam' else 'entry'}", f"{domain['description']} ({domain['accession']})")
+
+
+def _tier_text(tier):
+    """'A - Strong' -> 'A · Strong'."""
+    return str(tier).replace(" - ", " · ", 1)
+
+
 def _facts(ev, prediction, context):
     """The key facts behind the prediction, shown as a grid under the predicted function."""
     route = prediction["route"]
     prim, ter = ev["primary"], ev["tertiary"]
     hit = prim.get("hit") if prim.get("ran") else None
     domain = prim.get("domain") if prim.get("ran") else None
+    tier = prim.get("tier") if prim.get("ran") else None
     facts = []
     if route == "sequence":
-        source = f"{hit['protein'] or hit['entry']} ({hit['accession']})"
+        gene = f", gene {hit['gene']}" if hit.get("gene") else ""
+        source = f"{hit['protein'] or hit['entry']} ({hit['accession']}{gene})"
+        similarity = f"{_percent(hit['identity'])} identity over {_percent(hit['coverage'])} of the query"
         facts += [
             ("Basis", "Sequence homology (route 1 of 3)"),
             ("Closest Swiss-Prot protein", source + (f", {hit['organism']}" if hit["organism"] else "")),
-            ("Similarity", f"{_percent(hit['identity'])} identity over {_percent(hit['coverage'])} of the query"),
+            ("Similarity", similarity + (f" · {hit['method']}" if hit.get("method") else "")),
         ]
         if domain is not None:
-            facts.append(("Pfam domain", f"{domain['description']} ({domain['accession']})"))
+            facts.append(_domain_fact(domain))
         if context is not None:
             if context.get("formula") and context["status"] in ("CONFIRMED", "SUPPORTED"):
                 facts.append((f"Oligomeric state of {hit['accession']}", _assembly(context)))
@@ -518,13 +651,17 @@ def _facts(ev, prediction, context):
                     complexes.append(f"{name} ({details})" if details else str(name))
             if complexes:
                 facts.append(("Complex" if len(complexes) == 1 else "Complexes", "; ".join(complexes)))
+        if tier:
+            facts.append(("Primary evidence tier", _tier_text(tier)))
         facts.append(("Specificity", "Specific protein"))
     elif route == "domain":
+        source = domain.get("source", "Pfam")
         facts += [
-            ("Basis", "Pfam domain (route 2 of 3)"),
-            ("Pfam domain", f"{domain['description']} ({domain['accession']})"),
-            ("Domain E-value", _scientific(domain["evalue"])),
+            ("Basis", f"{source} {'domain' if source == 'Pfam' else 'entry'} (route 2 of 3)"),
+            _domain_fact(domain),
         ]
+        if domain.get("evalue") is not None:
+            facts.append(("Domain E-value", _scientific(domain["evalue"])))
         if hit is not None and hit["passed"]:
             source = f"{hit['protein'] or hit['entry']} ({hit['accession']})"
             facts.append(("Closest Swiss-Prot protein", f"{source}, uncharacterised"))
@@ -533,42 +670,67 @@ def _facts(ev, prediction, context):
             facts.append(("Best Swiss-Prot hit", f"{hit['entry']}: {similarity} (below the homology thresholds)"))
         else:
             facts.append(("Best Swiss-Prot hit", "none found"))
+        if tier:
+            facts.append(("Primary evidence tier", _tier_text(tier)))
         facts.append(("Specificity", "Protein family"))
     elif route == "fold":
-        best = ter["best"]
-        probability = f", homology probability {best['prob']:.2f}" if best["prob"] is not None else ""
+        match = ter["neighbour"]
+        evalue = f", E-value {_scientific(match['evalue'])}" if match["evalue"] is not None else ""
         facts += [
             ("Basis", "Structural similarity (route 3 of 3)"),
-            ("Structural match", f"{best['target']} ({best['database']})"),
-            ("Match statistics", f"E-value {_scientific(best['evalue'])}{probability}"),
-            ("3D model quality", f"mean local QMEAN {ter['qmean']:.2f}"),
-            ("Specificity", "Fold only"),
+            ("Structural match", f"{match['name']} ({match['accession']}, AlphaFold DB)"),
+            ("Match statistics",
+             f"homology probability {match['prob']:.2f} over {match['coverage']:.0%} of the structure{evalue}"),
+            ("Structure analysed",
+             f"AlphaFold DB {ter['template']}, {_percent(ter['template_identity'])} identical to the query over "
+             f"{_percent(ter['template_coverage'])} of it"),
+            ("Structure confidence",
+             f"mean pLDDT {ter['plddt']:.1f}" if ter["plddt"] is not None else "experimental structure"),
         ]
+        if match["sites"]:
+            facts.append(("Functional sites", f"{match['conserved']} of {match['sites']} conserved"))
+        if tier:
+            facts.append(("Primary evidence tier", _tier_text(tier)))
+        facts.append(("Specificity", "Fold only"))
     return [VerdictFact(label=label, value=value) for label, value in facts]
+
+
+def _curated_function(ev, prediction):
+    """UniProt's curated FUNCTION text of the protein the function was transferred from."""
+    if prediction["route"] == "sequence":
+        source = ev["primary"]["hit"]
+    elif prediction["route"] == "fold":
+        source = ev["tertiary"]["neighbour"]
+    else:
+        return None
+    if not source.get("function"):
+        return None
+    text = textwrap.shorten(" ".join(str(source["function"]).split()), 600, placeholder=" …")
+    return CuratedFunction(accession=source["accession"], text=text)
 
 
 def _band(score, P):
     return "high" if score >= P["high"] else "moderate" if score >= P["moderate"] else "low"
 
 
-def _confidence_range(ev, prediction, statuses, P):
+def _confidence_range(ev, prediction, statuses, P, refining=frozenset()):
     """The confidence the levels that have not finished could still produce (None if none apply).
 
     Once the primary level has finished the route, and so the predicted function, is fixed
     (the fold route also needs the tertiary level, so it has finished too). An unfinished
     level can then only add the adjustment `predict` gives it: the agreement bonus, the
-    contradiction penalty or nothing. The extremes of the range are all-agree and
-    all-contradict.
+    contradiction penalty or nothing (the tertiary level gives none). The extremes of the range are all-agree and
+    all-contradict. While the primary level's own background step (EBI BLASTp and
+    InterProScan) still runs, the best match itself may still be refined: function_fixed
+    is then False.
     """
     route = prediction["route"]
     if route is None or statuses.get("primary") not in ("completed", "failed", "skipped"):
         return None
     unfinished = {key for key, status in statuses.items() if status in _RUNNING or status == "cancelled"}
     possible = {}
-    if "secondary" in unfinished:
+    if "secondary" in unfinished or ("secondary" in refining and ev["secondary"].get("pdb_status") == "pending"):
         possible["secondary"] = (P["d_ss_contra"], P["d_ss_agree"])
-    if "tertiary" in unfinished and route != "fold":
-        possible["tertiary"] = (P["d_ter_contra"], P["d_ter_agree"])
     if "quaternary" in unfinished and route == "sequence":
         factor = 1.0 if ev["primary"]["hit"]["identity"] >= P["q_full_identity"] else 0.5
         possible["quaternary"] = (P["d_q_conflict"] * factor, P["d_q_good"] * factor)
@@ -585,6 +747,7 @@ def _confidence_range(ev, prediction, statuses, P):
         high_tier=_band(high, P),
         levels=levels,
         stopped=all(statuses.get(key) == "cancelled" for key in levels),
+        function_fixed="primary" not in refining,
     )
 
 
@@ -602,18 +765,24 @@ def _range_line(confidence_range):
             f"Had the {names} level{plural} finished, the confidence would have been between {low:.2f} and "
             f"{high:.2f} ({tiers}); the predicted function would have been the same."
         )
+    if not confidence_range.function_fixed:
+        return (
+            f"Still to come: the {names} check{plural} can move the confidence to between {low:.2f} and "
+            f"{high:.2f} ({tiers}); the primary level's EBI BLASTp and InterProScan may still refine the best match."
+        )
     return (
         f"Still to come: the {names} check{plural} can move the confidence to between {low:.2f} and {high:.2f} "
         f"({tiers}); the predicted function itself will not change."
     )
 
 
-def _rationale(ev, prediction, context, P, statuses, confidence_range):
+def _rationale(ev, prediction, context, P, statuses, confidence_range, refining=frozenset()):
     route = prediction["route"]
     if route is None:
         lines = [
-            "No route applied: no characterised Swiss-Prot homologue or Pfam domain passed the primary tests, "
-            "and no significant structural match came from a reliable 3D model."
+            "No route applied: no characterised Swiss-Prot homologue passed the primary homology test, no Pfam domain "
+            "or InterPro entry gave domain support, and the tertiary level found no characterised structural match "
+            "for a reliable structure that shares the query's fold."
         ]
     else:
         lines = [f"{_ROUTE_TEXT[route]}: {prediction['basis']} (specificity: {prediction['specificity']})."]
@@ -636,6 +805,16 @@ def _rationale(ev, prediction, context, P, statuses, confidence_range):
                 lines.append(f"{key.capitalize()} level: stopped before it finished, so it was not used.")
             else:
                 lines.append(f"{key.capitalize()} level: no real (live) result, so it was not used.")
+    if "primary" in refining:
+        lines.append(
+            "Primary level: its remote EBI BLASTp and InterProScan are still running; they can refine the best "
+            "match and the domain evidence, and the prediction is updated when they finish."
+        )
+    if "secondary" in refining:
+        lines.append(
+            "Secondary level: its comparison with experimental PDB structures is still running; the prediction is "
+            "updated when it finishes."
+        )
     if prediction["score"] is not None:
         total = sum(delta for _, _, delta in prediction["steps"])
         lines.append(
@@ -663,13 +842,14 @@ def _integrate(job):
     prediction = predict(ev, PARAMS)
     context = _template_context(ev, prediction)
     statuses = {level.key: level.status for level in job.levels}
+    refining = frozenset(level.key for level in job.levels if level.refining)
     running = [key for key in ("primary", "tertiary") if not ev[key].get("ran") and statuses.get(key) in _RUNNING]
     missing = [key for key in ("primary", "tertiary") if not ev[key].get("ran") and key not in running]
     function = prediction["function"]
     if prediction["route"] == "fold":
         function = _brief(function, 110)
     score = prediction["score"]
-    confidence_range = _confidence_range(ev, prediction, statuses, PARAMS)
+    confidence_range = _confidence_range(ev, prediction, statuses, PARAMS, refining)
     return Verdict(
         source="live",
         function=function,
@@ -677,13 +857,14 @@ def _integrate(job):
         confidence_tier=prediction["band"],
         confidence_score=None if score is None else round(min(max(score, 0.0), 1.0), 2),
         confidence_range=confidence_range,
+        curated_function=_curated_function(ev, prediction),
         facts=_facts(ev, prediction, context),
         go_terms=_go_terms(context),
         level_support=[
             LevelSupport(key=level.key, state=_support(level, prediction["support"].get(level.key, "neutral")))
             for level in job.levels
         ],
-        rationale=_rationale(ev, prediction, context, PARAMS, statuses, confidence_range),
+        rationale=_rationale(ev, prediction, context, PARAMS, statuses, confidence_range, refining),
     )
 
 

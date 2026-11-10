@@ -140,6 +140,13 @@
   white-space: nowrap;
 }
 
+.tag-group {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
 .tag--placeholder {
   background: var(--color-placeholder-soft);
   color: var(--color-placeholder);

@@ -42,20 +42,17 @@ API_VERSION = "0.4.0"
 LEVEL_NAMES = ("primary", "secondary", "tertiary", "quaternary")
 
 # --- Sequence limits -------------------------------------------------------
-# JPred (secondary structure) and the RCSB search reject very short inputs.
-MIN_SEQUENCE_LENGTH = 25
+# The secondary-structure notebook supports 25-1,000 residues per query, and
 # ESM-2 (primary structure) handles at most ~1,022 residues per sequence.
+MIN_SEQUENCE_LENGTH = 25
 MAX_SEQUENCE_LENGTH = 1000
-# JPred's single-sequence mode accepts at most 800 residues; longer inputs
-# skip secondary-structure prediction instead of failing the whole analysis.
-JPRED_MAX_LENGTH = 800
 
 # --- Job handling ------------------------------------------------------------
 # Results live in memory and disappear when the server restarts.
 MAX_STORED_JOBS = 100
 # Analyses that may run at the same time; others queue. Most of an analysis is
-# spent waiting for web services (JPred, Swiss-Model), so several can overlap;
-# the CPU-heavy primary level still runs for one analysis at a time.
+# spent waiting for web services (EBI, AlphaFold DB, Foldseek), so several can overlap;
+# the CPU-heavy primary and secondary levels still run for one analysis at a time.
 MAX_CONCURRENT_JOBS = 3
 
 
@@ -96,14 +93,9 @@ CACHE_ENABLED = os.getenv("PFP_CACHE", "on").strip().lower() not in {"off", "0",
 CACHE_DIR = BACKEND_DIR / "data" / "cache"
 
 # --- External services --------------------------------------------------------
-# Swiss-Model API token (tertiary structure). Keep it in backend/.env only.
-SWISSMODEL_TOKEN = os.getenv("SWISSMODEL_TOKEN", "").strip() or None
-# Longest we wait for Swiss-Model (it usually needs 5-15 minutes).
-SWISSMODEL_TIMEOUT_SECONDS = _read_float("PFP_SWISSMODEL_TIMEOUT", 2400.0)
+# The tertiary level uses AlphaFold DB and Foldseek, which need no account.
 # Longest we wait for a Foldseek search.
 FOLDSEEK_TIMEOUT_SECONDS = _read_float("PFP_FOLDSEEK_TIMEOUT", 900.0)
-# Longest we wait for JPred (secondary structure; the notebook's jpred_max_wait).
-JPRED_TIMEOUT_SECONDS = _read_float("PFP_JPRED_TIMEOUT", 900.0)
 # Longest a single web request may take before it counts as a failure.
 HTTP_TIMEOUT_SECONDS = 60.0
 
@@ -131,6 +123,20 @@ DIAMOND_BIN = os.getenv("PFP_DIAMOND_BIN", "").strip() or "diamond"
 HMMSCAN_BIN = os.getenv("PFP_HMMSCAN_BIN", "").strip() or "hmmscan"
 # Longest a single DIAMOND or hmmscan run may take.
 PRIMARY_TOOL_TIMEOUT_SECONDS = _read_float("PFP_PRIMARY_TOOL_TIMEOUT", 1800.0)
+# The primary level's remote EMBL-EBI services (BLASTp and InterProScan) refine its
+# result in the background. EBI's job service requires a contact e-mail with every
+# job; without one these two modules are skipped and only the local tools are used.
+EBI_EMAIL = os.getenv("PFP_EBI_EMAIL", "").strip()
+# Longest each remote job may take (the notebook allows 1 h and 2 h; shorter here so
+# a stuck EBI job cannot hold an analysis slot for hours).
+EBI_BLAST_TIMEOUT_SECONDS = _read_float("PFP_EBI_BLAST_TIMEOUT", 1800.0)
+EBI_INTERPRO_TIMEOUT_SECONDS = _read_float("PFP_EBI_INTERPRO_TIMEOUT", 3600.0)
+
+# --- Secondary-structure module (S4PRED, ESM-2 SS3, PSIPRED, GOR IV, Chou-Fasman) ---
+# The notebook's ASSETS folder, created by scripts/setup_secondary.py (about 250 MB;
+# ignored by git): S4PRED's code and weights, PSIPRED built from source, the ESM-2
+# secondary-structure checkpoint.
+SECONDARY_DATA_DIR = Path(os.getenv("PFP_SECONDARY_DATA_DIR", "").strip() or BACKEND_DIR / "data" / "secondary")
 
 # --- Quaternary-structure module (the team's quaternary_pipeline package) -----
 # Longest the pipeline's six stages (about a dozen database queries) may take.
@@ -140,6 +146,6 @@ QUATERNARY_TIMEOUT_SECONDS = _read_float("PFP_QUATERNARY_TIMEOUT", 600.0)
 QUATERNARY_CACHE_DIR = BACKEND_DIR / "data" / "quaternary_cache"
 
 # --- Hosting ------------------------------------------------------------------
-# Load the ESM-2 and ProtBert models when the server starts instead of during
+# Load the primary level's ESM-2 and the secondary level's predictors when the server starts instead of during
 # the first analysis (on by default in the hosted Docker image; see app/warmup.py).
 PRELOAD_MODELS = os.getenv("PFP_PRELOAD_MODELS", "off").strip().lower() in {"on", "1", "true", "yes"}

@@ -10,18 +10,22 @@ dependencies = [
     "uvicorn[standard]>=0.30,<1.0",
     "requests>=2.31,<3",
     "biopython>=1.84,<2",
-    "jpredapi>=1,<2",
     # Used by the quaternary_pipeline package (quaternary/session.py).
     "pandas>=2.0,<4",
 ]
 
 [dependency-groups]
-# Machine-learning libraries for the primary-structure module (ESM-2).
-# `uv sync` installs them (see default-groups below); the free hosted build
-# leaves them out with `uv export --no-group primary`.
+# Machine-learning libraries: ESM-2 for the primary level; S4PRED and ESM-2 SS3
+# (PyTorch, Transformers) and GOR IV (gor4, C code built with cffi, so it needs a C
+# compiler) for the secondary level; pydssp (secondary structure of the AlphaFold DB
+# structure) for the tertiary level. gor4 is pinned to the secondary notebook's commit.
+# `uv sync` installs them (see default-groups below); the server image installs
+# them separately (CPU-only PyTorch), so `uv export --no-group primary` leaves them out.
 primary = [
-    "torch>=2.4,<3",
-    "transformers>=4.44,<6",
+    "torch>=2.6,<3",
+    "transformers>=4.50,<5",
+    "pydssp>=0.9,<1",
+    "gor4 @ git+https://github.com/acorg/gor4.git@38de0ac7def0dde4f6c6efea3cce2fed772137d1",
 ]
 
 [tool.uv]

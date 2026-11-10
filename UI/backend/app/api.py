@@ -21,6 +21,7 @@ from .schemas import (
     HealthResponse,
     LevelReport,
     QueryInfo,
+    ResidueReplacement,
 )
 from .sequence import SequenceError, parse_sequence
 
@@ -52,7 +53,16 @@ async def create_analysis(request: AnalysisRequest) -> AnalysisJob:
     name = typed_name or parsed.header or "Untitled sequence"
 
     job = store.create(
-        query=QueryInfo(name=name[:80], sequence=parsed.sequence, length=len(parsed.sequence)),
+        query=QueryInfo(
+            name=name[:80],
+            sequence=parsed.sequence,
+            length=len(parsed.sequence),
+            replacements=[
+                ResidueReplacement(position=item.position, original=item.original, replacement=item.replacement)
+                for item in parsed.replacements
+            ],
+            removed_gaps=parsed.removed_gaps,
+        ),
         levels=[
             LevelReport(key=spec.key, title=spec.title, tools=list(spec.tools)) for spec in LEVELS
         ],

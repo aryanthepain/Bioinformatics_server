@@ -5,7 +5,7 @@ container on a cloud server, behind Caddy, which provides HTTPS automatically.
 
 | What | Why |
 | --- | --- |
-| A Linux server with about **8 GB of memory** and **50 GB of disk** (e.g. Google Cloud `e2-standard-2`, free with the $300 trial) | ProtBert, ESM-2 and DIAMOND need about 4–5 GB of memory; Swiss-Prot, Pfam and the models need about 10 GB of disk. The server must stay on while analyses run. Free "platform" hosts (512 MB) are too small. |
+| A Linux server with about **8 GB of memory** and **50 GB of disk** (e.g. Google Cloud `e2-standard-2`, free with the $300 trial) | ESM-2, the secondary-structure models and DIAMOND need about 4 GB of memory; Swiss-Prot, Pfam and the models need about 10 GB of disk. The server must stay on while analyses run. Free "platform" hosts (512 MB) are too small. |
 | A web address, e.g. a free **DuckDNS** subdomain or your own domain | Caddy gets a free HTTPS certificate for it. |
 | This `deploy/` folder | `Dockerfile` (builds everything), `docker-compose.yml` + `Caddyfile` (app + HTTPS), `setup_server.sh` (one-time server setup). |
 
@@ -44,13 +44,13 @@ cd REPO/UI/deploy
 bash setup_server.sh
 ```
 
-The script opens the web ports, installs Docker, asks for the web address and the
-Swiss-Model token (saved in `deploy/.env`, never committed), then builds and starts
-everything. Reconnect later with `tmux attach -t deploy`.
+The script opens the web ports, installs Docker, asks for the web address and a
+contact e-mail for EMBL-EBI (saved in `deploy/.env`, never
+committed), then builds and starts everything. Reconnect later with `tmux attach -t deploy`.
 
 ## 4. Before a demo: pre-compute the examples
 
-New sequences take 15–30 minutes in total (mostly JPred and Swiss-Model), although
+New sequences take a few minutes in total (mostly the web services: AlphaFold DB, Foldseek and, if enabled, EMBL-EBI), although
 the results page opens as soon as the first level has finished (usually the primary
 level, after about a minute), with a provisional prediction.
 To make the examples open instantly, analyse them once (run from `REPO/UI/deploy`):
@@ -59,7 +59,7 @@ To make the examples open instantly, analyse them once (run from `REPO/UI/deploy
 sudo docker compose exec app python scripts/precompute.py http://127.0.0.1:8000
 ```
 
-It prints progress and takes roughly 30–60 minutes for the five examples. The
+It prints progress and takes roughly 10–30 minutes for the five examples. The
 results are saved on the server and survive restarts and updates.
 
 ## 5. Updating after a change
@@ -77,7 +77,8 @@ sudo docker image prune -f        # removes the old image to free disk space
 | Setting | Effect |
 | --- | --- |
 | `SITE_ADDRESS` | The web address(es), comma-separated, e.g. `protfunc.duckdns.org, www.example.com` |
-| `SWISSMODEL_TOKEN` | Swiss-Model API token for the tertiary level |
+| `PFP_EBI_EMAIL` | Contact e-mail sent with the primary level's optional EMBL-EBI jobs (BLASTp, InterProScan), which EBI requires; they then run in the background after the local result. Empty: those two are skipped, as in the notebook's default fast local profile |
+| `PFP_EBI_BLAST_TIMEOUT`, `PFP_EBI_INTERPRO_TIMEOUT` | Longest each EBI job may take, in seconds (defaults 1800 and 3600) |
 | `PFP_QUICK_RESULT_SECONDS` | Seconds to wait for the quaternary level before the provisional prediction is shown (default 0: as soon as the primary level is done) |
 | `PFP_PLACEHOLDER_LEVELS` | Use placeholder data for a level whose web service is down, e.g. `tertiary` |
 
@@ -100,4 +101,4 @@ After editing: `sudo docker compose up -d`.
 | Browser warns about the certificate | DNS was not ready when Caddy started: wait a minute and reload, or `sudo docker compose restart caddy`. |
 | The build fails | Copy the last 40 lines of the output; run `sudo docker compose up -d --build` again after fixing (finished steps are reused). |
 | Browser terminal says "Connection failed" during the build | The server is busy; wait a few minutes and retry, then `tmux attach -t deploy`. |
-| Tertiary level says it was skipped | Add the Swiss-Model token to `deploy/.env`, then `sudo docker compose up -d`. |
+| Tertiary level says it was skipped | It needs the primary level's closest Swiss-Prot match with an AlphaFold DB model; the message says which was missing. |

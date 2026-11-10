@@ -7,7 +7,9 @@
  * properties, references, raw output) is kept in one collapsed "More details"
  * section, so the page stays short without losing any information.
  * A level that is still running shows its own waiting screen (live progress)
- * instead, until its result arrives.
+ * instead, until its result arrives. A level whose result is shown while a
+ * slower background step still runs (the primary level's EBI services) says so
+ * above its result.
  */
 import { useState } from "react";
 import type {
@@ -49,9 +51,27 @@ const TABLE_PREVIEW_ROWS = 5;
 /** How long each level usually takes, shown while it runs. */
 const TYPICAL_DURATION: Record<LevelKey, string> = {
   primary: "This level usually takes about a minute.",
-  secondary: "JPred usually answers within a few minutes.",
-  tertiary: "Swiss-Model and Foldseek usually take 5–15 minutes.",
+  secondary: "Five local predictors; usually under a minute (the first analysis also loads the models).",
+  tertiary: "Starts when the primary level has its closest match; AlphaFold DB and Foldseek usually take a minute or two.",
   quaternary: "This level usually takes a minute or two.",
+};
+
+/** What a level's background step is, shown above its result while it runs. */
+const REFINING_TEXT: Partial<Record<LevelKey, { title: string; note: string }>> = {
+  primary: {
+    title: "EBI BLASTp and InterProScan still running",
+    note:
+      "This result comes from the local tools (DIAMOND, HMMER, ESM-2, ProtParam). It is updated by itself when " +
+      "the remote EMBL-EBI analyses finish, usually within 2–10 minutes, and so is the prediction on the Summary tab.",
+  },
+  secondary: {
+    title: "Comparison with experimental PDB structures still running",
+    note:
+      "This result comes from the five predictors. The comparison of their consensus with up to three " +
+      "experimentally solved PDB structures is added by itself when it finishes: usually within seconds, but up " +
+      "to about 10 minutes when RCSB's sequence search is busy. The secondary check of the prediction on the " +
+      "Summary tab is updated then too.",
+  },
 };
 
 const NOTE_ORDER: NoteKind[] = ["recommendation", "observation", "caution"];
@@ -430,6 +450,31 @@ function Progress({ level, active }: { level: LevelReport; active: boolean }) {
   );
 }
 
+/** Above a result that a background step will still update: what is running, and for how long. */
+function Refining({ level, active, printMode }: { level: LevelReport; active: boolean; printMode: boolean }) {
+  const finishedAt = parseTimestamp(level.finished_at);
+  const now = useNow(active && !printMode);
+  const elapsed = !printMode && finishedAt !== null ? formatDuration(now - finishedAt) : null;
+  const text = REFINING_TEXT[level.key] ?? {
+    title: "A background step is still running",
+    note: "The result below is updated by itself when it finishes.",
+  };
+
+  return (
+    <div className="alert alert--info analysis__refining" role="status">
+      {!printMode && <span className="spinner analysis__refining-spinner" aria-hidden="true" />}
+      <div className="alert__body">
+        <span className="alert__title">
+          {text.title}
+          {elapsed && <span className="analysis__refining-time"> · {elapsed}</span>}
+        </span>
+        {level.message && !printMode && <span className="analysis__refining-message">{level.message}</span>}
+        <span>{text.note}</span>
+      </div>
+    </div>
+  );
+}
+
 export default function LevelAnalysis({ level, index, sequence, active, printMode = false }: LevelAnalysisProps) {
   const startedAt = parseTimestamp(level.started_at);
   const finishedAt = parseTimestamp(level.finished_at);
@@ -459,6 +504,14 @@ export default function LevelAnalysis({ level, index, sequence, active, printMod
           {duration && <span className="analysis__duration">{duration}</span>}
         </div>
       </header>
+
+      {level.result && level.refining && <Refining level={level} active={active} printMode={printMode} />}
+      {level.result && !level.refining && level.message && (
+        // e.g. the background step failed or was stopped: the result shown is the first one.
+        <div className="alert alert--info" role="note">
+          <div className="alert__body">{level.message}</div>
+        </div>
+      )}
 
       {level.result ? (
         <AnalysisBody result={level.result} sequence={sequence} title={level.title} printMode={printMode} />

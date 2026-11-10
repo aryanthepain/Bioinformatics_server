@@ -243,6 +243,33 @@
   text-wrap: pretty;
 }
 
+/* UniProt's curated function of the template (sequence route) */
+.verdict__curated {
+  max-width: 700px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: 14px;
+  border-left: 2px solid var(--color-border-strong);
+}
+
+.verdict__curated-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-muted);
+}
+
+.verdict__curated-label a {
+  color: var(--color-accent);
+}
+
+.verdict__curated-text {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--color-ink-3);
+  text-wrap: pretty;
+}
+
 /* Confidence panel */
 
 .confidence {

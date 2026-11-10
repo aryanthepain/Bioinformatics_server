@@ -5,7 +5,7 @@
 #     bash setup_server.sh
 #
 # It opens the web ports, installs Docker, asks for the web address and the
-# Swiss-Model token (saved in deploy/.env), then builds and starts the app.
+# EMBL-EBI contact e-mail (saved in deploy/.env), then builds and starts the app.
 # Safe to run again: finished steps are skipped.
 set -euo pipefail
 cd "$(dirname "$0")"   # the deploy folder
@@ -70,12 +70,12 @@ else
   read -rp "Web address, without https:// (e.g. protfunc.duckdns.org): " site
   site="${site#http://}"; site="${site#https://}"; site="${site%%/*}"; site="${site// /}"
   [ -n "$site" ] || fail "A web address is needed."
-  read -rsp "Swiss-Model API token (typing is hidden; press Enter to skip the tertiary level): " token
-  echo
+  read -rp "Contact e-mail for EMBL-EBI BLASTp and InterProScan (press Enter to skip them): " ebi_email
+  ebi_email="${ebi_email// /}"
   umask 077
   {
     echo "SITE_ADDRESS=$site"
-    echo "SWISSMODEL_TOKEN=$token"
+    echo "PFP_EBI_EMAIL=$ebi_email"
     echo "PFP_PRELOAD_MODELS=on"
   } > .env
   echo "Saved deploy/.env (readable only by you)."

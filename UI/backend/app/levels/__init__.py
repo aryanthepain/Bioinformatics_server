@@ -12,8 +12,13 @@ those levels even when a real module exists, which is handy for fast
 interface work.
 
 The levels run at the same time (see app/runner.py), except that a level
-waits for the levels listed in its `after` (quaternary analyses the Swiss-Prot
-homologue that the primary level found). The order below is the display order.
+waits for the levels listed in its `after` (tertiary and quaternary analyse the
+Swiss-Prot match that the primary level found). The order below is the display order.
+
+A level may also have a background `refine` step that runs after its result is
+shown and then replaces it (the primary level's remote EBI BLASTp and
+InterProScan, the secondary level's comparison with experimental PDB structures);
+`needs_refinement` says whether a result still needs it.
 """
 
 import logging
@@ -28,6 +33,7 @@ from . import placeholders, primary, quaternary, secondary, tertiary
 logger = logging.getLogger(__name__)
 
 LevelRunner = Callable[[str, StageContext], LevelResult]
+LevelRefiner = Callable[[str, LevelResult, StageContext], LevelResult]
 
 
 @dataclass(frozen=True)
@@ -47,6 +53,9 @@ class LevelSpec:
     essential: bool = False
     # Usually slow (remote queues): the results page opens without waiting for it.
     background: bool = False
+    # Optional background step after the result is shown, and when it is needed.
+    refine: LevelRefiner | None = None
+    needs_refinement: Callable[[LevelResult], bool] | None = None
 
 
 def _spec(
@@ -60,10 +69,15 @@ def _spec(
     exclusive: bool = False,
     essential: bool = False,
     background: bool = False,
+    refine: LevelRefiner | None = None,
+    needs_refinement: Callable[[LevelResult], bool] | None = None,
 ) -> LevelSpec:
     flags = {"after": after, "essential": essential, "background": background}
     if live is not None and key not in PLACEHOLDER_LEVELS:
-        return LevelSpec(key, title, tools, live, live=True, cache_version=cache_version, exclusive=exclusive, **flags)
+        return LevelSpec(
+            key, title, tools, live, live=True, cache_version=cache_version, exclusive=exclusive,
+            refine=refine, needs_refinement=needs_refinement, **flags,
+        )
     return LevelSpec(key, title, tools, placeholder, **flags)
 
 
@@ -71,30 +85,36 @@ LEVELS: tuple[LevelSpec, ...] = (
     _spec(
         "primary",
         "Primary structure",
-        ("DIAMOND", "HMMER / Pfam", "ESM-2", "ProtParam"),
+        ("DIAMOND", "HMMER / Pfam", "ESM-2", "ProtParam", "UniProt")
+        + (("EBI BLASTp", "InterProScan") if primary.ebi_enabled() else ()),
         placeholders.primary,
         live=primary.analyze,
         cache_version=primary.CACHE_VERSION,
         exclusive=True,  # DIAMOND, HMMER and ESM-2 on the local CPU
         essential=True,
+        refine=primary.refine,  # EBI BLASTp and InterProScan, after the local result is shown
+        needs_refinement=primary.needs_refinement,
     ),
     _spec(
         "secondary",
         "Secondary structure",
-        ("JPred 4", "ProtBert-BFD-SS3", "RCSB PDB / PDBe"),
+        ("S4PRED", "ESM-2 SS3", "PSIPRED", "GOR IV", "Chou–Fasman", "RCSB PDB / PDBe"),
         placeholders.secondary,
         live=secondary.analyze,
         cache_version=secondary.CACHE_VERSION,
-        background=True,  # JPred can take up to 15 minutes
+        exclusive=True,  # five predictors on the local CPU, models shared between analyses
+        refine=secondary.refine,  # the comparison with experimental PDB structures, after the result is shown
+        needs_refinement=secondary.needs_refinement,
     ),
     _spec(
         "tertiary",
         "Tertiary structure",
-        ("Swiss-Model", "Foldseek", "ProtParam"),
+        ("AlphaFold DB", "Foldseek", "ProtParam", "pydssp", "UniProt"),
         placeholders.tertiary,
         live=tertiary.analyze,
         cache_version=tertiary.CACHE_VERSION,
-        background=True,  # Swiss-Model usually needs 5-20 minutes
+        after=("primary",),  # analyses the AlphaFold DB structure of the primary level's closest match
+        background=True,
     ),
     _spec(
         "quaternary",

@@ -10,9 +10,9 @@ been analysed once opens within seconds the next time. Run this before a demo:
       python3 scripts/precompute.py http://127.0.0.1:8000             the built-in examples
       python3 scripts/precompute.py http://127.0.0.1:8000 my.fasta    the sequences in a FASTA file
 
-Uses only Python's standard library. New sequences take 15-30 minutes each
-(mostly waiting for JPred and Swiss-Model); the app runs up to three at once
-and queues the rest, so the five examples need roughly 30-60 minutes in total.
+Uses only Python's standard library. New sequences take a few minutes each
+(mostly waiting for web services); the app runs up to three at once and
+queues the rest, so the five examples need roughly 10-30 minutes in total.
 """
 
 import json

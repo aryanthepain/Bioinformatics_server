@@ -507,6 +507,27 @@
   color: var(--color-muted);
 }
 
+/* ---- A background step still running, above the result -------------------------------- */
+
+.analysis__refining .analysis__refining-spinner {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  margin-top: 3px;
+  color: var(--color-accent);
+}
+
+.analysis__refining-time {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  color: var(--color-muted);
+}
+
+.analysis__refining-message {
+  color: var(--color-ink-2);
+  overflow-wrap: anywhere;
+}
+
 /* ---- Raw output -------------------------------------------------------------------- */
 
 .raw-output {

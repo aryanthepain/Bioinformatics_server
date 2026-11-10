@@ -47,6 +47,12 @@ class RCSBSearchClient(BaseBioClient):
             resp = self.session.post(url, json=payload, timeout=self.config.timeout)
             if resp.status_code == 204:
                 return {"result_set": []}
+            # UI integration fix: these two lines were missing, so every answer other than
+            # 204 returned None and the sequence search failed ("'NoneType' object has no
+            # attribute 'get'"). Same handling as the module's other requests.
+            resp.raise_for_status()
+            return resp.json()
+
         cache_key = f"seq_{hashlib.sha256(f'{clean_seq}_{evalue_cutoff}_{identity_cutoff}'.encode()).hexdigest()[:32]}"
         legacy_key = f"seq_{clean_seq[:32]}"
 

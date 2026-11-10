@@ -118,6 +118,11 @@ export interface LevelReport {
   started_at: string | null;
   finished_at: string | null;
   result: LevelResult | null;
+  /**
+   * The result is shown, but a slower background step is still running and will
+   * replace it (the primary level's EBI BLASTp and InterProScan).
+   */
+  refining: boolean;
 }
 
 export interface GoTerm {
@@ -139,7 +144,7 @@ export interface VerdictFact {
 
 /**
  * How far the levels that have not finished could still move the confidence.
- * The predicted function itself can no longer change.
+ * The predicted function itself can no longer change, unless function_fixed is false.
  */
 export interface ConfidenceRange {
   low: number;
@@ -149,6 +154,14 @@ export interface ConfidenceRange {
   levels: LevelKey[];
   /** True when these levels were stopped: the range is what they could have changed. */
   stopped: boolean;
+  /** False while the primary level's EBI services still run: they can refine the best match itself. */
+  function_fixed: boolean;
+}
+
+/** UniProt's curated function text of the protein the function was transferred from. */
+export interface CuratedFunction {
+  accession: string;
+  text: string;
 }
 
 export interface Verdict {
@@ -158,16 +171,29 @@ export interface Verdict {
   confidence_tier: ConfidenceTier;
   confidence_score: number | null;
   confidence_range: ConfidenceRange | null;
+  curated_function: CuratedFunction | null;
   facts: VerdictFact[];
   go_terms: GoTerm[];
   level_support: LevelSupport[];
   rationale: string[];
 }
 
+/** A non-standard letter in the submitted sequence and what it was replaced with. */
+export interface ResidueReplacement {
+  /** 1-based position in the analysed sequence. */
+  position: number;
+  original: string;
+  replacement: string;
+}
+
 export interface QueryInfo {
   name: string;
+  /** The analysed sequence (after cleaning and replacements). */
   sequence: string;
   length: number;
+  replacements: ResidueReplacement[];
+  /** Alignment gap characters ("-", ".") removed from the submitted sequence. */
+  removed_gaps: number;
 }
 
 export interface AnalysisJob {

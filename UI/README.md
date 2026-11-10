@@ -52,15 +52,16 @@ UI/
 │   ├── .python-version          pins Python 3.12 for uv
 │   ├── pyproject.toml           backend dependencies
 │   ├── .env.example             template for .env (secrets; .env itself is never committed)
-│   ├── quaternary_pipeline.py   the team's quaternary package (copied unchanged from main)
+│   ├── quaternary_pipeline.py   the team's quaternary package (from main; one fix in clients/rcsb.py)
 │   ├── quaternary/              ″
 │   ├── seed_cache/              saved example results, copied into the hosted app
 │   ├── scripts/
 │   │   ├── smoke_test.py        end-to-end check of the running backend
 │   │   ├── setup_primary.sh     one-time download of Swiss-Prot and Pfam
+│   │   ├── setup_secondary.py   one-time download of S4PRED, PSIPRED and the ESM-2 SS3 model
 │   │   ├── check_primary.py     runs each real module once…
 │   │   ├── check_secondary.py   ″
-│   │   ├── check_tertiary.py    ″ (5–15 min)
+│   │   ├── check_tertiary.py    ″ (about a minute)
 │   │   ├── check_quaternary.py  ″ (about a minute; --offline needs no internet)
 │   │   └── update_seed_cache.sh copies saved results into seed_cache
 │   └── app/
@@ -78,9 +79,9 @@ UI/
 │       └── levels/
 │           ├── __init__.py      level registry — where real modules plug in
 │           ├── placeholders.py  stand-in results (used when a module is switched off)
-│           ├── primary.py       REAL: DIAMOND, HMMER/Pfam, ESM-2, ProtParam
-│           ├── secondary.py     REAL: JPred, ProtBert, RCSB/PDBe comparison
-│           ├── tertiary.py      REAL: Swiss-Model, Foldseek, ProtParam, wet-lab advice
+│           ├── primary.py       REAL: DIAMOND, HMMER/Pfam, ESM-2, ProtParam, UniProt (+ optional EBI BLASTp, InterProScan)
+│           ├── secondary.py     REAL: S4PRED, ESM-2 SS3, PSIPRED, GOR IV, Chou–Fasman, PDB comparison
+│           ├── tertiary.py      REAL: AlphaFold DB, Foldseek, pLDDT, DSSP, ProtParam, annotation transfer
 │           └── quaternary.py    REAL: the team's quaternary pipeline (six stages)
 ├── deploy/                      hosting: Dockerfile, docker-compose, Caddy, DEPLOY.md
 └── frontend/
@@ -156,32 +157,58 @@ PFP_MOCK_FAIL_LEVEL=secondary uv run uvicorn app.main:app --reload --port 8000
 ## Real analysis modules
 
 All four levels are connected, each ported from the team notebook with its
-logic unchanged: **primary** (`levels/primary.py`; one documented bug fix),
-**secondary** (`levels/secondary.py`), **tertiary** (`levels/tertiary.py`) and
-**quaternary** (`levels/quaternary.py`, which runs the team's `quaternary_pipeline`
-package on the closest Swiss-Prot homologue found by the primary level).
+logic unchanged: **primary** (`levels/primary.py`, the final notebook
+`Final_Primary_structure.ipynb`, pipeline 3.1-fast-local: the validated sequence and its
+query ID, ProtParam, DIAMOND `--fast` against Swiss-Prot, HMMER against Pfam-A, the 320-d
+ESM-2 embedding with its nearest neighbours in the notebook's 4-protein demo reference,
+UniProt metadata for the 3 best candidates, and the evidence tier A–D with its
+rationale; the optional remote EMBL-EBI BLASTp and InterProScan, off in the notebook's
+fast profile, run in the background only when `PFP_EBI_EMAIL` is set),
+**secondary** (`levels/secondary.py`, the final notebook `SecondaryStructureFinal.ipynb`:
+five local single-sequence predictors - S4PRED, ESM-2 SS3, PSIPRED-single, GOR IV and
+Chou–Fasman - and their majority consensus, profile, regions and pairwise agreement; the
+consensus is then compared with up to three experimentally solved PDB structures in the
+background), **tertiary** (`levels/tertiary.py`, the notebook
+`Tertiary_protein_identification.ipynb`: the AlphaFold DB structure of the primary
+level's closest Swiss-Prot match, searched with Foldseek, with its confidence, secondary
+structure, shape, surface and the annotation of its AlphaFold DB match; skipped with a
+message when there is no match or no AlphaFold DB model) and **quaternary**
+(`levels/quaternary.py`, which runs the team's `quaternary_pipeline` package on the
+closest Swiss-Prot homologue found by the primary level).
 
 **The final prediction** (`backend/app/verdict.py`) follows the notebook
 `Function_Prediction_Integration_Final.ipynb`: the function is transferred from the
-best-supported template (Swiss-Prot homologue → Pfam domain → Foldseek fold), its
-confidence is P(homology) × P(function conserved), and the secondary, tertiary and
-quaternary results act as consistency checks on the log-odds scale.
+best-supported template (Swiss-Prot homologue → Pfam/InterPro domain → a characterised
+structural match of the template's AlphaFold DB structure), its confidence is
+P(homology) × P(function conserved), and the secondary and quaternary results act as
+consistency checks on the log-odds scale. The tertiary level analyses the template's
+own structure, so it is not counted as a check; it provides the structural route.
 
 **Quick results** (`backend/app/runner.py`): the four levels run at the same time
-(quaternary starts when primary has found its homologue). The results page opens
+(tertiary and quaternary start when primary has found its closest match). The results page opens
 as soon as the first level has finished, on that level's tab; levels that are
 still running show their progress in their own tab. A *provisional* prediction
 appears on the Summary tab once the primary level is done and updates as the
-slower secondary (JPred) and tertiary (Swiss-Model) levels finish. Meanwhile it
+slower levels finish. Meanwhile it
 shows the confidence range those levels could still produce: the predicted
 function itself can no longer change, only their consistency checks are
-outstanding. **Stop & finish now** finalises the report with the levels that are
-done. Up to three analyses run at once; the CPU-heavy primary level runs for one
+outstanding. When `PFP_EBI_EMAIL` is set, the primary level's optional EBI BLASTp and
+InterProScan (a few minutes) run after its local result is shown and then replace it;
+likewise the secondary level's comparison with PDB structures (a few seconds). The
+prediction is recomputed when they finish. **Stop & finish now** finalises the report with the levels that are
+done. Up to three analyses run at once; the CPU-heavy primary and secondary levels run for one
 analysis at a time.
 
 **Results page:** a Summary tab (prediction, confidence, key facts, residue map,
 how it was reached) and one tab per level with the essentials; everything else is
 under "More details". The Print menu prints the full report or a single level.
+
+**Non-standard letters** (`backend/app/sequence.py`): a few of them are replaced
+with the standard amino acid they most likely stand for: X (unknown) → L, the most
+common amino acid; B → D; Z → E; J → L; U (selenocysteine) → C; O (pyrrolysine) → K.
+At most 5% of the residues (at least one) and no more than 3 in a row may be
+replaced; otherwise the sequence is rejected with an explanation. Alignment gaps
+("-", ".") are removed. The input screen and the results page say what was changed.
 
 **Primary structure needs a one-time setup** (about 5 GB of disk):
 
@@ -189,18 +216,31 @@ under "More details". The Print menu prints the full report or a single level.
 brew install diamond hmmer
 cd backend && uv sync && bash scripts/setup_primary.sh
 uv run python scripts/check_primary.py   # compares with the notebook's recorded results
+uv run python scripts/check_primary.py --benchmark   # also its fast-vs-sensitive benchmark (~15 min)
 ```
 
-**Secrets live in `backend/.env`** (never committed; see `.env.example`):
+**Secondary structure needs a one-time setup too** (about 250 MB; needs git, make and a C
+compiler, which a Mac gets with `xcode-select --install`):
+
+```bash
+cd backend && uv sync && uv run python scripts/setup_secondary.py
+uv run python scripts/check_secondary.py   # compares with the notebook's recorded results
+```
+
+**Settings live in `backend/.env`** (never committed; see `.env.example`), for
+example the contact e-mail EMBL-EBI requires for the optional BLASTp and InterProScan
+modules (leave it empty for the notebook's default fast local profile):
 
 ```
-SWISSMODEL_TOKEN=your-swiss-model-token
+PFP_EBI_EMAIL=you@example.org
 ```
 
-Without a token, the tertiary level is skipped with an explanation.
+The tertiary level needs no account: AlphaFold DB and Foldseek are open. Its
+secondary-structure part uses the `pydssp` package, which `uv sync` installs.
 
 - **Check a module on its own** (needs internet):
-  `uv run python scripts/check_tertiary.py` (5–15 minutes) or
+  `uv run python scripts/check_tertiary.py` (about a minute; compares with the
+  notebook's recorded result) or
   `uv run python scripts/check_quaternary.py` (about a minute; add `--offline`
   to test without internet)
 - **Cache:** real results are saved in `backend/data/cache`, so the same
@@ -231,9 +271,9 @@ backend with `PFP_PLACEHOLDER_LEVELS=tertiary` to run them too.
 2. Data contract and mock API (placeholder results for all four levels) ✅
 3. Input screen: sequence entry, validation, examples, job progress ✅
 4. Results screen: verdict, residue map, level cards, detailed analyses, print ✅
-5. Integrate primary-structure analysis (DIAMOND, HMMER, ESM-2, ProtParam) ✅
-6. Integrate secondary-structure analysis (JPred, ProtBert, RCSB/PDBe) ✅
-7. Integrate tertiary-structure analysis (Swiss-Model, Foldseek, ProtParam) ✅
+5. Integrate primary-structure analysis (DIAMOND, HMMER, ESM-2 + retrieval, ProtParam, UniProt; optional EBI BLASTp, InterProScan) ✅
+6. Integrate secondary-structure analysis (S4PRED, ESM-2 SS3, PSIPRED, GOR IV, Chou–Fasman, RCSB/PDBe) ✅
+7. Integrate tertiary-structure analysis (AlphaFold DB, Foldseek, pLDDT, DSSP, annotation transfer) ✅
 8. Integrate quaternary-structure analysis, then evidence aggregation ✅
 9. Hosting (Docker on a cloud server; see `deploy/DEPLOY.md`) ✅
 10. Quick results (parallel levels, provisional prediction) and a tabbed results page ✅

@@ -1,8 +1,11 @@
 """Quaternary structure: the team's quaternary_pipeline package (six stages).
 
 Runs the package behind the team notebook "Quaternary_Structure.ipynb"
-(quaternary_pipeline.py and the quaternary/ folder, copied unchanged from the
-main branch into UI/backend). Nothing in that package is modified. This module
+(quaternary_pipeline.py and the quaternary/ folder, copied from the main branch
+into UI/backend). ONE CORRECTION in the package (please tell its author):
+quaternary/clients/rcsb.py search_by_sequence lacked the two lines that read the RCSB
+answer (raise_for_status / return resp.json()), so the sequence search - the path for
+sequences without a qualifying homologue - always failed. Nothing else is modified. This module
 only decides what the pipeline analyses, runs its six stages one by one so the
 interface can show progress and Cancel works, and translates the pipeline's
 QuaternaryStructureOutput into the shared LevelResult shape.
@@ -13,7 +16,7 @@ What is analysed
   entries and their PDBe PISA interfaces, SWISS-MODEL Repository templates,
   IntAct and AlphaFold DB. The app only receives a sequence, so this level uses
   the closest Swiss-Prot homologue found by the primary level, provided the
-  primary notebook's own homology test passed for it (identity > 30% and query
+  primary notebook's own homology test passed for it (identity >= 30% and query
   coverage >= 80%). Otherwise the pipeline receives the raw sequence, its
   documented path for novel sequences. The interface always says which of the
   two was analysed.
@@ -33,6 +36,13 @@ Settings (as in the notebook unless noted)
 Plumbing only
   * every stage runs in a helper thread, so Cancel and a time limit
     (PFP_QUATERNARY_TIMEOUT, default 10 minutes) work while a database is slow;
+  * when a database did not answer in time or answered with a server error (5xx, 429),
+    the pipeline is run again after each of RETRY_WAITS_SECONDS, within the same time limit
+    (RCSB's sequence search keeps running after it reports a time-out, so asking again later
+    returns its result).
+    Its cache keeps every answer that did arrive, so only the failed lookups are repeated
+    (the pipeline's own urllib3 retries do not cover POST requests such as the RCSB search
+    or read timeouts);
   * the app does not cache this level (backend/data/cache): the pipeline caches
     every successful database answer itself, so repeats are fast, and a query
     that failed is tried again next time instead of being remembered.
@@ -68,12 +78,22 @@ from ..schemas import (
     Table,
     TableColumn,
 )
-from .primary import _hit_details
+from .primary import describe_candidate
 
 T = TypeVar("T")
 
 # The notebook's QuaternaryConfig(timeout=30.0): seconds allowed per web request.
 REQUEST_TIMEOUT_SECONDS = 30.0
+# Plumbing: one more run of the pipeline when a database was busy (see the module docstring).
+# RCSB's sequence search answers "500 ... did not complete within 30000 ms" while its job is still
+# running, and returns the result when asked again once the job is done; so the pipeline is run
+# again after these waits, as long as they fit in PFP_QUATERNARY_TIMEOUT.
+RETRY_WAITS_SECONDS = (15.0, 30.0, 60.0, 90.0, 120.0)
+_TRANSIENT_ERROR = re.compile(
+    r"\b(429|5\d\d) (Client|Server) Error|timed out|Connection (aborted|reset|refused)|Max retries exceeded"
+    r"|RemoteDisconnected|Temporary failure|Failed to establish",
+    re.IGNORECASE,
+)
 
 MINUS = "−"  # a true minus sign, for typography
 
@@ -155,27 +175,35 @@ class Homologue:
     gene: str
     identity: float
     coverage: float
-    passed: bool  # the primary notebook's DIAMOND test (identity > 30% and coverage >= 80%)
+    passed: bool  # the primary notebook's homology test (identity >= 30% and coverage >= 80%)
 
 
 def primary_homologue(result: LevelResult | None) -> Homologue | None:
     """The best Swiss-Prot hit in a live primary result, or None if there is none.
 
-    The pass/fail decision is the primary notebook's own: its DIAMOND evidence
-    line ("DIAMOND: ...") is positive exactly when both thresholds were met.
+    The hit and the pass/fail decision are the primary notebook's own: the best hit of
+    its evidence summary and its strong-homology test (both thresholds met).
     """
     if result is None or result.source != "live" or not isinstance(result.raw, dict):
         return None
-    diamond = result.raw.get("diamond")
-    if not isinstance(diamond, dict) or str(diamond.get("best_hit", "None")) == "None":
+    summary = result.raw.get("evidence_summary")
+    if not isinstance(summary, dict):
         return None
-    details = _hit_details(diamond)
+    assessment = summary.get("assessment") or {}
+    best = assessment.get("best_hit")
+    if not isinstance(best, dict) or not best.get("accession"):
+        return None
     try:
-        identity = float(diamond.get("identity") or 0.0)
-        coverage = float(diamond.get("query_coverage") or 0.0)
+        identity = float(best.get("identity_percent") or 0.0)
+        coverage = float(best.get("query_coverage_percent_approx") or 0.0)
     except (TypeError, ValueError):
         return None
-    passed = any(item.polarity == "positive" and item.text.startswith("DIAMOND:") for item in result.evidence)
+    candidate = next(
+        (item for item in summary.get("top_homology_candidates") or [] if item.get("accession") == best["accession"]),
+        None,
+    )
+    details = describe_candidate(best, candidate)
+    passed = bool(assessment.get("strong_homology"))
     return Homologue(
         accession=details["accession"].strip().upper(),
         entry=details["entry"],
@@ -212,7 +240,7 @@ def choose_target(sequence: str, primary_result: LevelResult | None) -> tuple[Ta
     elif homologue is not None:
         reason = (
             f"The best Swiss-Prot hit ({homologue.entry}, {homologue.identity:.2f}% identity, "
-            f"{homologue.coverage:.2f}% coverage) did not pass the primary thresholds (identity > 30% and "
+            f"{homologue.coverage:.2f}% coverage) did not pass the primary thresholds (identity ≥ 30% and "
             "coverage ≥ 80%)"
         )
     elif primary_result is None:
@@ -270,12 +298,15 @@ def _bounded(call: Callable[[], T], ctx: StageContext, deadline: float, message:
     return outcome["value"]
 
 
-def run_pipeline(target: str, ctx: StageContext, offline: bool = False) -> tuple[Any, Any]:
+def run_pipeline(
+    target: str, ctx: StageContext, offline: bool = False, deadline: float | None = None
+) -> tuple[Any, Any]:
     """Run the pipeline's six stages on an accession or a sequence.
 
     Returns (QuaternaryStructureOutput, the session with its stage results).
     offline=True uses the package's bundled test data instead of the internet
-    (only scripts/check_quaternary.py --offline does this).
+    (only scripts/check_quaternary.py --offline does this). `deadline` (time.monotonic())
+    defaults to PFP_QUATERNARY_TIMEOUT from now.
     """
     from quaternary.config import QuaternaryConfig
     from quaternary.engine import QuaternaryEngine
@@ -308,7 +339,8 @@ def run_pipeline(target: str, ctx: StageContext, offline: bool = False) -> tuple
         ),
         ("Stage 6 of 6 · synthesis and functional inference…", session.run_stage_6_synthesis),
     ]
-    deadline = time.monotonic() + QUATERNARY_TIMEOUT_SECONDS
+    if deadline is None:
+        deadline = time.monotonic() + QUATERNARY_TIMEOUT_SECONDS
     output = None
     for message, stage in stages:
         ctx.report(message)
@@ -386,6 +418,14 @@ def _stage_errors(session: Any) -> dict[str, list[str]]:
                 source = str(entry.get("source", "unknown"))
                 errors.setdefault(source, []).append(_brief(str(entry.get("error", "")), 160))
     return errors
+
+
+def _busy_sources(session: Any) -> list[str]:
+    """Sources whose errors look temporary: no answer in time, a dropped connection or a server error."""
+    return [
+        source for source, messages in _stage_errors(session).items()
+        if any(_TRANSIENT_ERROR.search(message) for message in messages)
+    ]
 
 
 def _stage_data(session: Any, number: int) -> dict[str, Any]:
@@ -939,7 +979,19 @@ def analyze_target(
 
     Shared by analyze() below and scripts/check_quaternary.py.
     """
-    output, session = run_pipeline(target.value, ctx, offline=offline)
+    deadline = time.monotonic() + QUATERNARY_TIMEOUT_SECONDS
+    output, session = run_pipeline(target.value, ctx, offline=offline, deadline=deadline)
+    for wait in RETRY_WAITS_SECONDS:
+        busy = _busy_sources(session)
+        if offline or not busy or time.monotonic() + wait >= deadline:
+            break
+        names = ", ".join(_SOURCE_LABEL.get(source, source) for source in busy)
+        ctx.report(f"{names} did not answer properly (still busy); asking again in {wait:.0f} s…")
+        ctx.sleep(wait)
+        try:
+            output, session = run_pipeline(target.value, ctx, offline=offline, deadline=deadline)
+        except TimeoutError:
+            break  # out of time: keep the previous run's result, which reports the failed lookups
 
     # Every other lookup starts from the UniProt entry: if it could not be read
     # (e.g. no internet), "uncharacterized" would be misleading, so the level fails.

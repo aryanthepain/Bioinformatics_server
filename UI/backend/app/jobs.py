@@ -149,6 +149,35 @@ class JobStore:
 
         self._update(job_id, apply)
 
+    def start_refining(self, job_id: str, key: LevelKey, message: str) -> None:
+        """A completed level starts its background step; its result stays visible."""
+
+        def apply(job: AnalysisJob) -> None:
+            level = _find_level(job, key)
+            level.refining = True
+            level.message = message
+
+        self._update(job_id, apply)
+
+    def finish_refining(
+        self,
+        job_id: str,
+        key: LevelKey,
+        result: LevelResult | None,
+        message: str | None = None,
+    ) -> None:
+        """The background step ended: replace the result (None keeps the current one)."""
+
+        def apply(job: AnalysisJob) -> None:
+            level = _find_level(job, key)
+            level.refining = False
+            level.message = message
+            if result is not None:
+                level.result = result
+                level.finished_at = utc_now()
+
+        self._update(job_id, apply)
+
     def set_verdict_status(self, job_id: str, status: StepStatus) -> None:
         def apply(job: AnalysisJob) -> None:
             job.verdict_status = status
@@ -175,11 +204,16 @@ class JobStore:
                         level.finished_at = now
                     level.status = "cancelled"
                     level.message = message
+                elif level.refining:
+                    level.refining = False  # its result stays; the background step was stopped
+                    level.message = "Its background step was stopped before it finished."
 
         self._update(job_id, apply)
 
     def complete(self, job_id: str, verdict: Verdict) -> None:
         def apply(job: AnalysisJob) -> None:
+            for level in job.levels:
+                level.refining = False
             job.verdict = verdict
             job.verdict_status = "completed"
             job.status = "completed"
@@ -191,6 +225,7 @@ class JobStore:
         def apply(job: AnalysisJob) -> None:
             now = utc_now()
             for level in job.levels:
+                level.refining = False
                 if level.status in UNFINISHED_STEP_STATUSES:
                     if level.status == "running":
                         level.finished_at = now
@@ -207,6 +242,7 @@ class JobStore:
         def apply(job: AnalysisJob) -> None:
             now = utc_now()
             for level in job.levels:
+                level.refining = False
                 if level.status == "running":
                     level.status = "failed"
                     level.message = error
@@ -251,7 +287,7 @@ class StageContext:
     """Handed to every analysis module so it can report progress and stop early.
 
     Modules call:
-      ctx.report("Waiting for JPred... 40 s")   # shown live in the interface
+      ctx.report("Waiting for Foldseek... 40 s")   # shown live in the interface
       ctx.sleep(20)                              # a wait that stops on cancel
       ctx.check_cancelled()                      # between long steps
     """

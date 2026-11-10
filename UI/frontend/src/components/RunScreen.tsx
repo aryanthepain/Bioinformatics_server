@@ -228,8 +228,8 @@ export default function RunScreen({
           {active && (
             <p className="run-note">
               The results open as soon as the first level has finished; the others keep running in their own
-              tabs. Some levels use public web servers (Swiss-Model, JPred) and can take 5–15 minutes. You can
-              safely refresh this page — the analysis keeps running on the server.
+              tabs. Some levels use public web servers (AlphaFold DB, Foldseek, EMBL-EBI) and can take several
+              minutes. You can safely refresh this page — the analysis keeps running on the server.
             </p>
           )}
         </aside>
