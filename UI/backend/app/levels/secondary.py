@@ -930,11 +930,21 @@ def analyze(sequence: str, ctx: StageContext) -> LevelResult:
 
 
 def needs_refinement(result: LevelResult) -> bool:
-    """True while the PDB comparison has not succeeded for this result."""
+    """True while the PDB comparison has not succeeded for this result: it has not run, the RCSB
+    search was unavailable, or structures were found but none could be compared because PDBe did
+    not answer properly (a time-out or a server error). Such a result tries again when it is next
+    opened."""
     if not RUN_PDB_REFERENCES or result.source != "live" or not isinstance(result.raw, dict):
         return False
     pdb = result.raw.get("pdb_references")
-    return isinstance(pdb, dict) and pdb.get("status") in ("pending", "unavailable")
+    if not isinstance(pdb, dict):
+        return False
+    if pdb.get("status") in ("pending", "unavailable"):
+        return True
+    rows = pdb.get("rows") or []
+    return (pdb.get("status") == "success" and bool(rows)
+            and not any(row.get("Status") == "OK" for row in rows)
+            and any(_is_transient(str(row.get("Status"))) for row in rows))
 
 
 _TRANSIENT_TEXT = re.compile(
