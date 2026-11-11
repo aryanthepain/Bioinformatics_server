@@ -238,11 +238,16 @@ Run the backend and frontend in separate terminals with hot-reloading.
 ```bash
 cd UI/backend
 
-# 1. Install all dependencies using uv
-uv sync
+# 1. Install dependencies (skipping C compiler-dependent ML packages on Windows):
+uv sync --no-default-groups
 
-# 2. (Fast UI mode) Start immediately with placeholder data:
-PFP_PLACEHOLDER_LEVELS=tertiary uv run uvicorn app.main:app --reload --port 8000
+# 2. Start with placeholder data:
+# On Windows PowerShell:
+$env:PFP_PLACEHOLDER_LEVELS="secondary,tertiary,quaternary"
+uv run --no-default-groups uvicorn app.main:app --reload --port 8000
+
+# On Linux / macOS:
+PFP_PLACEHOLDER_LEVELS=secondary,tertiary,quaternary uv run uvicorn app.main:app --reload --port 8000
 ```
 
 To run with **full real local scientific models**:
