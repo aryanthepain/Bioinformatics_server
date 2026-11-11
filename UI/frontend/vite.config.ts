@@ -9,6 +9,8 @@ import react from "@vitejs/plugin-react";
 // Node resolves "localhost" to the IPv6 address ::1 first, while uvicorn
 // listens on IPv4 127.0.0.1 by default, which causes confusing
 // "ECONNREFUSED" proxy errors.
+const BACKEND_URL = process.env.VITE_BACKEND_URL || "https://protfunc.duckdns.org";
+
 export default defineConfig({
   plugins: [react()],
   server: {
@@ -16,8 +18,9 @@ export default defineConfig({
     strictPort: true,
     proxy: {
       "/api": {
-        target: "http://127.0.0.1:8000",
+        target: BACKEND_URL,
         changeOrigin: true,
+        secure: true,
       },
     },
   },
