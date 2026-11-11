@@ -2,8 +2,6 @@
 
 This document provides the visual architecture diagram for the Quaternary Structure Analysis Pipeline.
 
-> **Tip for VS Code:** Press `Ctrl+Shift+V` (or `Cmd+Shift+V` on macOS, or click the **Open Preview** icon in the upper right) to render this diagram interactively.
-
 ```mermaid
 flowchart TD
     %% ------------------------------------------------------------------------
