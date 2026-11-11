@@ -156,6 +156,35 @@ The server pre-computes five representative benchmark proteins for instant, zero
 
 ---
 
+### 📦 How to Download & Install Docker (Official Guides)
+
+Docker is required for **Option A** to execute the complete multi-tier pipeline with all scientific databases and neural network models in an isolated Linux container.
+
+| Platform | Official Documentation | Direct Download / Quick Command |
+| :--- | :--- | :--- |
+| **Windows** | [Docker Desktop for Windows Guide](https://docs.docker.com/desktop/setup/install/windows-install/) | [Download Docker Desktop for Windows](https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe) <br> *(or `winget install --id Docker.DockerDesktop`)* |
+| **macOS** | [Docker Desktop for Mac Guide](https://docs.docker.com/desktop/setup/install/mac-install/) | [Download for Mac (Apple Silicon & Intel)](https://www.docker.com/products/docker-desktop/) <br> *(or `brew install --cask docker`)* |
+| **Linux** | [Docker Engine Installation Guide](https://docs.docker.com/engine/install/) | [Official Convenience Script](https://docs.docker.com/engine/install/ubuntu/#install-using-the-convenience-script) <br> `curl -fsSL https://get.docker.com | sudo sh` |
+
+#### Windows Installation Checklist (WSL2):
+1. **Enable WSL 2**: Open PowerShell as Administrator and run:
+   ```powershell
+   wsl --install
+   ```
+   *(Reboot your computer if prompted by Windows to enable the Virtual Machine Platform).*
+2. **Install Docker Desktop**: Run in Administrator PowerShell:
+   ```powershell
+   winget install --id Docker.DockerDesktop --accept-source-agreements --accept-package-agreements
+   ```
+   *Or double-click the downloaded installer and accept the Windows UAC prompt.*
+3. **Verify Installation**: Open Docker Desktop from the Start Menu, then verify in your terminal:
+   ```powershell
+   docker --version
+   docker compose version
+   ```
+
+---
+
 ### Option A: Full Docker Deployment (Mirrors Cloud Server)
 
 This runs the exact setup hosted on `protfunc.duckdns.org` (FastAPI backend + built React frontend + Caddy HTTPS proxy).
